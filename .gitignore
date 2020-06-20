@@ -1,0 +1,7 @@
+settings.json
+config.json
+boundaries.json
+bin/**
+output.log
+example.csv
+smallexample.csv
