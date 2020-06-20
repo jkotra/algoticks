@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <time.h>
 #include <dlfcn.h>
-#include <math.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
@@ -165,10 +164,6 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         struct Signal signal;
         signal = analyze(&series, config.candles);
 
-        //debug
-        
-
-
         if (signal.buy)
         {
             simresult.buy_signals += 1;
@@ -219,6 +214,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             }
 
             //continue til EOF
+            //FIX this
             //debug_msg("sim_pnl", "sim.c", ftoa(simresult.pnl), false);
             continue;
         }

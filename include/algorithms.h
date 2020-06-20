@@ -1,1 +1,0 @@
-algoticks_signal analyze(algoticks_row *series, int n_candles);

@@ -2,6 +2,7 @@ settings.json
 config.json
 boundaries.json
 bin/**
+*.o
 output.log
 example.csv
 smallexample.csv
