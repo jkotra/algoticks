@@ -79,10 +79,13 @@ int main(int argc, char **argv)
 
     struct Config config;
     struct Settings settings;
+    struct BenchmarkConfig benchmarkconfig;
     
 
     settings = parse_settings_from_json(settings_file);
     config = parse_config_from_json(config_file);
+    benchmarkconfig = parse_benchmark_from_json("benchmark.json");
+
 
     //set debug is arg passed in cmd.
     if (debug_flag == 1){

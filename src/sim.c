@@ -8,6 +8,9 @@
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
 #include "../include/timeutils.h"
+#include "../include/sim.h"
+#include "../include/misc.h"
+#include "../include/debug.h"
 
 int curr = 0;
 
@@ -34,7 +37,6 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     else
     {
         printf("Invalid signal!\n");
-        print_signal_struct(signal);
         exit(1);
     }
 
@@ -50,9 +52,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             if (settings.debug)
             {
                 //todo
-                debug_msg("EOF", "sim.c", config.datasource, false);
+                debug_msg("EOF", "sim.c", config.datasource, true);
             }
-
+            positionresult.pnl = getPnL(dashboard);
             positionresult.eof = true;
             return positionresult;
         }
@@ -116,12 +118,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         exit(1);
     }
 
-    struct Dashboard dashboard;
-    dashboard.q = config.quantity;
-
     struct Row storage;
 
     struct SimResult simresult = {0};
+
+    //add config to simresult
+    simresult.config = config;
 
     //load algo
     void *handle;
@@ -167,17 +169,26 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.buy)
         {
             simresult.buy_signals += 1;
-            debug_msg("signal", "sim.c", "Buy", false);
+            if (settings.debug){
+                debug_msg("signal", "sim.c", "Buy", false);
+            }
+            
         }
         else if (signal.sell)
         {
             simresult.sell_signals += 1;
-            debug_msg("signal", "sim.c", "Sell", false);
+            if (settings.debug){
+                debug_msg("signal", "sim.c", "Sell", false);
+            }
+            
         }
         else if (signal.neutral)
         {
             simresult.neutral_signals += 1;
-            debug_msg("signal", "sim.c", "Neutral", false);
+            if (settings.debug){
+                debug_msg("signal", "sim.c", "Neutral", false);
+            }
+            
         }
         else
         {
@@ -198,6 +209,15 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             curr = positionresult.curr;
 
             simresult.pnl += positionresult.pnl;
+            //update peak and bottom;
+            if (simresult.pnl > simresult.peak){
+                simresult.peak = simresult.pnl;
+            }
+            if (simresult.pnl < simresult.bottom){
+                simresult.bottom = simresult.pnl;
+            }
+
+            
 
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
@@ -221,8 +241,10 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         memset(&storage, 0, sizeof(storage));
     }
-    //debug
+    if (settings.debug){
     print_simresult_struct(simresult);
+    }
 
+    write_simresult_to_csv(simresult);
     return simresult;
 }

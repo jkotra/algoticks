@@ -15,8 +15,8 @@ int is_date_after(char *date_a, char *date_b, char *format){
     strptime(date_a, format, &date_a_ts);
     strptime(date_b, format, &date_b_ts);
 
-    date_a_ts.tm_year + 1900;
-    date_b_ts.tm_year + 1900;
+    date_a_ts.tm_year += 1900;
+    date_b_ts.tm_year += 1900;
 
     a_mktime = mktime(&date_a_ts);
     b_mktime = mktime(&date_b_ts);

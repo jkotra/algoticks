@@ -1,4 +1,5 @@
 CC=gcc
+CSTD = -std=c17
 IDIR = include/
 CFLAGS=-I$(IDIR) -Wall -Wl,-rpath,bin/algorithms/
 LINKS = -ljson-c -ldl
@@ -12,17 +13,20 @@ DEBUG_BUILD_PATH = bin/debug
 RELEASE_BUILD_PATH = bin/release
 ALGORITHMS_BUILD_PATH = bin/algorithms
 
-all:
-	mkdir -p bin/algorithms/
+	
 
 release: $(SRCFILES)
-	$(CC) $(CFLAGS) $(LINKS) $(SRCFILES) -o $(RELEASE_BUILD_PATH)
+	mkdir -p bin/algorithms/
+	$(CC) $(CSTD) $(CFLAGS) $(LINKS) $(SRCFILES) -o $(RELEASE_BUILD_PATH)
+	make algorithms
 
 debug: $(SRCFILES)
-	$(CC) $(CFLAGS) $(DEBUG_SYMBOLS) $(LINKS) $(SRCFILES) -o $(DEBUG_BUILD_PATH)
+	mkdir -p bin/algorithms/
+	$(CC) $(CSTD) $(CFLAGS) $(DEBUG_SYMBOLS) $(LINKS) $(SRCFILES) -o $(DEBUG_BUILD_PATH)
+	make algorithms
 
 algorithms: $(ALGORITHMS)
-	$(foreach file, $(ALGORITHMS), gcc -shared -fPIC $(file) -o $(patsubst %.c,%.so,$(file)); mv $(patsubst %.c,%.so,$(file)) bin/algorithms/)
+	$(foreach file, $(ALGORITHMS), gcc $(CSTD) -shared -fPIC $(file) -o $(patsubst %.c,%.so,$(file)); mv $(patsubst %.c,%.so,$(file)) bin/algorithms/;)
 
 clean:
 	rm bin/algorithms/*

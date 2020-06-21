@@ -5,6 +5,41 @@ typedef struct Settings
     int debug;
 }algoticks_settings;
 
+typedef struct BenchmarkConfig
+{
+    char algo[1024][32];
+    int n_algo;
+
+    char datasource[1024][512];
+    int n_datasource;
+
+    char symbol[32];
+
+    int candles[1024];
+    int n_candles;
+
+    double target[1024];
+    int n_target;
+
+    double stoploss[1024];
+    int n_stoploss;
+
+    int is_training_sl[2];
+    int n_is_training_sl;
+
+    double trailing_sl_val[1024];
+    int n_trailing_sl_val;
+
+    int quantity[1024];
+    int n_quantity;
+
+    int intraday[2];
+    int n_intraday;
+
+    int skip_header;
+    
+}algoticks_benchmarkconfig;
+
 typedef struct Config
 {
     char algo[32];

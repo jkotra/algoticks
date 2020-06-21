@@ -1,6 +1,7 @@
 #include<time.h>
 #include<stdio.h>
 #include<string.h>
+#include<stdbool.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 
@@ -21,9 +22,17 @@ void debug_msg(char *op, char *loc, char *remarks, int log){
     chomp(hrt);
 
     char buffer[5000];
-    sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"remarks\": \"%s\"}", hrt, op, loc, remarks);
+    sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"remarks\": \"%s\"}\n", hrt, op, loc, remarks);
 
-    printf("%s\n", buffer);
+    printf("%s", buffer);
+
+    if (log == true){
+        FILE *fp;
+
+        fp = fopen("debug.log","a+");
+
+        fprintf(fp, buffer);
+    }
 }
 
 
