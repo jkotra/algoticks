@@ -40,6 +40,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         exit(1);
     }
 
+    //filter targets
+    config = filter_boundaries(config, dashboard.is_short);
+
     struct Row pos_storage;
 
     // infinite loop
@@ -51,12 +54,16 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
             if (settings.debug)
             {
-                //todo
                 debug_msg("EOF", "sim.c", config.datasource, true);
             }
             positionresult.pnl = getPnL(dashboard);
+
+            if (positionresult.pnl > 0){
+                strncpy(positionresult.hit_type, "T", 4);
+            }
+
             positionresult.eof = true;
-            return positionresult;
+            break;
         }
 
         curr = read_csv(fp, &pos_storage, curr, config, settings.debug);
@@ -65,41 +72,57 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
             continue;
         }
-
+        
         dashboard.b = pos_storage.close;
         strncpy(dashboard.date, pos_storage.date, 32);
         positionresult.curr = curr;
 
-        if (settings.print == 1)
+        if (settings.print == true)
         {
             print_dashboard(settings, config, dashboard);
         }
 
-        if (config.target <= (getPnL(dashboard) / dashboard.q))
+        if (is_target_hit(dashboard, config.target) == true)
         {
-            printf("\nTarget Hit!\n");
-            if (config.is_training_sl)
-            {
-                config.target = dashboard.b + config.trailing_sl_val;
-                config.stoploss = dashboard.b - config.trailing_sl_val;
-                continue;
-            }
+            printf("\n Target Hit! \n");
 
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
+
+            if (config.is_training_sl)
+            {
+                config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
+
+                if (dashboard.is_short){
+                config.stoploss += config.trailing_sl_val;
+                }else{
+                config.stoploss -= -config.trailing_sl_val;
+                }
+
+                continue;
+            }
+
+
             break;
         }
 
-        if (config.stoploss >= (getPnL(dashboard) / dashboard.q))
+        if (is_stoploss_hit(dashboard, config.stoploss) == true)
         {
-            printf("\nSL Hit!\n");
+            printf("\n SL Hit! \n");
 
-            strncpy(positionresult.hit_type, "SL", 4);
             positionresult.pnl = getPnL(dashboard);
+
+            if (positionresult.pnl > 0){
+                strncpy(positionresult.hit_type, "T", 4);
+            }
+            else{
+                strncpy(positionresult.hit_type, "SL", 4);
+            }
+            
             break;
         }
 
-        memset(&pos_storage, 0, sizeof(pos_storage));
+        memset(&pos_storage, 0, sizeof(pos_storage));  
     }
 
     return positionresult;
@@ -201,14 +224,10 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             struct PositionResult positionresult;
             positionresult = take_position(signal, fp, curr, settings, config, storage);
 
-            if (positionresult.eof == true)
-            {
-                break;
-            }
-
             curr = positionresult.curr;
-
+            
             simresult.pnl += positionresult.pnl;
+
             //update peak and bottom;
             if (simresult.pnl > simresult.peak){
                 simresult.peak = simresult.pnl;
@@ -216,9 +235,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             if (simresult.pnl < simresult.bottom){
                 simresult.bottom = simresult.pnl;
             }
-
             
-
+            //DEBUG - hit_type
+            if (settings.debug){
+                debug_msg("pos_result", "sim.c", positionresult.hit_type, false);
+            }
+            
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
@@ -230,6 +252,13 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             else
             {
                 printf("Position did not hit any boundary\n");
+
+            }
+
+            if (positionresult.eof == true)
+            {
+                break;
+            }else{
                 continue;
             }
 

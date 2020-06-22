@@ -1,14 +1,14 @@
 {
-    "algo": "3Reds.so",
+    "algo": "3Greens.so",
     "datasource": "example.csv",
     "symbol": "SUNPHARMA",
-    "candles": 4,
+    "candles": 3,
 
-    "target": 50,
-    "stoploss": -70,
+    "target": 5,
+    "stoploss": 7,
     "is_training_sl": false,
-    "trailing_sl_val": -1,
-    "quantity": 1,
+    "trailing_sl_val": 1,
+    "quantity": 100,
 
     "intraday": true,
     "skip_header": true

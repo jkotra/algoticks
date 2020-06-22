@@ -18,12 +18,12 @@ Algoticks is algorithmic trading simulator written in C.
 
 ## Usage
 
-
 ---
 
 ### Timeline
 
 Start of development: 13-Jun-2020
+
 Repository made public: **TDB**
 
 ### Credits

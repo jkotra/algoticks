@@ -1,5 +1,6 @@
 #include<time.h>
 #include<stdio.h>
+#include "../include/timeutils.h"
 
 int is_date_after(char *date_a, char *date_b, char *format){
 

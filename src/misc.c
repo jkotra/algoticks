@@ -2,6 +2,7 @@
 #include <string.h>
 #include <json-c/json.h>
 #include <stdbool.h>
+#include <math.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 #include "../include/misc.h"
@@ -313,6 +314,94 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
 
 
     return benchmarkconfig;
+}
+
+algoticks_config filter_boundaries(algoticks_config config, int is_short){
+
+    if (is_short == true){
+
+        config.target = -(fabs(config.target));
+        config.stoploss = fabs(config.stoploss);
+        config.trailing_sl_val = -(fabs(config.trailing_sl_val));
+    }
+    else{
+
+    config.target = fabs(config.target);
+    config.stoploss = -(fabs(config.stoploss));
+    config.trailing_sl_val = fabs(config.trailing_sl_val);
+
+    }
+
+    return config;
+}
+
+/*
+
+def condition_target(a, b, target, short=False):
+    if short:
+        if (b-a) < target:
+            return True
+        else:
+            return False
+
+    if (b-a) > target:
+        return True
+    else:
+        return False
+
+
+
+
+def condition_stop_loss(a, b, stop_loss, short=False):
+    if short:
+        if (b-a) > stop_loss:
+            return True
+        else:
+            return False
+
+    if (b-a) < stop_loss:
+        return True
+    else:
+        return False
+
+*/
+
+//essential boundary checking fuctions
+int is_target_hit(algoticks_dashboard dashboard, float target){
+    if(dashboard.is_short == true){
+        if ((dashboard.b - dashboard.a) < target){
+            return true;
+        }else{
+            return false;
+        }
+
+    }else{
+        if ((dashboard.b - dashboard.a) >= target){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
+
+int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss){
+    if(dashboard.is_short == true){
+        // sell / short
+        if ((dashboard.b - dashboard.a) > stoploss){
+            return true;
+        }else{
+            //printf("SL HIT => Received: %f %f %d\n", abs_pnl, stoploss, is_short);
+            return false;
+        }
+
+    }else{
+        // buy
+        if ((dashboard.b - dashboard.a) <= stoploss){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
 
 /* TODO - brokerage calculator */

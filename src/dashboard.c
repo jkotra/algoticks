@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
+#include "../include/dashboard.h"
 
 
 char *color_reset = "\033[0m";

@@ -1,0 +1,1 @@
+void benchmark(char *benchmark_config_file, algoticks_settings settings);

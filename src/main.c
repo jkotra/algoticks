@@ -7,10 +7,11 @@
 
 
 int debug_flag = 0;
+int benchmark_flag = 0;
 
 char settings_file[64] = "settings.json";
 char config_file[64] = "config.json";
-char boundaries_file[64] = "boundaries.json";
+char benchmark_file[64] = "benchmark.json";
 
 
 void print_version_and_exit(){
@@ -26,7 +27,7 @@ void print_help_and_exit(){
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--boundaries [*.JSON]\t\t\tCustom boundaries file. Default: boundaries.json\n");
+    printf("--benchmark -B [(Optional)[*.JSON]\t\t\tCustom config file. Default: benchmark.json\n");
     exit(0);
 
 }
@@ -55,17 +56,23 @@ int main(int argc, char **argv)
 
         // for --settings
         else if (strcmp(argv[i],"--settings") == 0){
-            *settings_file = argv[i+1];
+            strncpy(settings_file,argv[i+1],64);
         }
 
         // for --config
         else if (strcmp(argv[i],"--config") == 0){
-            *config_file = argv[i+1];
+            strncpy(config_file,argv[i+1],64);
         }
 
-        // for --config
-        else if (strcmp(argv[i],"--boundaries") == 0){
-            *boundaries_file = argv[i+1];
+        // for --benchmark
+        else if ((strcmp(argv[i],"--benchmark") == 0)|| (strcmp(argv[i],"-B") == 0)){
+            // if custom .jsom file provided.
+            if (i+1 < argc){
+                strncpy(benchmark_file,argv[i+1],64);
+            }
+
+            benchmark_flag = 1;
+
         }
 
         else{
@@ -84,7 +91,7 @@ int main(int argc, char **argv)
 
     settings = parse_settings_from_json(settings_file);
     config = parse_config_from_json(config_file);
-    benchmarkconfig = parse_benchmark_from_json("benchmark.json");
+    benchmarkconfig = parse_benchmark_from_json(benchmark_file);
 
 
     //set debug is arg passed in cmd.
