@@ -10,6 +10,6 @@
     "is_training_sl": [true,false],
     "trailing_sl_val": [1,2,3],
     
-    "intraday": [true],
+    "intraday": [true,false],
     "skip_header": true
 }

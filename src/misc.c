@@ -90,6 +90,9 @@ algoticks_settings parse_settings_from_json(char *filename)
     struct json_object *debug;
     struct json_object *debug_level;
 
+    struct json_object *intraday_hour;
+    struct json_object *intraday_min;
+
     struct Settings settings;
 
     parsed_json = json_tokener_parse(buffer);
@@ -99,10 +102,16 @@ algoticks_settings parse_settings_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "debug", &debug);
     json_object_object_get_ex(parsed_json, "debug_level", &debug_level);
 
+    json_object_object_get_ex(parsed_json, "intraday_hour", &intraday_hour);
+    json_object_object_get_ex(parsed_json, "intraday_min", &intraday_min);
+
     settings.print = json_object_get_boolean(print);
     settings.colors = json_object_get_boolean(colors);
     settings.debug = json_object_get_boolean(debug);
     settings.debug_level = json_object_get_int(debug_level);
+
+    settings.intraday_hour = json_object_get_int(intraday_hour);
+    settings.intraday_min = json_object_get_int(intraday_min);
 
     return settings;
 }

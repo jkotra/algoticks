@@ -4,6 +4,11 @@ typedef struct Settings
     int colors;
     int debug;
     int debug_level;
+
+    
+    int intraday_hour;
+    int intraday_min;
+    
 }algoticks_settings;
 
 typedef struct BenchmarkConfig

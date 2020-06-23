@@ -61,7 +61,8 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             }
             positionresult.pnl = getPnL(dashboard);
 
-            if (positionresult.pnl > 0){
+            if (positionresult.pnl > 0)
+            {
                 strncpy(positionresult.hit_type, "T", 4);
             }
 
@@ -75,7 +76,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
             continue;
         }
-        
+
         dashboard.b = pos_storage.close;
         strncpy(dashboard.date, pos_storage.date, 32);
         positionresult.curr = curr;
@@ -83,6 +84,34 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         if (settings.print == true)
         {
             print_dashboard(settings, config, dashboard);
+        }
+        
+        //intraday check condition.
+        if (config.intraday)
+        {
+
+            //check if over intraday squareoff time!
+            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings.intraday_min, settings.intraday_hour);
+
+            if (intraday_check == true)
+            {
+                //debug msg
+                sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings.intraday_hour, settings.intraday_min, pos_storage.date);
+                debug_msg(settings, 2, "intraday_squareoff", "sim.c", debug_msg_buffer);
+
+                positionresult.pnl = getPnL(dashboard);
+
+                if (positionresult.pnl > 0)
+                {
+                    strncpy(positionresult.hit_type, "T", 4);
+                }
+                else
+                {
+                    strncpy(positionresult.hit_type, "SL", 4);
+                }
+
+                break;
+            }
         }
 
         if (is_target_hit(dashboard, config.target) == true)
@@ -96,10 +125,13 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             {
                 config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
 
-                if (dashboard.is_short){
-                config.stoploss += config.trailing_sl_val;
-                }else{
-                config.stoploss -= -config.trailing_sl_val;
+                if (dashboard.is_short)
+                {
+                    config.stoploss += config.trailing_sl_val;
+                }
+                else
+                {
+                    config.stoploss -= -config.trailing_sl_val;
                 }
 
                 sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
@@ -107,7 +139,6 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
                 continue;
             }
-
 
             break;
         }
@@ -118,18 +149,20 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
             positionresult.pnl = getPnL(dashboard);
 
-            if (positionresult.pnl > 0){
+            if (positionresult.pnl > 0)
+            {
                 strncpy(positionresult.hit_type, "T", 4);
             }
-            else{
+            else
+            {
                 strncpy(positionresult.hit_type, "SL", 4);
             }
-            
+
             break;
         }
-        
+
         //zero out pos_stotage
-        memset(&pos_storage, 0, sizeof(pos_storage));  
+        memset(&pos_storage, 0, sizeof(pos_storage));
     }
 
     return positionresult;
@@ -181,7 +214,6 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         sprintf(debug_msg_buffer, "%s", config.algo);
         debug_msg(settings, 3, "LoadAlgo", "sim.c", debug_msg_buffer);
     }
-    
 
     while (curr != EOF)
     {
@@ -202,20 +234,16 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         {
             simresult.buy_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Buy");
-
-            
         }
         else if (signal.sell)
         {
             simresult.sell_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Sell");
-            
         }
         else if (signal.neutral)
         {
             simresult.neutral_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Neutral");
-            
         }
         else
         {
@@ -229,20 +257,22 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             positionresult = take_position(signal, fp, curr, settings, config, storage);
 
             curr = positionresult.curr;
-            
+
             simresult.pnl += positionresult.pnl;
 
             //update peak and bottom;
-            if (simresult.pnl > simresult.peak){
+            if (simresult.pnl > simresult.peak)
+            {
                 simresult.peak = simresult.pnl;
             }
-            if (simresult.pnl < simresult.bottom){
+            if (simresult.pnl < simresult.bottom)
+            {
                 simresult.bottom = simresult.pnl;
             }
-            
+
             //DEBUG - hit_type
-            debug_msg(settings, 1, "signal", "sim.c", positionresult.hit_type);
-            
+            debug_msg(settings, 1, "hit_type", "sim.c", positionresult.hit_type);
+
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
@@ -254,19 +284,20 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             else
             {
                 printf("Position did not hit any boundary\n");
-
             }
 
             if (positionresult.eof == true)
             {
                 break;
-            }else{
+            }
+            else
+            {
                 continue;
             }
 
             continue;
         }
-        
+
         //zero out storage
         memset(&storage, 0, sizeof(storage));
     }

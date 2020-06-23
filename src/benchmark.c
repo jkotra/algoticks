@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 #include "../include/dtypes.h"
 #include "../include/misc.h"
 #include "../include/benchmark.h"
@@ -7,32 +9,14 @@
 
 void benchmark(char *benchmark_config_file, algoticks_settings settings)
 {
-
+    
+    //disable printing
+    settings.print = false;
     struct BenchmarkConfig benchmarkconfig;
     benchmarkconfig = parse_benchmark_from_json(benchmark_config_file);
 
-
     //total 11 fields in config = 11 loops
 
-    /*
-
-    {
-    "algo": ["3Reds.so"],
-    "datasource": ["example.csv"],
-    "symbol": ["SUNPHARMA"],
-    "candles": [4,6,8],
-
-    "target": [35,50],
-    "stoploss": [-70,-50],
-    "is_training_sl": [true,false],
-    "trailing_sl_val": [2,4],
-    "quantity": [100],
-
-    "intraday": [true],
-    "skip_header": [true]
-
-}
-*/ 
    int total_combinations = 1;
    total_combinations *= benchmarkconfig.n_algo;
    total_combinations *= benchmarkconfig.n_datasource;
@@ -83,9 +67,9 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
 
                                         config.skip_header = benchmarkconfig.skip_header;
 
-                                        if (settings.debug){
+                                        /* if (settings.debug){
                                             print_config_struct(config);
-                                        }
+                                        } */
                                         
                                         run_sim(settings, config);
                                         combination_completed++;

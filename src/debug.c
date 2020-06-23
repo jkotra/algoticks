@@ -13,6 +13,11 @@ void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc
         return;
     }
 
+    //if debug level less then 0 or greater then 3.
+    if ( (debug_level <= 0) == true || (settings.debug_level > 3) == true ){
+        return;
+    }
+
     // if less then required debug level.
     if (settings.debug_level < debug_level){
         return;
