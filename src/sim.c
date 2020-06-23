@@ -12,7 +12,8 @@
 #include "../include/misc.h"
 #include "../include/debug.h"
 
-int curr = 0;
+/* this buffer is used for sprintf() */
+char debug_msg_buffer[1024];
 
 algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
 {
@@ -54,7 +55,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
             if (settings.debug)
             {
-                debug_msg("EOF", "sim.c", config.datasource, true);
+                debug_msg(settings, 1, "EOF", "sim.c", config.datasource);
+                sprintf(debug_msg_buffer, "%d", curr);
+                debug_msg(settings, 2, "fp_curr", "sim.c", debug_msg_buffer);
             }
             positionresult.pnl = getPnL(dashboard);
 
@@ -84,7 +87,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
         if (is_target_hit(dashboard, config.target) == true)
         {
-            printf("\n Target Hit! \n");
+            debug_msg(settings, 1, "Hit", "sim.c", "Target Hit!");
 
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
@@ -99,6 +102,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
                 config.stoploss -= -config.trailing_sl_val;
                 }
 
+                sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
+                debug_msg(settings, 1, "TrailingSL_Adjust", "sim.c", debug_msg_buffer);
+
                 continue;
             }
 
@@ -108,7 +114,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
         if (is_stoploss_hit(dashboard, config.stoploss) == true)
         {
-            printf("\n SL Hit! \n");
+            debug_msg(settings, 1, "Hit", "sim.c", "SL Hit!");
 
             positionresult.pnl = getPnL(dashboard);
 
@@ -121,7 +127,8 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             
             break;
         }
-
+        
+        //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));  
     }
 
@@ -133,6 +140,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     // open and read CSV file.
     FILE *fp;
     fp = fopen(config.datasource, "r");
+    int curr = 0;
 
     // exit if file cannot be opened.
     if (fp == NULL)
@@ -170,7 +178,8 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     }
     else
     {
-        printf("Algorithm %s loaded!\n", config.algo);
+        sprintf(debug_msg_buffer, "%s", config.algo);
+        debug_msg(settings, 3, "LoadAlgo", "sim.c", debug_msg_buffer);
     }
     
 
@@ -192,25 +201,20 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.buy)
         {
             simresult.buy_signals += 1;
-            if (settings.debug){
-                debug_msg("signal", "sim.c", "Buy", false);
-            }
+            debug_msg(settings, 3, "signal", "sim.c", "Buy");
+
             
         }
         else if (signal.sell)
         {
             simresult.sell_signals += 1;
-            if (settings.debug){
-                debug_msg("signal", "sim.c", "Sell", false);
-            }
+            debug_msg(settings, 3, "signal", "sim.c", "Sell");
             
         }
         else if (signal.neutral)
         {
             simresult.neutral_signals += 1;
-            if (settings.debug){
-                debug_msg("signal", "sim.c", "Neutral", false);
-            }
+            debug_msg(settings, 3, "signal", "sim.c", "Neutral");
             
         }
         else
@@ -237,9 +241,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             }
             
             //DEBUG - hit_type
-            if (settings.debug){
-                debug_msg("pos_result", "sim.c", positionresult.hit_type, false);
-            }
+            debug_msg(settings, 1, "signal", "sim.c", positionresult.hit_type);
             
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
@@ -262,16 +264,11 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
                 continue;
             }
 
-            //continue til EOF
-            //FIX this
-            //debug_msg("sim_pnl", "sim.c", ftoa(simresult.pnl), false);
             continue;
         }
-
+        
+        //zero out storage
         memset(&storage, 0, sizeof(storage));
-    }
-    if (settings.debug){
-    print_simresult_struct(simresult);
     }
 
     write_simresult_to_csv(simresult);

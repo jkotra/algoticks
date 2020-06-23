@@ -3,6 +3,7 @@ typedef struct Settings
     int print;
     int colors;
     int debug;
+    int debug_level;
 }algoticks_settings;
 
 typedef struct BenchmarkConfig

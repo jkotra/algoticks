@@ -88,6 +88,7 @@ algoticks_settings parse_settings_from_json(char *filename)
     struct json_object *colors;
 
     struct json_object *debug;
+    struct json_object *debug_level;
 
     struct Settings settings;
 
@@ -96,10 +97,12 @@ algoticks_settings parse_settings_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "print", &print);
     json_object_object_get_ex(parsed_json, "colors", &colors);
     json_object_object_get_ex(parsed_json, "debug", &debug);
+    json_object_object_get_ex(parsed_json, "debug_level", &debug_level);
 
     settings.print = json_object_get_boolean(print);
     settings.colors = json_object_get_boolean(colors);
     settings.debug = json_object_get_boolean(debug);
+    settings.debug_level = json_object_get_int(debug_level);
 
     return settings;
 }
@@ -335,36 +338,6 @@ algoticks_config filter_boundaries(algoticks_config config, int is_short){
     return config;
 }
 
-/*
-
-def condition_target(a, b, target, short=False):
-    if short:
-        if (b-a) < target:
-            return True
-        else:
-            return False
-
-    if (b-a) > target:
-        return True
-    else:
-        return False
-
-
-
-
-def condition_stop_loss(a, b, stop_loss, short=False):
-    if short:
-        if (b-a) > stop_loss:
-            return True
-        else:
-            return False
-
-    if (b-a) < stop_loss:
-        return True
-    else:
-        return False
-
-*/
 
 //essential boundary checking fuctions
 int is_target_hit(algoticks_dashboard dashboard, float target){

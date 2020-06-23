@@ -4,6 +4,7 @@
 #include "../include/dtypes.h"
 #include "../include/misc.h"
 #include "../include/sim.h"
+#include "../include/benchmark.h"
 
 
 int debug_flag = 0;
@@ -86,20 +87,24 @@ int main(int argc, char **argv)
 
     struct Config config;
     struct Settings settings;
-    struct BenchmarkConfig benchmarkconfig;
     
 
     settings = parse_settings_from_json(settings_file);
-    config = parse_config_from_json(config_file);
-    benchmarkconfig = parse_benchmark_from_json(benchmark_file);
 
 
-    //set debug is arg passed in cmd.
+    //set debug if passed as arg.
     if (debug_flag == 1){
         settings.debug = 1;
     }
 
-   run_sim(settings, config);
+
+    if (benchmark_flag){
+        benchmark(benchmark_file, settings);
+    }
+    else{
+        config = parse_config_from_json(config_file);
+        run_sim(settings, config);
+    }
 
    return 0;
 }

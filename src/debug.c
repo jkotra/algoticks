@@ -6,9 +6,19 @@
 #include "../include/debug.h"
 
 
-void debug_msg(char *op, char *loc, char *remarks, int log){
+void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks){
     
-    //Human readable time
+    //check if debug is enabled!
+    if (settings.debug != true){
+        return;
+    }
+
+    // if less then required debug level.
+    if (settings.debug_level < debug_level){
+        return;
+    }
+
+    //HRT = Human readable time
     char hrt[32];
 
     time_t now;
@@ -22,19 +32,33 @@ void debug_msg(char *op, char *loc, char *remarks, int log){
     chomp(hrt);
 
     char buffer[5000];
-    sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"remarks\": \"%s\"}\n", hrt, op, loc, remarks);
+    sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"msg\": \"%s\"}\n", hrt, op, loc, remarks);
 
     printf("%s", buffer);
+    
+    /*
+    FILE *fp;
+    fp = fopen("debug.log","a+");
+    fprintf(fp, buffer);
+    */
 
-    if (log == true){
-        FILE *fp;
-
-        fp = fopen("debug.log","a+");
-
-        fprintf(fp, buffer);
-    }
 }
 
+void print_config_struct(algoticks_config config){
+    printf("\n===*===\n");
+    printf("[DEBUG] config.algo = %s\n", config.algo);
+    printf("[DEBUG] config.datasource = %s\n", config.datasource);
+    printf("[DEBUG] config.symbol = %s\n", config.symbol);
+
+    printf("[DEBUG] config.candles = %d\n", config.candles);
+    printf("[DEBUG] config.target = %f\n", config.target);
+    printf("[DEBUG] config.stoploss = %f\n", config.stoploss);
+    printf("[DEBUG] config.is_trailing_sl = %d\n", config.is_training_sl);
+    printf("[DEBUG] config.trailing_sl_val = %f\n", config.trailing_sl_val);
+
+    printf("[DEBUG] config.quantity = %d\n", config.quantity);
+    printf("[DEBUG] config.skip_header = %d\n", config.skip_header);
+}
 
 void print_dashboard_struct(algoticks_dashboard dashboard){
     printf("\n===*===\n");

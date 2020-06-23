@@ -85,9 +85,6 @@ int read_csv(FILE *fp, algoticks_row *storage, int seek_offset, algoticks_config
 
 
     if ((config.skip_header == true) && (skip_header == true)){
-        if (debug) {
-            debug_msg("condition","csvutils.c","Header Skipped!", false);
-        }
         skip_header = false;
         continue;
     }
