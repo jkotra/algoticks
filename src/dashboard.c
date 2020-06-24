@@ -42,12 +42,7 @@ void print_dashboard(algoticks_settings settings,algoticks_config config,algotic
     
     
 
-    sprintf(buffer, "%s\t%s\t%f\t%f\t%s\r",dashboard.date, config.symbol,dashboard.a, dashboard.b, pnl_s);               
+    sprintf(buffer, "%s\t%s\t%f\t%f\t%s",dashboard.date, config.symbol,dashboard.a, dashboard.b, pnl_s);               
     printf("%s\n", buffer);
-
-    /*
-    flust stdout if needed
-    fflush(stdout);
-    */
 
 }
