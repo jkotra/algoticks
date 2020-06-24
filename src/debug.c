@@ -4,6 +4,7 @@
 #include<stdbool.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
+#include "misc.h"
 
 
 void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks){

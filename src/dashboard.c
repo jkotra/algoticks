@@ -35,9 +35,9 @@ void print_dashboard(algoticks_settings settings,algoticks_config config,algotic
     
     if (settings.colors == true){
         if(pnl > 0){ pnlcolor = "\033[0;32m"; }else { pnlcolor = "\033[0;31m"; }
-        sprintf(pnl_s, "%s%f \(%f%%\) %f %s", pnlcolor, pnl, percentage_change, pnl_i, color_reset);
+        sprintf(pnl_s, "%s%f (%f%%) %f %s", pnlcolor, pnl, percentage_change, pnl_i, color_reset);
     }else{
-        sprintf(pnl_s, "%s%f \(%f%%\) %f", pnlcolor, pnl, percentage_change, pnl_i);
+        sprintf(pnl_s, "%s%f (%f%%) %f", pnlcolor, pnl, percentage_change, pnl_i);
     }
     
     
