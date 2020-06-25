@@ -178,7 +178,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     // exit if file cannot be opened.
     if (fp == NULL)
     {
-        printf("cannot Read: %s \n", config.datasource);
+        printf("cannot Read datasource: %s \n", config.datasource);
         exit(1);
     }
 

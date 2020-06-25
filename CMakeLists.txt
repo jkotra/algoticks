@@ -41,3 +41,11 @@ set_target_properties(algoticks
     LIBRARY_OUTPUT_DIRECTORY "bin/lib/"
     RUNTIME_OUTPUT_DIRECTORY "bin/"
 )
+
+#copy configs to bin/
+file(COPY ${PROJECT_SOURCE_DIR}/example_configs/config.json
+     DESTINATION bin/)
+file(COPY ${PROJECT_SOURCE_DIR}/example_configs/settings.json
+     DESTINATION bin/)
+file(COPY ${PROJECT_SOURCE_DIR}/example_configs/benchmark.json
+     DESTINATION bin/)

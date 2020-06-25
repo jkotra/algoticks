@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "../include/dtypes.h"
 #include "../include/misc.h"
 #include "../include/sim.h"
 #include "../include/benchmark.h"
 
-int debug_flag = 0;
-int benchmark_flag = 0;
+int debug_flag = false;
+int benchmark_flag = false;
+int config_need_exit_flag = false;
 
 char settings_file[64] = "settings.json";
 char config_file[64] = "config.json";
@@ -93,12 +95,35 @@ int main(int argc, char **argv)
     struct Config config;
     struct Settings settings;
 
+    //check if req files really exist
+    if (!is_file_exists(settings_file)){
+        create_setting_config_enchmark_files(1);
+        config_need_exit_flag = true;
+    }
+
+    if (!is_file_exists(config_file)){
+        create_setting_config_enchmark_files(2);
+        config_need_exit_flag = true;
+    }
+
+    if ((is_file_exists(benchmark_file) == false) && (benchmark_flag == true)){
+        create_setting_config_enchmark_files(3);
+        config_need_exit_flag = true;
+    }
+
+    if (config_need_exit_flag == true){
+        printf("\nPlease edit settings.json, config.json and benchmark.json accordingly, program will use these configs on next run!\nBye!\n");
+        exit(0);
+    }
+
+
+
     settings = parse_settings_from_json(settings_file);
 
     //set debug if passed as arg.
-    if (debug_flag == 1)
+    if (debug_flag == true)
     {
-        settings.debug = 1;
+        settings.debug = true;
     }
 
     if (benchmark_flag)

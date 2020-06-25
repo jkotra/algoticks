@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/debug",
+            "program": "${workspaceFolder}/bin/algoticks",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

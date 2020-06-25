@@ -51,6 +51,98 @@ void write_simresult_to_csv(algoticks_simresult simresult)
     fprintf(fp, buffer);
 }
 
+int is_file_exists(const char *filename)
+{
+    /* try to open file to read */
+    FILE *file;
+    if (file = fopen(filename, "r"))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
+void create_setting_config_enchmark_files(int type)
+{
+
+    /*
+     type = 1 = settings.json
+     type = 2 = config.json
+     type = 3 = benchmark.json
+    */
+
+    char settings[1000] = "{ \n \
+    \"print\": true, \n \
+    \"colors\": true, \n \
+    \"debug\": false,  \n \
+    \"debug_level\": 1, \n \
+                          \n \
+    \"intraday_hour\": 15, \n \
+    \"intraday_min\": 15 \n \
+}\n";
+
+    char config[1000] = "{\n \
+    \"algo\": \"algorithms/3Reds.so\", \n \
+    \"datasource\": \"example.csv\", \n \
+    \"symbol\": \"SUNPHARMA\", \n \
+    \"candles\": 3, \n \
+                    \n \
+    \"quantity\": 100, \n \
+    \"target\": 5, \n \
+    \"stoploss\": 7, \n \
+    \"is_training_sl\": false, \n \
+    \"trailing_sl_val\": 1, \n \
+                            \n \
+    \"intraday\": true, \n \
+    \"skip_header\": true \n \
+}\n";
+
+    char benchmark[1000] = "{ \n \
+    \"algo\": [\"algorithms/3Greens.so\", \"algorithms/3Reds.so\"], \n \
+    \"datasource\": [\"example.csv\"], \n \
+    \"symbol\": \"SUNPHARMA\", \n \
+    \"candles\": [4,6,8], \n \
+                           \n \
+    \"quantity\": [10], \n \
+    \"target\": [1.5,2,2.5], \n \
+    \"stoploss\": [2,2.5,3,3.5], \n \
+    \"is_training_sl\": [true,false], \n \
+    \"trailing_sl_val\": [1,2,3], \n \
+                                  \n \
+    \"intraday\": [true,false], \n \
+    \"skip_header\": true \n \
+}\n";
+
+    // write to file
+
+    if (type == 1)
+    {
+        FILE *settingsf;
+        settingsf = fopen("settings.json", "w+");
+        fprintf(settingsf, settings);
+
+        printf("\nsettings.json created!\n");
+    }
+
+    else if (type == 2)
+    {
+        FILE *configf;
+        configf = fopen("config.json", "w+");
+        fprintf(configf, config);
+
+        printf("\nconfig.json created!\n");
+    }
+    else if (type == 3)
+    {
+        FILE *benchf;
+        benchf = fopen("benchmark.json", "w+");
+        fprintf(benchf, benchmark);
+
+        printf("\nbenchmark.json created!\n");
+    }
+    
+}
 void chomp(char *s)
 {
     /* This removes newline at end of string */
@@ -252,7 +344,6 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "intraday", &intraday);
     json_object_object_get_ex(parsed_json, "skip_header", &skip_header);
 
-
     benchmarkconfig.n_algo = json_object_array_length(algo);
     for (int i = 0; i < benchmarkconfig.n_algo; i++)
     {
@@ -264,25 +355,23 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     for (int i = 0; i < benchmarkconfig.n_datasource; i++)
     {
         tmp = json_object_array_get_idx(datasource, i);
-        strncpy(benchmarkconfig.datasource[i],json_object_get_string(tmp),32);
+        strncpy(benchmarkconfig.datasource[i], json_object_get_string(tmp), 32);
     }
 
     strncpy(benchmarkconfig.symbol, json_object_get_string(symbol), 32);
-
 
     benchmarkconfig.n_candles = json_object_array_length(candles);
     for (int i = 0; i < benchmarkconfig.n_candles; i++)
     {
         tmp = json_object_array_get_idx(candles, i);
-        benchmarkconfig.candles[i] =json_object_get_int(tmp);
+        benchmarkconfig.candles[i] = json_object_get_int(tmp);
     }
-
 
     benchmarkconfig.n_target = json_object_array_length(target);
     for (int i = 0; i < benchmarkconfig.n_target; i++)
     {
         tmp = json_object_array_get_idx(target, i);
-        benchmarkconfig.target[i] =json_object_get_double(tmp);
+        benchmarkconfig.target[i] = json_object_get_double(tmp);
     }
 
     benchmarkconfig.n_stoploss = json_object_array_length(stoploss);
@@ -306,7 +395,6 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         benchmarkconfig.trailing_sl_val[i] = json_object_get_double(tmp);
     }
 
-
     benchmarkconfig.n_quantity = json_object_array_length(quantity);
     for (int i = 0; i < benchmarkconfig.n_quantity; i++)
     {
@@ -321,66 +409,83 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         benchmarkconfig.intraday[i] = json_object_get_boolean(tmp);
     }
 
-
     benchmarkconfig.skip_header = json_object_get_boolean(skip_header);
-
 
     return benchmarkconfig;
 }
 
-algoticks_config filter_boundaries(algoticks_config config, int is_short){
+algoticks_config filter_boundaries(algoticks_config config, int is_short)
+{
 
-    if (is_short == true){
+    if (is_short == true)
+    {
 
         config.target = -(fabs(config.target));
         config.stoploss = fabs(config.stoploss);
         config.trailing_sl_val = -(fabs(config.trailing_sl_val));
     }
-    else{
+    else
+    {
 
-    config.target = fabs(config.target);
-    config.stoploss = -(fabs(config.stoploss));
-    config.trailing_sl_val = fabs(config.trailing_sl_val);
-
+        config.target = fabs(config.target);
+        config.stoploss = -(fabs(config.stoploss));
+        config.trailing_sl_val = fabs(config.trailing_sl_val);
     }
 
     return config;
 }
 
-
 //essential boundary checking fuctions
-int is_target_hit(algoticks_dashboard dashboard, float target){
-    if(dashboard.is_short == true){
-        if ((dashboard.b - dashboard.a) < target){
+int is_target_hit(algoticks_dashboard dashboard, float target)
+{
+    if (dashboard.is_short == true)
+    {
+        if ((dashboard.b - dashboard.a) < target)
+        {
             return true;
-        }else{
+        }
+        else
+        {
             return false;
         }
-
-    }else{
-        if ((dashboard.b - dashboard.a) >= target){
+    }
+    else
+    {
+        if ((dashboard.b - dashboard.a) >= target)
+        {
             return true;
-        }else{
+        }
+        else
+        {
             return false;
         }
     }
 }
 
-int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss){
-    if(dashboard.is_short == true){
+int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss)
+{
+    if (dashboard.is_short == true)
+    {
         // sell / short
-        if ((dashboard.b - dashboard.a) > stoploss){
+        if ((dashboard.b - dashboard.a) > stoploss)
+        {
             return true;
-        }else{
+        }
+        else
+        {
             //printf("SL HIT => Received: %f %f %d\n", abs_pnl, stoploss, is_short);
             return false;
         }
-
-    }else{
+    }
+    else
+    {
         // buy
-        if ((dashboard.b - dashboard.a) <= stoploss){
+        if ((dashboard.b - dashboard.a) <= stoploss)
+        {
             return true;
-        }else{
+        }
+        else
+        {
             return false;
         }
     }
