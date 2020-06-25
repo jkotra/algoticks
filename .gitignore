@@ -1,6 +1,5 @@
 bin/**
 *.o
-example_configs/**
 
 CMakeFiles/**
 build/**

@@ -1,0 +1,15 @@
+{
+    "algo": ["algorithms/3Greens.so", "algorithms/3Reds.so"],
+    "datasource": ["example.csv"],
+    "symbol": "SUNPHARMA",
+    "candles": [4,6,8],
+
+    "quantity": [10],
+    "target": [1.5,2,2.5],
+    "stoploss": [2,2.5,3,3.5],
+    "is_training_sl": [true,false],
+    "trailing_sl_val": [1,2,3],
+    
+    "intraday": [true,false],
+    "skip_header": true
+}

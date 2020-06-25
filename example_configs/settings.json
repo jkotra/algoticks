@@ -1,0 +1,9 @@
+{
+    "print": true,
+    "colors": true,
+    "debug": false,
+    "debug_level": 1,
+
+    "intraday_hour": 15,
+    "intraday_min": 15
+}
