@@ -31,6 +31,7 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
    printf("Total Unique Combinations: %d\n", total_combinations);
 
    int combination_completed = 0;
+   float progress = 0;
 
     for (int n_algo = 0; n_algo < benchmarkconfig.n_algo; n_algo++)
     {
@@ -73,7 +74,9 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
                                         
                                         run_sim(settings, config);
                                         combination_completed++;
-                                        printf("%d/%d\r",combination_completed, total_combinations);
+
+                                        progress = ((float)combination_completed/total_combinations)*100;
+                                        printf("%d/%d (%f%%)\r",combination_completed, total_combinations, progress);
                                         fflush(stdout);
                                     }
                                 }
