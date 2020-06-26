@@ -1,15 +1,11 @@
 bin/**
 *.o
-
-CMakeFiles/**
-build/**
-CMakeCache.txt
+*.csv
+*.json
 
 output.log
 debug.log
 
-example.csv
-results.csv
 
 CMakeLists.txt.user
 CMakeCache.txt

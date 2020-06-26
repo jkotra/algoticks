@@ -10,3 +10,5 @@ algoticks_config filter_boundaries(algoticks_config config, int is_short);
 int is_target_hit(algoticks_dashboard dashboard, float target);
 int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss);
 float brokerage_calc();
+void convert_to_lowercase(char *str);
+void remove_quotes(char *str);

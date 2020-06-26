@@ -85,6 +85,8 @@ typedef struct Row
     float low;
     float close;
     int volume;
+
+    char technical_indicators[1024];
     int n_rows;
 }algoticks_row;
 

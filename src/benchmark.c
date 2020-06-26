@@ -68,9 +68,6 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
 
                                         config.skip_header = benchmarkconfig.skip_header;
 
-                                        /* if (settings.debug){
-                                            print_config_struct(config);
-                                        } */
                                         
                                         run_sim(settings, config);
                                         combination_completed++;

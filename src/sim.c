@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
@@ -70,7 +71,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
 
-        curr = read_csv(fp, &pos_storage, curr, config, settings.debug);
+        curr = read_csv(settings, fp, &pos_storage, curr, config, settings.debug);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -222,10 +223,10 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         for (int i = 0; i < config.candles; i++)
         {
-            curr = read_csv(fp, &series[i], curr, config, settings.debug);
+            curr = read_csv(settings, fp, &series[i], curr, config, settings.debug);
         }
 
-        curr = read_csv(fp, &storage, curr, config, settings.debug);
+        curr = read_csv(settings, fp, &storage, curr, config, settings.debug);
 
         struct Signal signal;
         signal = analyze(&series, config.candles);
@@ -272,6 +273,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
             //DEBUG - hit_type
             debug_msg(settings, 1, "hit_type", "sim.c", positionresult.hit_type);
+            
 
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
@@ -283,7 +285,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             }
             else
             {
-                printf("Position did not hit any boundary\n");
+                debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
             }
 
             if (positionresult.eof == true)

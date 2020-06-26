@@ -143,13 +143,7 @@ void create_setting_config_enchmark_files(int type)
     }
     
 }
-void chomp(char *s)
-{
-    /* This removes newline at end of string */
-    while (*s && *s != '\n' && *s != '\r')
-        s++;
-    *s = 0;
-}
+
 
 algoticks_settings parse_settings_from_json(char *filename)
 {
@@ -496,4 +490,31 @@ float brokerage_calc()
 {
 
     return 1.0;
+}
+
+
+void convert_to_lowercase(char *str){
+    for (int i = 0; i < strlen(str); i++)
+    {
+        str[i] = tolower(str[i]);
+    }
+    
+}
+
+void remove_quotes(char *str){ 
+    int i;
+
+    for (i = 1; i < strlen(str)-1; i++)
+    {
+        str[i-1] = str[i];
+    }
+    str[i-1] = '\0';
+}
+
+void chomp(char *s)
+{
+    /* This removes newline at end of string */
+    while (*s && *s != '\n' && *s != '\r')
+        s++;
+    *s = 0;
 }
