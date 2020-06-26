@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <time.h>
 #include <dlfcn.h>
-#include <unistd.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
