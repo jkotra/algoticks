@@ -3,5 +3,5 @@
 
 /* Declarations */
 algoticks_row tokenize_row(char *row);
-int read_csv(algoticks_settings settings, FILE *fp, algoticks_row *storage, int seek_offset, algoticks_config config, int debug);
+int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset);
 int is_quoted(char *str);

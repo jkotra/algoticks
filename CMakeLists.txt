@@ -3,7 +3,7 @@ project(algoticks VERSION 0.1)
 
 #create required dirs
 file(MAKE_DIRECTORY "bin")
-file(MAKE_DIRECTORY "bin/algorithms")
+file(MAKE_DIRECTORY "bin/algorithms/")
 
 include_directories(include /usr/include)
 include_directories(${PROJECT_SOURCE_DIR})

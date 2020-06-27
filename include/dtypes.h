@@ -24,6 +24,9 @@ typedef struct BenchmarkConfig
     int candles[1024];
     int n_candles;
 
+    int interval[1024];
+    int n_interval;
+
     double target[1024];
     int n_target;
 
@@ -39,6 +42,9 @@ typedef struct BenchmarkConfig
     int quantity[1024];
     int n_quantity;
 
+    int sliding[2];
+    int n_sliding;
+
     int intraday[2];
     int n_intraday;
 
@@ -52,13 +58,15 @@ typedef struct Config
     char datasource[512];
     char symbol[32];
     int candles;
+    int interval;
 
     double target;
     double stoploss;
     int is_training_sl;
     double trailing_sl_val;
     int quantity;
-
+    
+    int sliding;
     int intraday;
 
     int skip_header;
@@ -87,6 +95,7 @@ typedef struct Row
     int volume;
 
     char technical_indicators[1024];
+    int curr;
     int n_rows;
 }algoticks_row;
 
@@ -118,6 +127,12 @@ typedef struct SimResult{
 
     int trgt_hits;
     int sl_hits;
+
+    int b_trgt_hits;
+    int b_sl_hits;
+
+    int s_trgt_hits;
+    int s_sl_hits;
 
     float peak;
     float bottom;

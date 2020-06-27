@@ -12,7 +12,7 @@
 #include "../include/misc.h"
 #include "../include/debug.h"
 
-/* this buffer is used for sprintf() */
+/* this buffer is used for sprintf() to send to debung_msg function. */
 char debug_msg_buffer[1024];
 
 algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
@@ -70,7 +70,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
 
-        curr = read_csv(settings, fp, &pos_storage, curr, config, settings.debug);
+        curr = read_csv(settings,config, fp, &pos_storage, curr);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -222,25 +222,25 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         for (int i = 0; i < config.candles; i++)
         {
-            curr = read_csv(settings, fp, &series[i], curr, config, settings.debug);
+            curr = read_csv(settings,config, fp, &series[i], curr);
         }
 
-        curr = read_csv(settings, fp, &storage, curr, config, settings.debug);
+        curr = read_csv(settings, config, fp, &storage, curr);
 
         struct Signal signal;
         signal = analyze(&series, config.candles);
 
-        if (signal.buy)
+        if (signal.buy == true)
         {
             simresult.buy_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Buy");
         }
-        else if (signal.sell)
+        else if (signal.sell == true)
         {
             simresult.sell_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Sell");
         }
-        else if (signal.neutral)
+        else if (signal.neutral == true)
         {
             simresult.neutral_signals += 1;
             debug_msg(settings, 3, "signal", "sim.c", "Neutral");
@@ -254,8 +254,11 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.neutral != true)
         {
             struct PositionResult positionresult;
+            if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) != true){
             positionresult = take_position(signal, fp, curr, settings, config, storage);
-
+            }else{
+                continue;
+            }
             curr = positionresult.curr;
 
             simresult.pnl += positionresult.pnl;
@@ -277,10 +280,14 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
+                if (signal.buy == true){ simresult.b_trgt_hits += 1; }
+                else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
+                if (signal.buy == true){ simresult.b_sl_hits += 1; }
+                else if (signal.sell == true){ simresult.s_sl_hits += 1; }
             }
             else
             {
@@ -298,10 +305,20 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
             continue;
         }
+        
+        // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
+        if (config.sliding == true && (config.candles > 2) == true){
+            if (curr != -1){
+                curr = series[1].curr;
+            }
+        }
 
         //zero out storage
         memset(&storage, 0, sizeof(storage));
     }
+    
+    //close datasource file.
+    fclose(fp);
 
     write_simresult_to_csv(simresult);
     return simresult;

@@ -55,14 +55,17 @@ void print_config_struct(algoticks_config config){
     printf("[DEBUG] config.algo = %s\n", config.algo);
     printf("[DEBUG] config.datasource = %s\n", config.datasource);
     printf("[DEBUG] config.symbol = %s\n", config.symbol);
+    printf("[DEBUG] config.interval = %d\n", config.interval);
 
     printf("[DEBUG] config.candles = %d\n", config.candles);
     printf("[DEBUG] config.target = %f\n", config.target);
     printf("[DEBUG] config.stoploss = %f\n", config.stoploss);
     printf("[DEBUG] config.is_trailing_sl = %d\n", config.is_training_sl);
     printf("[DEBUG] config.trailing_sl_val = %f\n", config.trailing_sl_val);
-
     printf("[DEBUG] config.quantity = %d\n", config.quantity);
+
+    printf("[DEBUG] config.sliding = %d\n", config.sliding);
+    printf("[DEBUG] config.intraday = %d\n", config.intraday);
     printf("[DEBUG] config.skip_header = %d\n", config.skip_header);
 }
 

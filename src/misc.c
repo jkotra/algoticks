@@ -8,30 +8,36 @@
 #include "../include/misc.h"
 
 int simresult_file_header = false;
-char simresult_csv_header[1000] = "algo,pnl,datasource,symbol,candles,target,stoploss,is_trailing_sl,trailing_sl_val,quantity,intraday,buy_signals,sell_signals,neutral_signals,trgt_hits,sl_hits,peak,bottom\n";
+char simresult_csv_header[1000] = "algo,pnl,datasource,symbol,candles,interval,target,stoploss,is_trailing_sl,trailing_sl_val,quantity,sliding,intraday,buy_signals,sell_signals,neutral_signals,trgt_hits,sl_hits,b_trgt_hits,s_trgt_hits,b_sl_hits,s_sl_hits,peak,bottom\n";
 
 void write_simresult_to_csv(algoticks_simresult simresult)
 {
     // config + sim result
     char buffer[4000];
 
-    sprintf(buffer, "%s,%f,%s,%s,%d,%f,%f,%d,%f,%d,%d,%d,%d,%d,%d,%d,%f,%f\n",
+    sprintf(buffer, "%s,%f,%s,%s,%d,%d,%f,%f,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%f,%f\n",
             simresult.config.algo,
             simresult.pnl,
             simresult.config.datasource,
             simresult.config.symbol,
             simresult.config.candles,
+            simresult.config.interval,
             simresult.config.target,
             simresult.config.stoploss,
             simresult.config.is_training_sl,
             simresult.config.trailing_sl_val,
             simresult.config.quantity,
+            simresult.config.sliding,
             simresult.config.intraday,
             simresult.buy_signals,
             simresult.sell_signals,
             simresult.neutral_signals,
             simresult.trgt_hits,
             simresult.sl_hits,
+            simresult.b_trgt_hits,
+            simresult.s_trgt_hits,
+            simresult.b_sl_hits,
+            simresult.s_sl_hits,
             simresult.peak,
             simresult.bottom);
     FILE *fp;
@@ -87,13 +93,15 @@ void create_setting_config_enchmark_files(int type)
     \"datasource\": \"example.csv\", \n \
     \"symbol\": \"SUNPHARMA\", \n \
     \"candles\": 3, \n \
+    \"interval\": 0, \n \
                     \n \
     \"quantity\": 100, \n \
     \"target\": 5, \n \
     \"stoploss\": 7, \n \
     \"is_training_sl\": false, \n \
     \"trailing_sl_val\": 1, \n \
-                            \n \
+                        \n \
+    \"sliding\": false, \n \             
     \"intraday\": true, \n \
     \"skip_header\": true \n \
 }\n";
@@ -103,6 +111,7 @@ void create_setting_config_enchmark_files(int type)
     \"datasource\": [\"example.csv\"], \n \
     \"symbol\": \"SUNPHARMA\", \n \
     \"candles\": [4,6,8], \n \
+    \"interval\": [5,10,15], \n \
                            \n \
     \"quantity\": [10], \n \
     \"target\": [1.5,2,2.5], \n \
@@ -110,6 +119,7 @@ void create_setting_config_enchmark_files(int type)
     \"is_training_sl\": [true,false], \n \
     \"trailing_sl_val\": [1,2,3], \n \
                                   \n \
+    \"sliding\": [true,false], \n \                             
     \"intraday\": [true,false], \n \
     \"skip_header\": true \n \
 }\n";
@@ -148,15 +158,6 @@ void create_setting_config_enchmark_files(int type)
 algoticks_settings parse_settings_from_json(char *filename)
 {
 
-    /* Example:
-
-    {
-    "print": true,
-    "colors": true,
-    "debug": true
-    }
-
-    */
 
     char buffer[4096];
     FILE *fp;
@@ -199,27 +200,15 @@ algoticks_settings parse_settings_from_json(char *filename)
     settings.intraday_hour = json_object_get_int(intraday_hour);
     settings.intraday_min = json_object_get_int(intraday_min);
 
+    //close config file!
+    fclose(fp);
+
     return settings;
 }
 
 algoticks_config parse_config_from_json(char *filename)
 {
 
-    /* Example JSON:
-
-    {
-    "algo": "",
-    "datasource": "",
-    "symbol": "",
-    "candles": 4,
-
-    "quantity": 20,
-    "start_date": "",
-    "intraday": true
-
-    }
-
-    */
 
     char buffer[4096];
     FILE *fp;
@@ -238,11 +227,15 @@ algoticks_config parse_config_from_json(char *filename)
     struct json_object *datasource;
     struct json_object *symbol;
     struct json_object *candles;
+    struct json_object *interval;
+
     struct json_object *target;
     struct json_object *stoploss;
     struct json_object *is_training_sl;
     struct json_object *trailing_sl_val;
     struct json_object *quantity;
+
+    struct json_object *sliding;
     struct json_object *intraday;
     struct json_object *skip_header;
 
@@ -254,11 +247,13 @@ algoticks_config parse_config_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "datasource", &datasource);
     json_object_object_get_ex(parsed_json, "symbol", &symbol);
     json_object_object_get_ex(parsed_json, "candles", &candles);
+    json_object_object_get_ex(parsed_json, "interval", &interval);
     json_object_object_get_ex(parsed_json, "target", &target);
     json_object_object_get_ex(parsed_json, "stoploss", &stoploss);
     json_object_object_get_ex(parsed_json, "is_training_sl", &is_training_sl);
     json_object_object_get_ex(parsed_json, "trailing_sl_val", &trailing_sl_val);
     json_object_object_get_ex(parsed_json, "quantity", &quantity);
+    json_object_object_get_ex(parsed_json, "sliding", &sliding);
     json_object_object_get_ex(parsed_json, "intraday", &intraday);
     json_object_object_get_ex(parsed_json, "skip_header", &skip_header);
 
@@ -266,13 +261,18 @@ algoticks_config parse_config_from_json(char *filename)
     strncpy(config.datasource, json_object_get_string(datasource), 512);
     strncpy(config.symbol, json_object_get_string(symbol), 32);
     config.candles = json_object_get_int(candles);
+    config.interval = json_object_get_int(interval);
     config.quantity = json_object_get_int(quantity);
     config.target = json_object_get_double(target);
     config.stoploss = json_object_get_double(stoploss);
     config.is_training_sl = json_object_get_boolean(is_training_sl);
     config.trailing_sl_val = json_object_get_double(trailing_sl_val);
+    config.sliding = json_object_get_boolean(sliding);
     config.intraday = json_object_get_boolean(intraday);
     config.skip_header = json_object_get_boolean(skip_header);
+
+    //close config file!
+    fclose(fp);
 
     return config;
 }
@@ -280,21 +280,7 @@ algoticks_config parse_config_from_json(char *filename)
 algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
 {
 
-    /* Example JSON:
 
-    {
-    "algo": "",
-    "datasource": "",
-    "symbol": "",
-    "candles": 4,
-
-    "quantity": 20,
-    "start_date": "",
-    "intraday": true
-
-    }
-
-    */
 
     char buffer[4096];
     FILE *fp;
@@ -313,12 +299,16 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     struct json_object *algo;
     struct json_object *datasource;
     struct json_object *symbol;
+    struct json_object *interval;
+
     struct json_object *candles;
     struct json_object *target;
     struct json_object *stoploss;
     struct json_object *is_training_sl;
     struct json_object *trailing_sl_val;
     struct json_object *quantity;
+
+    struct json_object *sliding;
     struct json_object *intraday;
     struct json_object *skip_header;
 
@@ -330,11 +320,13 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "datasource", &datasource);
     json_object_object_get_ex(parsed_json, "symbol", &symbol);
     json_object_object_get_ex(parsed_json, "candles", &candles);
+    json_object_object_get_ex(parsed_json, "interval", &interval);
     json_object_object_get_ex(parsed_json, "target", &target);
     json_object_object_get_ex(parsed_json, "stoploss", &stoploss);
     json_object_object_get_ex(parsed_json, "is_training_sl", &is_training_sl);
     json_object_object_get_ex(parsed_json, "trailing_sl_val", &trailing_sl_val);
     json_object_object_get_ex(parsed_json, "quantity", &quantity);
+    json_object_object_get_ex(parsed_json, "sliding", &sliding);
     json_object_object_get_ex(parsed_json, "intraday", &intraday);
     json_object_object_get_ex(parsed_json, "skip_header", &skip_header);
 
@@ -359,6 +351,13 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     {
         tmp = json_object_array_get_idx(candles, i);
         benchmarkconfig.candles[i] = json_object_get_int(tmp);
+    }
+
+    benchmarkconfig.n_interval = json_object_array_length(interval);
+    for (int i = 0; i < benchmarkconfig.n_interval; i++)
+    {
+        tmp = json_object_array_get_idx(interval, i);
+        benchmarkconfig.interval[i] = json_object_get_int(tmp);
     }
 
     benchmarkconfig.n_target = json_object_array_length(target);
@@ -396,6 +395,13 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         benchmarkconfig.quantity[i] = json_object_get_int(tmp);
     }
 
+    benchmarkconfig.n_sliding = json_object_array_length(sliding);
+    for (int i = 0; i < benchmarkconfig.n_sliding; i++)
+    {
+        tmp = json_object_array_get_idx(sliding, i);
+        benchmarkconfig.sliding[i] = json_object_get_boolean(tmp);
+    }
+
     benchmarkconfig.n_intraday = json_object_array_length(intraday);
     for (int i = 0; i < benchmarkconfig.n_intraday; i++)
     {
@@ -404,6 +410,9 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     }
 
     benchmarkconfig.skip_header = json_object_get_boolean(skip_header);
+    
+    //close config file!
+    fclose(fp);
 
     return benchmarkconfig;
 }

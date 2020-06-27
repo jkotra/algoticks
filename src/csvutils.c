@@ -116,7 +116,7 @@ algoticks_row tokenize_row(char *row){
 
 }
 
-int read_csv(algoticks_settings settings, FILE *fp, algoticks_row *storage, int seek_offset, algoticks_config config, int debug){
+int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset){
 
     if (feof(fp) == true)
     {
@@ -136,6 +136,14 @@ int read_csv(algoticks_settings settings, FILE *fp, algoticks_row *storage, int 
     
 
     while(1) {
+
+    //interval in config
+    if ((config.interval > 0) == true && skip_header == false){
+        for (int i = 0; i < config.interval; i++)
+        {
+            fgets(row, MAXCHARPERLINE, fp);
+        }
+    }
     
 
     //get the row
@@ -224,8 +232,9 @@ int read_csv(algoticks_settings settings, FILE *fp, algoticks_row *storage, int 
     curr_sp = ftell(fp);
 
     *storage = tokenize_row(row);
+    storage->curr = curr_sp;
 
-    debug_msg(settings, 3, "ReadRow", "csvutils.c", storage->date);
+    debug_msg(settings, 3, "ReadRowDate", "csvutils.c", storage->date);
     
     return curr_sp;
 
