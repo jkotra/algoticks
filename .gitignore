@@ -6,7 +6,7 @@ bin/**
 output.log
 debug.log
 
-
+build/**
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
