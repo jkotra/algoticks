@@ -1,5 +1,5 @@
 #define MAXCHARPERLINE 1024
-#define MAXCSVHEAD 8
+#define MAXCSVHEAD 11
 
 /* Declarations */
 algoticks_row tokenize_row(char *row);

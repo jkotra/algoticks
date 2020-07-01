@@ -83,6 +83,21 @@ typedef struct Dashboard
     int is_short;
 }algoticks_dashboard;
 
+typedef struct row_ti{
+
+    int is_ti1_p;
+    float ti1;
+
+    int is_ti2_p;
+    float ti2;
+
+    int is_ti3_p;
+    float ti3;
+
+    int is_ti_others_p;
+    char ti_others[2048];
+
+}algoticks_tow_ti;
 
 typedef struct Row
 {
@@ -94,7 +109,9 @@ typedef struct Row
     float close;
     int volume;
 
-    char technical_indicators[1024];
+    //char technical_indicators[1024];
+    algoticks_tow_ti technical_indicators;
+
     int curr;
     int n_rows;
 }algoticks_row;

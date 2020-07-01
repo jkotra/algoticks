@@ -43,9 +43,9 @@ set_target_properties(algoticks
 )
 
 #copy configs to bin/
-file(COPY ${PROJECT_SOURCE_DIR}/example_configs/config.json
+file(COPY ${PROJECT_SOURCE_DIR}/assets/config.json
      DESTINATION bin/)
-file(COPY ${PROJECT_SOURCE_DIR}/example_configs/settings.json
+file(COPY ${PROJECT_SOURCE_DIR}/assets/settings.json
      DESTINATION bin/)
-file(COPY ${PROJECT_SOURCE_DIR}/example_configs/benchmark.json
+file(COPY ${PROJECT_SOURCE_DIR}/assets/benchmark.json
      DESTINATION bin/)

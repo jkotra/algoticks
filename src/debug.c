@@ -97,3 +97,19 @@ void print_simresult_struct(algoticks_simresult simresult){
     printf("[DEBUG] signal.sl_hits = %d\n", simresult.sl_hits);
     printf("\n===*===\n");
 }
+
+void print_row_struct(algoticks_row row){
+    printf("\n===*===\n");
+    printf("[DEBUG] row.date = %s\n", row.date);
+    printf("[DEBUG] row.open = %f\n", row.open);
+    printf("[DEBUG] row.high = %f\n", row.high);
+    printf("[DEBUG] row.low = %f\n", row.low);
+    printf("[DEBUG] row.close = %f\n", row.close);
+    printf("[DEBUG] row.volume = %f\n", row.volume);
+
+    printf("[DEBUG] ti1 ti2 ti3 t_others = %f %f %f %s\n", row.technical_indicators.ti1,
+                                                           row.technical_indicators.ti2,
+                                                           row.technical_indicators.ti3,
+                                                           row.technical_indicators.ti_others);
+    printf("\n===*===\n");
+}

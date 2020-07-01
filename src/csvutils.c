@@ -28,7 +28,7 @@ header_map = {0,1,4,5,2,3,(Optional technical_indicator n)}
 technical_indicators is optional! it is by default set to None.
 */
 
-char header_template[MAXCSVHEAD][24] = {"date", "open", "high", "low", "close", "volume", "technical_indicators"};
+char header_template[MAXCSVHEAD][24] = {"date", "open", "high", "low", "close", "volume", "ti1", "ti2", "ti3", "ti_others"};
 int header_map[MAXCSVHEAD] = {0};
 
 // this checks if the first char of given string starts with quote.
@@ -45,9 +45,7 @@ algoticks_row tokenize_row(char *row){
     char *token;
     struct Row data;
     memset(&data, 0, sizeof(data));
-
-    // set default
-    strncpy(data.technical_indicators,"None",1024);
+    strncpy(data.technical_indicators.ti_others, "None", 2048);
 
     int row_pos = 0;
     int header_i = 0;
@@ -55,7 +53,7 @@ algoticks_row tokenize_row(char *row){
     token = strtok(row, ",");
 
     
-    while (token != NULL && header_i < MAXCSVHEAD) // MAXCSVHEAD+unknown_headers=0..8+unknown_headers
+    while (token != NULL && header_i < MAXCSVHEAD)
     {
         
         if (header_map[header_i] == -1){
@@ -96,10 +94,32 @@ algoticks_row tokenize_row(char *row){
             if (is_quoted(token) == true) { remove_quotes(token); }
             data.volume = atoi(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"technical_indicators") == 0)
+
+        //technical indicators
+        else if (strcmp(header_template[header_map[header_i]],"ti1") == 0)
         {
             if (is_quoted(token) == true) { remove_quotes(token); }
-            strncpy(data.technical_indicators,token,1024);
+            data.technical_indicators.is_ti1_p = true;
+            data.technical_indicators.ti1 = atof(token);
+        }
+        else if (strcmp(header_template[header_map[header_i]],"ti2") == 0)
+        {
+            if (is_quoted(token) == true) { remove_quotes(token); }
+            data.technical_indicators.is_ti2_p = true;
+            data.technical_indicators.ti2 = atof(token);
+        }
+        else if (strcmp(header_template[header_map[header_i]],"ti3") == 0)
+        {
+            if (is_quoted(token) == true) { remove_quotes(token); }
+            data.technical_indicators.is_ti3_p = true;
+            data.technical_indicators.ti3 = atof(token);
+        }
+        else if (strcmp(header_template[header_map[header_i]],"ti_others") == 0)
+        {
+            
+            if (is_quoted(token) == true) { remove_quotes(token); }
+            data.technical_indicators.is_ti_others_p = true;
+            strncpy(data.technical_indicators.ti_others, token,2048);
         }
         else
         {
@@ -176,7 +196,11 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
             "low" = 3,
             "close" = 4,
             "volume" = 5,
-            "technical_indicators" = 6
+
+            "ti1" = 6,
+            "ti2" = 7,
+            "ti3" = 9,
+            "ti_others" = 10
             */
 
             // Date
@@ -200,8 +224,17 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
             else if(strcmp(token, "volume") == 0){ 
                 header_map[header_i] = 5; }
 
-            else if(strcmp(token, "technical_indicators") == 0){ 
+            else if(strcmp(token, "ti1") == 0){ 
                 header_map[header_i] = 6; }
+
+            else if(strcmp(token, "ti2") == 0){ 
+                header_map[header_i] = 7; }
+
+            else if(strcmp(token, "ti3") == 0){ 
+                header_map[header_i] = 8; }
+
+            else if(strcmp(token, "ti_others") == 0){ 
+                header_map[header_i] = 9; }            
 
             else { printf("Unknown header element: %s\n", token);
                 header_map[header_i] = -1;
