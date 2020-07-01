@@ -1,0 +1,18 @@
+{
+    "algo": "algorithms/3Reds.so",
+    "datasource": "example.csv",
+    "symbol": "SUNPHARMA",
+    "candles": 3,
+    "interval": 0,
+
+    "quantity": 100,
+    "target": 5,
+    "stoploss": 7,
+    "is_training_sl": false,
+    "trailing_sl_val": 1,
+    
+    "sliding": false,
+    "intraday": true,
+    "skip_header": true
+
+}

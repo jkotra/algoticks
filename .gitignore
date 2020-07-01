@@ -1,7 +1,6 @@
 bin/**
 *.o
 *.csv
-*.json
 
 output.log
 debug.log
