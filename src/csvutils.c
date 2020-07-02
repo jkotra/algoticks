@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/stat.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/debug.h"
@@ -30,6 +31,41 @@ technical_indicators is optional! it is by default set to None.
 
 char header_template[MAXCSVHEAD][24] = {"date", "open", "high", "low", "close", "volume", "ti1", "ti2", "ti3", "ti_others"};
 int header_map[MAXCSVHEAD] = {0};
+
+struct stat stat_info;
+unsigned int datasource_lastmodified = -1;
+
+int change_in_modified_date(char* filename){
+
+
+        if (stat(filename, &stat_info) != 1){
+
+            if (datasource_lastmodified == -1) { 
+                datasource_lastmodified = stat_info.st_mtime;
+                return false; }
+
+        if (datasource_lastmodified != stat_info.st_mtime){
+
+            //update var.
+            datasource_lastmodified = stat_info.st_mtime;
+            return true;
+        }
+        
+    }
+
+    return false;
+}
+
+int reopen_datasource(char* filename, FILE** fp){
+
+    if (freopen(filename, "r", *fp) != NULL){
+        return true;
+    }
+    else{
+        return false;
+    }
+
+}
 
 // this checks if the first char of given string starts with quote.
 int is_quoted(char *str){
@@ -140,7 +176,25 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
 
     if (feof(fp) == true)
     {
+        if (settings.is_live_data){
+            while ((change_in_modified_date(config.datasource) == false))
+            {
+                printf("checking for new data in %s...\r", config.datasource);
+                fflush(stdout);
+                }
+
+                //since we are using fgets() the new data written to data source MUST end with new line (\n)
+                //reopen
+                reopen_datasource(config.datasource, &fp);
+
+                //set_seek
+                fseek(fp, seek_offset, SEEK_SET);
+
+                debug_msg(settings, 2, "FileReopen_LiveMode","csvutils.c", config.datasource);
+
+        }else {
         return EOF;
+        }
     }
 
     if (seek_offset != 0)

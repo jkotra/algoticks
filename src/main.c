@@ -10,6 +10,7 @@
 int debug_flag = false;
 int benchmark_flag = false;
 int config_need_exit_flag = false;
+int live_datasource_flag = false;
 
 char settings_file[64] = "settings.json";
 char config_file[64] = "config.json";
@@ -26,6 +27,8 @@ void print_help_and_exit()
 
     printf("-V\t\t\tPrint Version and Exit.\n");
     printf("-H\t\t\tPrint this message and Exit.\n\n\n");
+    printf("-D\t\t\tEnable Debug.\n\n\n");
+    printf("-L\t\t\tIndicate datasource is updated in realtime.\n\n\n");
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
@@ -57,7 +60,11 @@ int main(int argc, char **argv)
             //debug
             else if (strcmp(argv[i], "-D") == 0)
             {
-                debug_flag = 1;
+                debug_flag = true;
+            }
+            else if (strcmp(argv[i], "-L") == 0)
+            {
+                live_datasource_flag = true;
             }
 
             // for --settings
@@ -124,6 +131,11 @@ int main(int argc, char **argv)
     if (debug_flag == true)
     {
         settings.debug = true;
+    }
+
+    //set is_live_data to true as arg.
+    if (live_datasource_flag == true){
+        settings.is_live_data = true;
     }
 
     if (benchmark_flag)

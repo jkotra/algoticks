@@ -5,6 +5,8 @@ typedef struct Settings
     int debug;
     int debug_level;
 
+    int is_live_data;
+
     
     int intraday_hour;
     int intraday_min;
