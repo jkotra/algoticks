@@ -9,9 +9,11 @@
 Algoticks is an algorithmic trading simulator written in C.
 </pre>
 
+
+
+[READ: Getting started with Algoticks](https://stdin.top/posts/getting-started-with-algoticks/)
+
 </div>
-
-
 ---
 
 ## Building
@@ -25,7 +27,6 @@ Prerequisites:
 
 ```
 cmake .
-
 make
 ```
 
@@ -52,7 +53,7 @@ make
 
 Start of development: 13-Jun-2020
 
-Repository made public: **TDB**
+Repository made public: 07-Jul-2020
 
 ---
 

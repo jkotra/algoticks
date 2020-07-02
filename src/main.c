@@ -18,7 +18,7 @@ char benchmark_file[64] = "benchmark.json";
 
 void print_version_and_exit()
 {
-    printf("algoticks v0.1\n");
+    printf("algoticks v1.0\n");
     exit(0);
 }
 
