@@ -30,9 +30,24 @@ Prerequisites:
 - `JSON-C`
 
 ```
-cmake .
+mkdir bin
+cd bin
+cmake ..
 make
 ```
+
+upon successful compilation, the binary executable along with config files are found in `release` (`bin/release`) folder.
+
+### Debug Build
+
+```
+mkdir bin
+cd bin
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make
+```
+
+---
 
 ## Usage
 
@@ -57,7 +72,7 @@ make
 
 Start of development: 13-Jun-2020
 
-Repository made public: 07-Jul-2020
+Repository made public: 02-Jul-2020
 
 ---
 

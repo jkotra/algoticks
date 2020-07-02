@@ -3,8 +3,8 @@ project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
 #create required dirs
-file(MAKE_DIRECTORY "bin")
-file(MAKE_DIRECTORY "bin/algorithms/")
+file(MAKE_DIRECTORY "release")
+file(MAKE_DIRECTORY "release/algorithms/")
 
 include_directories(include /usr/include)
 include_directories(${PROJECT_SOURCE_DIR})
@@ -23,7 +23,7 @@ add_library(${algo} MODULE src/algorithms/${algo}.c)
 set_target_properties(${algo}
     PROPERTIES
     PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY "bin/algorithms/"
+    LIBRARY_OUTPUT_DIRECTORY "release/algorithms/"
 )
 endforeach()
 
@@ -36,15 +36,15 @@ target_link_libraries(algoticks PUBLIC dl)
 #set output to bin/
 set_target_properties(algoticks
     PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "bin/archive/"
-    LIBRARY_OUTPUT_DIRECTORY "bin/lib/"
-    RUNTIME_OUTPUT_DIRECTORY "bin/"
+    ARCHIVE_OUTPUT_DIRECTORY "release/archive/"
+    LIBRARY_OUTPUT_DIRECTORY "release/lib/"
+    RUNTIME_OUTPUT_DIRECTORY "release/"
 )
 
 #copy configs to bin/
 file(COPY ${PROJECT_SOURCE_DIR}/assets/config.json
-     DESTINATION bin/)
+     DESTINATION release/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/settings.json
-     DESTINATION bin/)
+     DESTINATION release/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/benchmark.json
-     DESTINATION bin/)
+     DESTINATION release/)
