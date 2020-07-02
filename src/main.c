@@ -32,7 +32,7 @@ void print_help_and_exit()
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--benchmark -B [(Optional)[*.JSON]\tCustom config file. Default: benchmark.json\n");
+    printf("--benchmark -B [(Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
     exit(0);
 }
 
