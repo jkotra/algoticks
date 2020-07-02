@@ -22,6 +22,8 @@ Algoticks is an algorithmic trading simulator written in C.
 
 ## Building
 
+### Release
+
 Recommended Compiler: `GCC`
 
 Recommended Standard: `C11`
@@ -38,7 +40,7 @@ make
 
 upon successful compilation, the binary executable along with config files are found in `release` (`bin/release`) folder.
 
-### Debug Build
+### Debug
 
 ```
 mkdir bin
@@ -47,21 +49,22 @@ cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 ```
 
+upon successful compilation, the binary executable along with config files are found in `debug` (`bin/debug`) folder.
+
 ---
 
 ## Usage
 
 ```
+-V			Print Version and Exit.
+-H			Print this message and Exit.
+-D			Enable Debug.
+-L			Indicate datasource is updated in realtime.
 
--V          Print Version and Exit.
--H          Print this message and Exit.
--D          Enable Debug.
--L          Indicate datasource is updated in realtime.
 
-
---settings [*.JSON]         Custom settings file. Default: settings.json
---config [*.JSON]           Custom config file. Default: config.json
---benchmark -B [(Optional)[*.JSON]  Custom config file. Default: benchmark.json
+--settings [*.JSON]			Custom settings file. Default: settings.json
+--config [*.JSON]			Custom config file. Default: config.json
+--benchmark -B [(Optional)[*.JSON]	Custom benchmark file. Default: benchmark.json
 
 
 ```

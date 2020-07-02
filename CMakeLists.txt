@@ -2,9 +2,17 @@ cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
+#default
+set(out_folder_name "release")
+
+#if debug in arg, change folder name to "debug"
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+     set(out_folder_name "debug")
+ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
+
 #create required dirs
-file(MAKE_DIRECTORY "release")
-file(MAKE_DIRECTORY "release/algorithms/")
+file(MAKE_DIRECTORY ${out_folder_name})
+file(MAKE_DIRECTORY ${out_folder_name}/algorithms/)
 
 include_directories(include /usr/include)
 include_directories(${PROJECT_SOURCE_DIR})
@@ -23,7 +31,7 @@ add_library(${algo} MODULE src/algorithms/${algo}.c)
 set_target_properties(${algo}
     PROPERTIES
     PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY "release/algorithms/"
+    LIBRARY_OUTPUT_DIRECTORY ${out_folder_name}/algorithms/
 )
 endforeach()
 
@@ -36,15 +44,15 @@ target_link_libraries(algoticks PUBLIC dl)
 #set output to bin/
 set_target_properties(algoticks
     PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "release/archive/"
-    LIBRARY_OUTPUT_DIRECTORY "release/lib/"
-    RUNTIME_OUTPUT_DIRECTORY "release/"
+    ARCHIVE_OUTPUT_DIRECTORY ${out_folder_name}/archive/
+    LIBRARY_OUTPUT_DIRECTORY ${out_folder_name}/lib/
+    RUNTIME_OUTPUT_DIRECTORY ${out_folder_name}/
 )
 
 #copy configs to bin/
 file(COPY ${PROJECT_SOURCE_DIR}/assets/config.json
-     DESTINATION release/)
+     DESTINATION ${out_folder_name}/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/settings.json
-     DESTINATION release/)
+     DESTINATION ${out_folder_name}/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/benchmark.json
-     DESTINATION release/)
+     DESTINATION ${out_folder_name}/)
