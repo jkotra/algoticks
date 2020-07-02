@@ -17,6 +17,7 @@ Algoticks is an algorithmic trading simulator written in C.
 [READ: Getting started with Algoticks](https://stdin.top/posts/getting-started-with-algoticks/)
 
 </div>
+
 ---
 
 ## Building
