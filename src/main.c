@@ -26,13 +26,13 @@ void print_help_and_exit()
 {
 
     printf("-V\t\t\tPrint Version and Exit.\n");
-    printf("-H\t\t\tPrint this message and Exit.\n\n\n");
-    printf("-D\t\t\tEnable Debug.\n\n\n");
+    printf("-H\t\t\tPrint this message and Exit.\n");
+    printf("-D\t\t\tEnable Debug.\n");
     printf("-L\t\t\tIndicate datasource is updated in realtime.\n\n\n");
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--benchmark -B [(Optional)[*.JSON]\t\t\tCustom config file. Default: benchmark.json\n");
+    printf("--benchmark -B [(Optional)[*.JSON]\tCustom config file. Default: benchmark.json\n");
     exit(0);
 }
 

@@ -39,11 +39,14 @@ int change_in_modified_date(char* filename){
 
 
         if (stat(filename, &stat_info) != 1){
-
-            if (datasource_lastmodified == -1) { 
-                datasource_lastmodified = stat_info.st_mtime;
-                return false; }
-
+            
+            //if datasource_lastmodified is -1 then it's initial check, update last it to last modfied
+        if (datasource_lastmodified == -1) { 
+            datasource_lastmodified = stat_info.st_mtime;
+            return false; 
+        }
+        
+        // if file modified
         if (datasource_lastmodified != stat_info.st_mtime){
 
             //update var.
