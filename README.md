@@ -20,7 +20,7 @@ Algoticks is an algorithmic trading simulator written in C.
 
 ---
 
-## Building
+## Building (Linux)
 
 ### Release
 
@@ -28,8 +28,8 @@ Recommended Compiler: `GCC`
 
 Recommended Standard: `C11`
 
-Prerequisites:
-- `JSON-C`
+Dependencies:
+- [`JSON-C`](https://github.com/json-c/json-c)
 
 ```
 mkdir bin
