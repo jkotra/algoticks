@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <dlfcn.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
@@ -19,7 +18,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 {
 
     //initialize pos res.
-    struct PositionResult positionresult;
+    struct PositionResult positionresult = {0};
 
     struct Dashboard dashboard;
 
@@ -189,36 +188,16 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     //add config to simresult
     simresult.config = config;
 
-    //load algo
-    void *handle;
-    algoticks_signal (*analyze)(algoticks_row *, int);
+    algo_func analyze = load_algo_func(config.algo);
 
-    handle = dlopen(config.algo, RTLD_LAZY);
+    //initialize and malloc for series
+    struct Row* series;
+    series = (algoticks_row*)malloc((config.candles+1) * sizeof(algoticks_row));
 
-    if (!handle)
-    {
-        fprintf(stderr, "Error: %s\n", dlerror());
-        exit(EXIT_FAILURE);
-    }
-
-    *(void **)(&analyze) = dlsym(handle, "analyze");
-
-    if (!analyze)
-    {
-        fprintf(stderr, "Error: %s\n", dlerror());
-        dlclose(handle);
-        exit(EXIT_FAILURE);
-    }
-    else
-    {
-        sprintf(debug_msg_buffer, "%s", config.algo);
-        debug_msg(settings, 3, "LoadAlgo", "sim.c", debug_msg_buffer);
-    }
 
     while (curr != EOF)
     {
 
-        struct Row series[config.candles + 1];
 
         for (int i = 0; i < config.candles; i++)
         {
@@ -228,7 +207,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         curr = read_csv(settings, config, fp, &storage, curr);
 
         struct Signal signal;
-        signal = analyze(&series, config.candles);
+        signal = analyze(series, config.candles);
 
         if (signal.buy == true)
         {
@@ -315,10 +294,19 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         //zero out storage
         memset(&storage, 0, sizeof(storage));
+
+        //zero out series
+        memset(series, 0, sizeof(series));
     }
     
     //close datasource file.
     fclose(fp);
+
+    //close algo
+    close_algo_func();
+
+    //free series mem.
+    free(series);
 
     write_simresult_to_csv(simresult);
     return simresult;

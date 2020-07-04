@@ -3,10 +3,45 @@
 #include <json-c/json.h>
 #include <stdbool.h>
 #include <math.h>
+#include <dlfcn.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 #include "../include/misc.h"
 
+void* handle;
+
+algo_func load_algo_func(char *algo){
+
+    algoticks_signal (*analyze)(algoticks_row *, int);
+
+    handle = dlopen(algo, RTLD_LAZY);
+
+    if (!handle)
+    {
+        fprintf(stderr, "Error: %s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+
+    *(void **)(&analyze) = dlsym(handle, "analyze");
+
+    if (!analyze)
+    {
+        fprintf(stderr, "Error: %s\n", dlerror());
+        dlclose(handle);
+        exit(EXIT_FAILURE);
+    }
+
+    return analyze;
+
+}
+
+void close_algo_func(){
+
+    dlclose(handle);
+    
+}
+
+// global vars for write_simresult_to_csv
 int simresult_file_header = false;
 char simresult_csv_header[1000] = "algo,pnl,datasource,symbol,candles,interval,target,stoploss,is_trailing_sl,trailing_sl_val,quantity,sliding,intraday,buy_signals,sell_signals,neutral_signals,trgt_hits,sl_hits,b_trgt_hits,s_trgt_hits,b_sl_hits,s_sl_hits,peak,bottom\n";
 

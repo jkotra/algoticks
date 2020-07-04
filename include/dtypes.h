@@ -163,3 +163,6 @@ typedef struct Signal {
     int neutral;
     int sell;
 }algoticks_signal;
+
+// algo_func - function pointer
+typedef algoticks_signal (*algo_func)(algoticks_row *, int);
