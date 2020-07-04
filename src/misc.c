@@ -88,41 +88,35 @@ void create_setting_config_enchmark_files(int type)
     \"intraday_min\": 15 \n \
 }\n";
 
-    char config[1000] = "{\n \
-    \"algo\": \"algorithms/3Reds.so\", \n \
-    \"datasource\": \"example.csv\", \n \
-    \"symbol\": \"SUNPHARMA\", \n \
-    \"candles\": 3, \n \
-    \"interval\": 0, \n \
-                    \n \
-    \"quantity\": 100, \n \
-    \"target\": 5, \n \
-    \"stoploss\": 7, \n \
-    \"is_training_sl\": false, \n \
-    \"trailing_sl_val\": 1, \n \
-                        \n \
-    \"sliding\": false, \n \             
-    \"intraday\": true, \n \
-    \"skip_header\": true \n \
-}\n";
+    char config[1000] = "{\n\
+    \"algo\": \"algorithms/3Reds.so\",\n\
+    \"datasource\": \"example.csv\",\n\
+    \"symbol\": \"SUNPHARMA\", \n\
+    \"candles\": 3, \n\
+    \"interval\": 0, \n\n\
+    \"quantity\": 100,\n\
+    \"target\": 5, \n\
+    \"stoploss\": 7, \n\
+    \"is_training_sl\": false, \n\
+    \"trailing_sl_val\": 1, \n\n\
+    \"sliding\": false, \n\           
+    \"intraday\": true, \n\
+    \"skip_header\": true \n}\n";
 
-    char benchmark[1000] = "{ \n \
-    \"algo\": [\"algorithms/3Greens.so\", \"algorithms/3Reds.so\"], \n \
-    \"datasource\": [\"example.csv\"], \n \
-    \"symbol\": \"SUNPHARMA\", \n \
-    \"candles\": [4,6,8], \n \
-    \"interval\": [5,10,15], \n \
-                           \n \
-    \"quantity\": [10], \n \
-    \"target\": [1.5,2,2.5], \n \
-    \"stoploss\": [2,2.5,3,3.5], \n \
-    \"is_training_sl\": [true,false], \n \
-    \"trailing_sl_val\": [1,2,3], \n \
-                                  \n \
-    \"sliding\": [true,false], \n \                             
-    \"intraday\": [true,false], \n \
-    \"skip_header\": true \n \
-}\n";
+    char benchmark[1000] = "{ \n\
+    \"algo\": [\"algorithms/3Greens.so\", \"algorithms/3Reds.so\"],\n\
+    \"datasource\": [\"example.csv\"],\n\
+    \"symbol\": \"SUNPHARMA\",\n\
+    \"candles\": [4,6,8],\n\
+    \"interval\": [5,10,15],\n\n\
+    \"quantity\": [10],\n\
+    \"target\": [1.5,2,2.5],\n\
+    \"stoploss\": [2,2.5,3,3.5],\n\
+    \"is_training_sl\": [true,false],\n\
+    \"trailing_sl_val\": [1,2,3],\n\n\
+    \"sliding\": [true,false],\n\                          
+    \"intraday\": [true,false], \n\
+    \"skip_header\": true \n }\n";
 
     // write to file
 
@@ -184,6 +178,11 @@ algoticks_settings parse_settings_from_json(char *filename)
 
     parsed_json = json_tokener_parse(buffer);
 
+    if (parsed_json == NULL){
+        printf("Invalid JSON!\n");
+        exit(1);
+    }
+
     json_object_object_get_ex(parsed_json, "print", &print);
     json_object_object_get_ex(parsed_json, "colors", &colors);
     json_object_object_get_ex(parsed_json, "debug", &debug);
@@ -242,6 +241,11 @@ algoticks_config parse_config_from_json(char *filename)
     struct Config config;
 
     parsed_json = json_tokener_parse(buffer);
+
+    if (parsed_json == NULL){
+        printf("Invalid JSON!\n");
+        exit(1);
+    }
 
     json_object_object_get_ex(parsed_json, "algo", &algo);
     json_object_object_get_ex(parsed_json, "datasource", &datasource);

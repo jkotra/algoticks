@@ -111,11 +111,10 @@ typedef struct Row
     float close;
     int volume;
 
-    //char technical_indicators[1024];
     algoticks_tow_ti technical_indicators;
 
     int curr;
-    int n_rows;
+    int n_rows; //this is to be set in case of Row array of non-predetermined size.
 }algoticks_row;
 
 
