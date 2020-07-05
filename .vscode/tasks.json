@@ -6,7 +6,7 @@
         {
             "label": "algoticks",
             "type": "shell",
-            "command": "make debug",
+            "command": "make",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
