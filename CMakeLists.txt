@@ -22,8 +22,13 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
 
 # add algorithm names to this list
 list(APPEND algorithms
-    3Greens
-    3Reds)
+    Greens
+    Reds
+    ThreeLineStrike
+    ThreeBlackCrows
+    TwoBlackGapping
+    EveningStar
+    AbandonedBaby)
 
 foreach(algo ${algorithms})
 message("Building Algorithm:" ${algo})

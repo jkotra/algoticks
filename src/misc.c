@@ -122,9 +122,9 @@ void create_setting_config_enchmark_files(int type)
     "\"intraday_min\": 15 \n }";
 
     char config[1000] = "{\n"
-    "\"algo\": \"algorithms/3Reds.so\",\n"
+    "\"algo\": \"algorithms/Reds.so\",\n"
     "\"datasource\": \"example.csv\",\n"
-    "\"symbol\": \"SUNPHARMA\", \n"
+    "\"symbol\": \"EXAMPLE\", \n"
     "\"candles\": 3, \n"
     "\"interval\": 0, \n\n"
     "\"quantity\": 100,\n"
@@ -137,9 +137,9 @@ void create_setting_config_enchmark_files(int type)
     "\"skip_header\": true \n}\n";
 
     char benchmark[1000] = "{ \n"
-    "\"algo\": [\"algorithms/3Greens.so\", \"algorithms/3Reds.so\"],\n"
+    "\"algo\": [\"algorithms/Greens.so\", \"algorithms/Reds.so\"],\n"
     "\"datasource\": [\"example.csv\"],\n"
-    "\"symbol\": \"SUNPHARMA\",\n"
+    "\"symbol\": \"EXAMPLE\",\n"
     "\"candles\": [4,6,8],\n"
     "\"interval\": [5,10,15],\n\n"
     "\"quantity\": [10],\n"

@@ -1,7 +1,7 @@
 {
-    "algo": "algorithms/3Reds.so",
+    "algo": "algorithms/Reds.so",
     "datasource": "example.csv",
-    "symbol": "SUNPHARMA",
+    "symbol": "EXAMPLE",
     "candles": 3,
     "interval": 0,
 
