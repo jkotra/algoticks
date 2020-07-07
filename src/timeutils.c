@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <string.h>
 #include "../include/timeutils.h"
 
 const char *strp_format_1 = "%Y-%m-%d %H:%M:%S";
+const char *scanf_time_format_1 = "%4d-%2d-%2d %2d:%2d:%2d";
+
 const char *strp_format_2 = "%Y/%m/%d %H:%M:%S";
+const char *scanf_time_format_2 = "%4d/%2d/%2d %2d:%2d:%2d";
 
 int is_date_over_or_eq_intraday(char *date, int intraday_hour, int intraday_min)
 {
@@ -75,4 +79,38 @@ int is_date_after(char *date_a, char *date_b)
     }
 
     return false;
+}
+
+
+int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
+
+    int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;
+    memset(time_struct, 0, sizeof(time_struct));
+       
+   
+   if ( sscanf(date, scanf_time_format_1, &year, &month, &day, &hour, &min, &sec) == 6 ) {
+       time_struct->tm_year = year;
+       time_struct->tm_mon = month;
+       time_struct->tm_mday = day;
+       time_struct->tm_hour = hour;
+       time_struct->tm_min = min;
+       time_struct->tm_sec = sec;
+
+       return true;
+   }
+   else if ( sscanf(date, scanf_time_format_2, &year, &month, &day, &hour, &min, &sec) == 6 ) {
+
+       time_struct->tm_year = year;
+       time_struct->tm_mon = month;
+       time_struct->tm_mday = day;
+       time_struct->tm_hour = hour;
+       time_struct->tm_min = min;
+       time_struct->tm_sec = sec;
+
+       return true;
+   }
+   else{
+       return false;
+   }
+
 }
