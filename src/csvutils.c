@@ -177,7 +177,7 @@ algoticks_row tokenize_row(char *row){
 
 int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset){
 
-    if (feof(fp) == true)
+    if (feof(fp))
     {
         if (settings.is_live_data){
             while ((change_in_modified_date(config.datasource) == false))

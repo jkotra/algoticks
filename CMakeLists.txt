@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 #default
-set(out_folder_name "release")
+set(CMAKE_CURRENT_BINARY_DIR "release")
 
 #if debug in arg, change folder name to "debug"
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-     set(out_folder_name "debug")
+     set(CMAKE_CURRENT_BINARY_DIR "debug")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
-#create required dirs
-file(MAKE_DIRECTORY ${out_folder_name})
-file(MAKE_DIRECTORY ${out_folder_name}/algorithms/)
+#create algo dir
+#file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms)
 
 include_directories(include /usr/include)
 include_directories(${PROJECT_SOURCE_DIR})
@@ -36,7 +36,7 @@ add_library(${algo} MODULE src/algorithms/${algo}.c)
 set_target_properties(${algo}
     PROPERTIES
     PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY ${out_folder_name}/algorithms/
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms/
 )
 endforeach()
 
@@ -49,15 +49,17 @@ target_link_libraries(algoticks PUBLIC dl)
 #set output to bin/
 set_target_properties(algoticks
     PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${out_folder_name}/archive/
-    LIBRARY_OUTPUT_DIRECTORY ${out_folder_name}/lib/
-    RUNTIME_OUTPUT_DIRECTORY ${out_folder_name}/
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/archive/
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib/
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
 #copy configs to bin/
 file(COPY ${PROJECT_SOURCE_DIR}/assets/config.json
-     DESTINATION ${out_folder_name}/)
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/settings.json
-     DESTINATION ${out_folder_name}/)
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 file(COPY ${PROJECT_SOURCE_DIR}/assets/benchmark.json
-     DESTINATION ${out_folder_name}/)
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+     file(COPY ${PROJECT_SOURCE_DIR}/assets/example.csv
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
