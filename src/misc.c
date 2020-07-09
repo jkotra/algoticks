@@ -104,7 +104,7 @@ int is_file_exists(const char *filename)
     return 0;
 }
 
-void create_setting_config_enchmark_files(int type)
+void create_setting_config_benchmark_files(int type)
 {
 
     /*

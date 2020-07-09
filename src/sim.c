@@ -171,7 +171,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 {
     // open and read CSV file.
     FILE *fp;
-    fp = fopen(config.datasource, "r");
+    fp = fopen(config.datasource, "rb");
     int curr = 0;
 
     // exit if file cannot be opened.

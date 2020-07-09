@@ -61,7 +61,7 @@ int change_in_modified_date(char* filename){
 
 int reopen_datasource(char* filename, FILE** fp){
 
-    if (freopen(filename, "r", *fp) != NULL){
+    if (freopen(filename, "rb", *fp) != NULL){
         return true;
     }
     else{

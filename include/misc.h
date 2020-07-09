@@ -2,7 +2,7 @@
 algo_func load_algo_func(char *algo);
 void close_algo_func();
 void write_simresult_to_csv(algoticks_simresult simresult);
-void create_setting_config_enchmark_files(int type);
+void create_setting_config_benchmark_files(int type);
 int is_file_exists(const char * filename);
 void chomp(char *s);
 algoticks_benchmarkconfig parse_benchmark_from_json(char *filename);

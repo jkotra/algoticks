@@ -68,6 +68,30 @@ upon successful compilation, the binary executable along with config files are f
 
 
 ```
+---
+
+## Tests
+
+Algoticks uses [check.h Unit Testing Framework](https://libcheck.github.io/check/) for testing.
+
+[How to install check.h?](https://libcheck.github.io/check/web/install.html)
+
+To run all Tests:
+
+```
+cd tests
+cmake .
+make
+./algoticks_tests
+```
+
+Output:
+```
+Running suite(s): Algoticks
+100%: Checks: 13, Failures: 0, Errors: 0
+
+```
+
 
 ---
 

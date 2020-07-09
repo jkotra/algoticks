@@ -6,6 +6,12 @@ bin/**
 output.log
 debug.log
 
+tests/**
+
+#tests folder exceptions
+!tests/algoticks_tests.c
+!tests/CMakeLists.txt
+
 build/**
 CMakeLists.txt.user
 CMakeCache.txt

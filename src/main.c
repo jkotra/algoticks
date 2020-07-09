@@ -104,17 +104,17 @@ int main(int argc, char **argv)
 
     //check if req files really exist
     if (!is_file_exists(settings_file)){
-        create_setting_config_enchmark_files(1);
+        create_setting_config_benchmark_files(1);
         config_need_exit_flag = true;
     }
 
     if (!is_file_exists(config_file)){
-        create_setting_config_enchmark_files(2);
+        create_setting_config_benchmark_files(2);
         config_need_exit_flag = true;
     }
 
     if ((is_file_exists(benchmark_file) == false) && (benchmark_flag == true)){
-        create_setting_config_enchmark_files(3);
+        create_setting_config_benchmark_files(3);
         config_need_exit_flag = true;
     }
 
