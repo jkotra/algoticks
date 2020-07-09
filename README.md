@@ -53,13 +53,14 @@ upon successful compilation, the binary executable along with config files are f
 
 ---
 
-## Building on Windows
+### Building on Windows
 
-**Note**:  *Algoticks* is a bit slower in windows compared to Linux version. Windows optimization is being worked on, but is not a priority.
+**Note**:  *Algoticks* is slower in windows compared to Linux version. Windows optimization is being worked on, but is not a priority.
 
 * Install [JSON-C](https://github.com/json-c/json-c#building-on-unix-and-windows-with-vcpkg-)
 * [Install C and C++ support in Visual Studio](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019)
-* Install [tdm-gcc](https://jmeubank.github.io/tdm-gcc/download/)
+* Install [Clang](https://releases.llvm.org/download.html)
+* [Ninja Build](https://github.com/ninja-build/ninja/releases)
 
 `include` path is set to `C:/vcpkg/installed/x64-windows/include` in `CMakeLists.txt`. Edit the path if you installed `vcpkg` in some other directory.
 
@@ -68,8 +69,9 @@ upon successful compilation, the binary executable along with config files are f
 ```
 mkdir bin
 cd bin
-cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-mingw32-make.exe
+
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
+ninja
 ```
 
 ---

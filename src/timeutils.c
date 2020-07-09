@@ -61,7 +61,7 @@ int is_date_after(char *date_a, char *date_b)
         return -1;
     }
 
-    if(!get_time_with_sscanf_from_string(date_b, &date_a_ts)){
+    if(!get_time_with_sscanf_from_string(date_b, &date_b_ts)){
         return -1;
     }
     #else

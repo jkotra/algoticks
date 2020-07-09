@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS_RELEASE "-O3")
+
+if (CMAKE_BUILD_TYPE MATCHES Release)
+message("Release Build: Enabling Optimizations (-O3)")
+set(CMAKE_C_FLAGS "-O3")
+endif()
 
 #default
 set(CMAKE_CURRENT_BINARY_DIR "release")
