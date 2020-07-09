@@ -11,3 +11,7 @@ add_executable(algoticks_tests algoticks_tests.c ../src/misc.c ../src/dashboard.
 
 target_link_libraries(algoticks_tests PRIVATE check)
 target_link_libraries(algoticks_tests PRIVATE json-c)
+
+if(NOT WIN32)
+target_link_libraries(algoticks_tests PRIVATE dl)
+endif()
