@@ -6,16 +6,25 @@
 #include "../include/timeutils.h"
 
 const char *strp_format_1 = "%Y-%m-%d %H:%M:%S";
+const char *scanf_format_notime = "%4d-%2d-%2d";
 const char *scanf_time_format_1 = "%4d-%2d-%2d %2d:%2d:%2d";
 
 const char *strp_format_2 = "%Y/%m/%d %H:%M:%S";
+const char *scanf_format2_notime = "%4d/%2d/%2d";
 const char *scanf_time_format_2 = "%4d/%2d/%2d %2d:%2d:%2d";
 
 int is_date_over_or_eq_intraday(char *date, int intraday_hour, int intraday_min)
 {
-
+    
     struct tm date_ts;
+    
+    #ifdef _WIN32
+    if (!get_time_with_sscanf_from_string(date, &date_ts))
+    {
+        return -1;
+    }
 
+    #else
     if (!strptime(date, strp_format_1, &date_ts))
     {
         if (!strptime(date, strp_format_2, &date_ts))
@@ -23,6 +32,8 @@ int is_date_over_or_eq_intraday(char *date, int intraday_hour, int intraday_min)
             return -1;
         }
     }
+    #endif
+
 
     date_ts.tm_year += 1900;
 
@@ -45,6 +56,15 @@ int is_date_after(char *date_a, char *date_b)
     time_t a_mktime;
     time_t b_mktime;
 
+    #ifdef _WIN32
+    if(!get_time_with_sscanf_from_string(date_a, &date_a_ts)){
+        return -1;
+    }
+
+    if(!get_time_with_sscanf_from_string(date_b, &date_a_ts)){
+        return -1;
+    }
+    #else
     if(!strptime(date_a, strp_format_1, &date_a_ts))
     {
         if (!strptime(date_a, strp_format_2, &date_a_ts))
@@ -58,6 +78,7 @@ int is_date_after(char *date_a, char *date_b)
         strptime(date_b, strp_format_1, &date_b_ts);
     }
 
+    #endif
 
     date_a_ts.tm_year += 1900;
     date_b_ts.tm_year += 1900;
@@ -99,6 +120,30 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
        return true;
    }
    else if ( sscanf(date, scanf_time_format_2, &year, &month, &day, &hour, &min, &sec) == 6 ) {
+
+       time_struct->tm_year = year;
+       time_struct->tm_mon = month;
+       time_struct->tm_mday = day;
+       time_struct->tm_hour = hour;
+       time_struct->tm_min = min;
+       time_struct->tm_sec = sec;
+
+       return true;
+   }
+
+    else if ( sscanf(date, scanf_format_notime, &year, &month, &day) == 3 ) {
+
+       time_struct->tm_year = year;
+       time_struct->tm_mon = month;
+       time_struct->tm_mday = day;
+       time_struct->tm_hour = hour;
+       time_struct->tm_min = min;
+       time_struct->tm_sec = sec;
+
+       return true;
+   }
+
+    else if ( sscanf(date, scanf_format2_notime, &year, &month, &day) == 3 ) {
 
        time_struct->tm_year = year;
        time_struct->tm_mon = month;

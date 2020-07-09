@@ -12,6 +12,10 @@ NAME:  Two Black Gapping (TwoBlackGapping.so / TwoBlackGapping.dll)
 MIN REQ CANDLES: 6
 */
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+
 algoticks_signal analyze(algoticks_row *series, int n_candles)
 {
 

@@ -164,5 +164,11 @@ typedef struct Signal {
     int sell;
 }algoticks_signal;
 
-// algo_func - function pointer
+//function pointer - load_algo_func
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 typedef algoticks_signal (*algo_func)(algoticks_row *, int);
+#endif
+
+#ifdef _WIN32
+typedef algoticks_signal (__cdecl *algo_func)(algoticks_row *, int);
+#endif

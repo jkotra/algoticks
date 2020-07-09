@@ -3,10 +3,12 @@
 #include <json-c/json.h>
 #include <stdbool.h>
 #include <math.h>
-#include <dlfcn.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 #include "../include/misc.h"
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+#include<dlfcn.h>
 
 void* handle;
 
@@ -40,6 +42,48 @@ void close_algo_func(){
     dlclose(handle);
     
 }
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+
+HINSTANCE hinstLib;
+
+algo_func load_algo_func(char *algo) {
+
+  algo_func ProcAdd;
+
+  // Get a handle to the DLL module.
+  hinstLib = LoadLibrary(algo);
+
+  // If the handle is valid, try to get the function address.
+  if (hinstLib != NULL) {
+    ProcAdd = (algo_func) GetProcAddress(hinstLib, "analyze");
+
+    // If the function address is valid, call the function.
+    if (NULL != ProcAdd) {
+      return ProcAdd;
+
+    } else {
+      printf("cannot open %s\n", algo);
+      exit(1);
+
+    }
+
+  }
+  else{
+      printf("cannot get handle on %s\n", algo);
+      exit(1);
+  }
+
+}
+
+void close_algo_func() {
+  FreeLibrary(hinstLib);
+}
+
+# endif
+
 
 // global vars for write_simresult_to_csv
 int simresult_file_header = false;
@@ -207,7 +251,7 @@ algoticks_settings parse_settings_from_json(char *filename)
     struct json_object *intraday_hour;
     struct json_object *intraday_min;
 
-    struct Settings settings;
+    struct Settings settings = {0};
 
     parsed_json = json_tokener_parse(buffer);
 

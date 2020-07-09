@@ -13,7 +13,9 @@ NAME:  Three Line Strike (ThreeLineStrike.so / ThreeLineStrike.dll)
 MIN REQ CANDLES: 4
 */
 
-
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 algoticks_signal analyze(algoticks_row *series, int n_candles){
 
 
