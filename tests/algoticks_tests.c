@@ -218,10 +218,7 @@ END_TEST
 START_TEST
 (__timeutils_c__is_date_over_or_eq_intraday) {
   
-  ck_assert_int_eq(is_date_over_or_eq_intraday("2010-07-12", 15, 15), -1);
-
   ck_assert_int_eq(is_date_over_or_eq_intraday("2015-02-02 09:25:00", 15, 15), false);
-
   ck_assert_int_eq(is_date_over_or_eq_intraday("2015-02-02 15:29:00", 15, 15), true);
 
 }
@@ -231,8 +228,9 @@ END_TEST
 START_TEST
 (__timeutils_c__is_date_after) {
   
-  ck_assert_int_eq(is_date_after("2015-02-02 09:25:00","2015-01-02 09:25:00"), true);
-  ck_assert_int_eq(is_date_after("2015-02-02 09:25:00","2015-03-15 09:25:00"), false);
+  //is a > b
+  ck_assert_int_eq(is_date_after("2019-02-02 09:25:00","2015-02-02 09:20:00"), true);
+  ck_assert_int_eq(is_date_after("2012-01-01 09:25:00","2015-02-02 09:29:00"), false);
 
 }
 END_TEST

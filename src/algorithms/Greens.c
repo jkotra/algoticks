@@ -3,7 +3,9 @@
 #include <stdbool.h>
 #include "../../include/dtypes.h"
 
-
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 algoticks_signal analyze(algoticks_row *series, int n_candles){
 
     /* This is a buy only algo indicator */

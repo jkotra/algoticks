@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS_RELEASE "-O3")
+
+if (CMAKE_BUILD_TYPE MATCHES Release)
+message("Release Build: Enabling Optimizations (-O3)")
+set(CMAKE_C_FLAGS "-O3")
+endif()
 
 #default
 set(CMAKE_CURRENT_BINARY_DIR "release")
@@ -16,6 +20,11 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 include_directories(include /usr/include)
 include_directories(${PROJECT_SOURCE_DIR})
+
+if (WIN32)
+include_directories(C:/vcpkg/installed/x64-windows/include)
+link_directories(C:/vcpkg/installed/x64-windows/lib)
+endif()
 
 #GLOB all source files!
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
@@ -43,8 +52,11 @@ endforeach()
 add_executable(algoticks ${SRC_FILES})
 
 #link required libs
-target_link_libraries(algoticks PUBLIC json-c)
-target_link_libraries(algoticks PUBLIC dl)
+target_link_libraries(algoticks PRIVATE json-c)
+
+if(NOT WIN32)
+     target_link_libraries(algoticks PRIVATE dl)
+endif()
 
 #set output to bin/
 set_target_properties(algoticks

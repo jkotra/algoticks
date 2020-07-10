@@ -14,6 +14,9 @@ MIN REQ CANDLES: 4
 
 int tall_candle_th = 3;
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 algoticks_signal analyze(algoticks_row *series, int n_candles)
 {
 
