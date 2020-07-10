@@ -218,10 +218,7 @@ END_TEST
 START_TEST
 (__timeutils_c__is_date_over_or_eq_intraday) {
   
-  ck_assert_int_eq(is_date_over_or_eq_intraday("2010-07-12", 15, 15), false);
-
   ck_assert_int_eq(is_date_over_or_eq_intraday("2015-02-02 09:25:00", 15, 15), false);
-
   ck_assert_int_eq(is_date_over_or_eq_intraday("2015-02-02 15:29:00", 15, 15), true);
 
 }
