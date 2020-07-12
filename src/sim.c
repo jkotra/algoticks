@@ -233,11 +233,14 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.neutral != true)
         {
             struct PositionResult positionresult;
-            if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) != true){
-            positionresult = take_position(signal, fp, curr, settings, config, storage);
-            }else{
-                continue;
+
+            if (config.intraday == true){
+                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
+                    continue;
+                }
             }
+            
+            positionresult = take_position(signal, fp, curr, settings, config, storage);
             curr = positionresult.curr;
 
             simresult.pnl += positionresult.pnl;
