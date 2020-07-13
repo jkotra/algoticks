@@ -314,6 +314,19 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         skip_header = false;
         continue;
     }
+    else if (config.skip_header == false){
+        for (int i = 0; i < MAXCSVHEAD; i++)
+        {
+            header_map[i] = -1;
+        }
+
+        //set to ohlcv
+        for (int i = 0; i < 5; i++)
+        {
+            header_map[i] = i;
+        }
+        
+    }
 
 
     //remove white space at end
@@ -324,7 +337,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
     *storage = tokenize_row(row);
     storage->curr = curr_sp;
 
-    debug_msg(settings, 3, "ReadRowDate", "csvutils.c", storage->date);
+    debug_msg(settings, 3, "ReadRow", "csvutils.c", storage->date);
     
     return curr_sp;
 

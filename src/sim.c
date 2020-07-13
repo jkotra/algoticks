@@ -64,6 +64,10 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             {
                 strncpy(positionresult.hit_type, "T", 4);
             }
+            else{
+                strncpy(positionresult.hit_type, "SL", 4);
+            }
+
 
             positionresult.eof = true;
             break;
@@ -134,7 +138,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
                 }
 
                 sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
-                debug_msg(settings, 1, "TrailingSL_Adjust", "sim.c", debug_msg_buffer);
+                debug_msg(settings, 1, "TSL_Adjust", "sim.c", debug_msg_buffer);
 
                 continue;
             }
@@ -163,6 +167,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
     }
+    
+    sprintf(debug_msg_buffer, "%f", positionresult.pnl);
+    debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
 
     return positionresult;
 }
@@ -192,7 +199,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
     //initialize and malloc for series
     struct Row* series;
-    series = (algoticks_row*)malloc((config.candles+1) * sizeof(algoticks_row));
+    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
 
 
     while (curr != EOF)
@@ -212,12 +219,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.buy == true)
         {
             simresult.buy_signals += 1;
-            debug_msg(settings, 3, "signal", "sim.c", "Buy");
+            debug_msg(settings, 1, "signal", "sim.c", "Buy");
         }
         else if (signal.sell == true)
         {
             simresult.sell_signals += 1;
-            debug_msg(settings, 3, "signal", "sim.c", "Sell");
+            debug_msg(settings, 1, "signal", "sim.c", "Sell");
         }
         else if (signal.neutral == true)
         {
@@ -291,7 +298,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
         if (config.sliding == true && (config.candles > 2) == true){
             if (curr != -1){
-                curr = series[1].curr;
+                curr = series[0].curr;
             }
         }
 

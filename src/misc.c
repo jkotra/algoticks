@@ -39,7 +39,11 @@ algo_func load_algo_func(char *algo){
 
 void close_algo_func(){
 
-    dlclose(handle);
+    int cr = dlclose(handle);
+
+    if (cr != 0){
+        printf("cannot close algo_func\n");
+    }
     
 }
 #endif
