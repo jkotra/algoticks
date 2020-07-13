@@ -168,8 +168,10 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         memset(&pos_storage, 0, sizeof(pos_storage));
     }
     
+    if (positionresult.n_steps > 0){
     sprintf(debug_msg_buffer, "%f", positionresult.pnl);
     debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
+    }
 
     return positionresult;
 }
@@ -261,9 +263,6 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             {
                 simresult.bottom = simresult.pnl;
             }
-
-            //DEBUG - hit_type
-            debug_msg(settings, 1, "hit_type", "sim.c", positionresult.hit_type);
             
 
             if (strcmp(positionresult.hit_type, "T") == 0)

@@ -8,7 +8,7 @@
 #include "../include/debug.h"
 #include "../include/misc.h"
 
-int skip_header = true;
+int is_header_skipped = false;
 
 /*
 header_template holds the values that program expects to find in header of csv.
@@ -215,7 +215,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
     while(1) {
 
     //interval in config
-    if ((config.interval > 0) == true && skip_header == false){
+    if ((config.interval > 0) == true && is_header_skipped == true){
         for (int i = 0; i < config.interval; i++)
         {
             fgets(row, MAXCHARPERLINE, fp);
@@ -227,7 +227,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
     fgets(row, MAXCHARPERLINE, fp);
 
 
-    if ((config.skip_header == true) && (skip_header == true)){
+    if ((config.skip_header == true) && (is_header_skipped == false)){
 
         char *token;
         token = strtok(row, ",");
@@ -311,7 +311,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         
         
         //skip the 1st row i.e header
-        skip_header = false;
+        is_header_skipped = true;
         continue;
     }
     else if (config.skip_header == false){
