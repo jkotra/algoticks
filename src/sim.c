@@ -11,11 +11,160 @@
 #include "../include/misc.h"
 #include "../include/debug.h"
 
-/* this buffer is used for sprintf() to send to debung_msg function. */
-char debug_msg_buffer[1024];
 
-algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
-{
+algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config){
+
+    // open and read CSV file.
+    FILE *fp;
+    fp = fopen(config.datasource, "rb");
+    int curr = 0;
+
+    // exit if file cannot be opened.
+    if (fp == NULL)
+    {
+        printf("cannot Read datasource: %s \n", config.datasource);
+        exit(1);
+    }
+
+    struct Row storage;
+
+    struct SimResult simresult = {0};
+
+    //add config to simresult
+    simresult.config = config;
+
+    algo_func analyze = load_algo_func(config.algo);
+
+    //initialize and malloc for series
+    struct Row* series;
+    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
+
+
+    while (curr != EOF)
+    {
+
+
+        for (int i = 0; i < config.candles; i++)
+        {
+            curr = read_csv(settings,config, fp, &series[i], curr);
+        }
+
+        curr = read_csv(settings, config, fp, &storage, curr);
+
+        struct Signal signal;
+        signal = analyze(series, config.candles);
+
+        if (signal.buy == true)
+        {
+            simresult.buy_signals += 1;
+            debug_msg(settings, 1, "signal", "sim.c", "Buy");
+        }
+        else if (signal.sell == true)
+        {
+            simresult.sell_signals += 1;
+            debug_msg(settings, 1, "signal", "sim.c", "Sell");
+        }
+        else if (signal.neutral == true)
+        {
+            simresult.neutral_signals += 1;
+            debug_msg(settings, 3, "signal", "sim.c", "Neutral");
+        }
+        else
+        {
+            printf("Unknown Signal received!\n");
+            exit(1);
+        }
+
+        if (signal.neutral != true)
+        {
+            struct PositionResult positionresult;
+
+            if (config.intraday == true){
+                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
+                    continue;
+                }
+            }
+            
+            positionresult = take_position(signal, fp, curr, settings, config, storage);
+            curr = positionresult.curr;
+
+            simresult.pnl += positionresult.pnl;
+
+            //update peak and bottom;
+            if (simresult.pnl > simresult.peak)
+            {
+                simresult.peak = simresult.pnl;
+            }
+            if (simresult.pnl < simresult.bottom)
+            {
+                simresult.bottom = simresult.pnl;
+            }
+            
+
+            if (strcmp(positionresult.hit_type, "T") == 0)
+            {
+                simresult.trgt_hits += 1;
+                if (signal.buy == true){ simresult.b_trgt_hits += 1; }
+                else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
+            }
+            else if (strcmp(positionresult.hit_type, "SL") == 0)
+            {
+                simresult.sl_hits += 1;
+                if (signal.buy == true){ simresult.b_sl_hits += 1; }
+                else if (signal.sell == true){ simresult.s_sl_hits += 1; }
+            }
+            else
+            {
+                debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
+            }
+
+            if (positionresult.eof == true)
+            {
+                break;
+            }
+            else
+            {
+                continue;
+            }
+
+            continue;
+        }
+        
+        // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
+        if (config.sliding == true && (config.candles > 2) == true){
+            if (curr != -1){
+                curr = series[0].curr;
+            }
+        }
+
+        //zero out storage
+        memset(&storage, 0, sizeof(storage));
+
+        //zero out series
+        for (int i = 0; i < config.candles; i++)
+        {
+            memset(&series[i], 0, sizeof(series[i]));
+        }
+        
+    }
+    
+    //close datasource file.
+    fclose(fp);
+
+    //close algo
+    close_algo_func();
+
+    //free series mem.
+    free(series);
+
+    write_simresult_to_csv(simresult);
+    return simresult;
+}
+
+algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow){
+     
+    //declare buffer for debug messages
+    char debug_msg_buffer[512];
 
     //initialize pos res.
     struct PositionResult positionresult = {0};
@@ -174,149 +323,4 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     }
 
     return positionresult;
-}
-
-algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config)
-{
-    // open and read CSV file.
-    FILE *fp;
-    fp = fopen(config.datasource, "rb");
-    int curr = 0;
-
-    // exit if file cannot be opened.
-    if (fp == NULL)
-    {
-        printf("cannot Read datasource: %s \n", config.datasource);
-        exit(1);
-    }
-
-    struct Row storage;
-
-    struct SimResult simresult = {0};
-
-    //add config to simresult
-    simresult.config = config;
-
-    algo_func analyze = load_algo_func(config.algo);
-
-    //initialize and malloc for series
-    struct Row* series;
-    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
-
-
-    while (curr != EOF)
-    {
-
-
-        for (int i = 0; i < config.candles; i++)
-        {
-            curr = read_csv(settings,config, fp, &series[i], curr);
-        }
-
-        curr = read_csv(settings, config, fp, &storage, curr);
-
-        struct Signal signal;
-        signal = analyze(series, config.candles);
-
-        if (signal.buy == true)
-        {
-            simresult.buy_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Buy");
-        }
-        else if (signal.sell == true)
-        {
-            simresult.sell_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Sell");
-        }
-        else if (signal.neutral == true)
-        {
-            simresult.neutral_signals += 1;
-            debug_msg(settings, 3, "signal", "sim.c", "Neutral");
-        }
-        else
-        {
-            printf("Unknown Signal received!\n");
-            exit(1);
-        }
-
-        if (signal.neutral != true)
-        {
-            struct PositionResult positionresult;
-
-            if (config.intraday == true){
-                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
-                    continue;
-                }
-            }
-            
-            positionresult = take_position(signal, fp, curr, settings, config, storage);
-            curr = positionresult.curr;
-
-            simresult.pnl += positionresult.pnl;
-
-            //update peak and bottom;
-            if (simresult.pnl > simresult.peak)
-            {
-                simresult.peak = simresult.pnl;
-            }
-            if (simresult.pnl < simresult.bottom)
-            {
-                simresult.bottom = simresult.pnl;
-            }
-            
-
-            if (strcmp(positionresult.hit_type, "T") == 0)
-            {
-                simresult.trgt_hits += 1;
-                if (signal.buy == true){ simresult.b_trgt_hits += 1; }
-                else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
-            }
-            else if (strcmp(positionresult.hit_type, "SL") == 0)
-            {
-                simresult.sl_hits += 1;
-                if (signal.buy == true){ simresult.b_sl_hits += 1; }
-                else if (signal.sell == true){ simresult.s_sl_hits += 1; }
-            }
-            else
-            {
-                debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
-            }
-
-            if (positionresult.eof == true)
-            {
-                break;
-            }
-            else
-            {
-                continue;
-            }
-
-            continue;
-        }
-        
-        // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
-        if (config.sliding == true && (config.candles > 2) == true){
-            if (curr != -1){
-                curr = series[0].curr;
-            }
-        }
-
-        //zero out storage
-        memset(&storage, 0, sizeof(storage));
-
-        //zero out series
-        memset(series, 0, sizeof(series));
-    }
-    
-    //close datasource file.
-    fclose(fp);
-
-    //close algo
-    close_algo_func();
-
-    //free series mem.
-    free(series);
-
-    write_simresult_to_csv(simresult);
-    return simresult;
 }

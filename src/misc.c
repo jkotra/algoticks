@@ -3,6 +3,7 @@
 #include <json-c/json.h>
 #include <stdbool.h>
 #include <math.h>
+#include <ctype.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 #include "../include/misc.h"
@@ -137,14 +138,14 @@ void write_simresult_to_csv(algoticks_simresult simresult)
     fprintf(fp, buffer);
     fclose(fp);
 
-    fprintf(fp, buffer);
 }
 
 int is_file_exists(const char *filename)
 {
     /* try to open file to read */
     FILE *file;
-    if (file = fopen(filename, "r"))
+    file = fopen(filename, "r");
+    if (file != NULL)
     {
         fclose(file);
         return 1;
@@ -206,6 +207,7 @@ void create_setting_config_benchmark_files(int type)
         FILE *settingsf;
         settingsf = fopen("settings.json", "w+");
         fprintf(settingsf, settings);
+        fclose(settingsf);
 
         printf("\nsettings.json created!\n");
     }
@@ -215,6 +217,7 @@ void create_setting_config_benchmark_files(int type)
         FILE *configf;
         configf = fopen("config.json", "w+");
         fprintf(configf, config);
+        fclose(configf);
 
         printf("\nconfig.json created!\n");
     }
@@ -223,6 +226,7 @@ void create_setting_config_benchmark_files(int type)
         FILE *benchf;
         benchf = fopen("benchmark.json", "w+");
         fprintf(benchf, benchmark);
+        fclose(benchf);
 
         printf("\nbenchmark.json created!\n");
     }
@@ -282,6 +286,9 @@ algoticks_settings parse_settings_from_json(char *filename)
 
     //close config file!
     fclose(fp);
+
+    //free json obj.
+    json_object_put(parsed_json);
 
     return settings;
 }
@@ -359,6 +366,9 @@ algoticks_config parse_config_from_json(char *filename)
     //close config file!
     fclose(fp);
 
+    //free json obj.
+    json_object_put(parsed_json);
+
     return config;
 }
 
@@ -426,7 +436,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     for (int i = 0; i < benchmarkconfig.n_datasource; i++)
     {
         tmp = json_object_array_get_idx(datasource, i);
-        strncpy(benchmarkconfig.datasource[i], json_object_get_string(tmp), 32);
+        strncpy(benchmarkconfig.datasource[i], json_object_get_string(tmp), 512);
     }
 
     strncpy(benchmarkconfig.symbol, json_object_get_string(symbol), 32);
@@ -498,6 +508,9 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     
     //close config file!
     fclose(fp);
+
+    //free json obj.
+    json_object_put(parsed_json);
 
     return benchmarkconfig;
 }

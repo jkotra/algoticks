@@ -105,7 +105,7 @@ void print_row_struct(algoticks_row row){
     printf("[DEBUG] row.high = %f\n", row.high);
     printf("[DEBUG] row.low = %f\n", row.low);
     printf("[DEBUG] row.close = %f\n", row.close);
-    printf("[DEBUG] row.volume = %f\n", row.volume);
+    printf("[DEBUG] row.volume = %d\n", row.volume);
 
     printf("[DEBUG] ti1 ti2 ti3 t_others = %f %f %f %s\n", row.technical_indicators.ti1,
                                                            row.technical_indicators.ti2,

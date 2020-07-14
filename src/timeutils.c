@@ -53,9 +53,6 @@ int is_date_after(char *date_a, char *date_b)
     struct tm date_a_ts;
     struct tm date_b_ts;
 
-    time_t a_mktime;
-    time_t b_mktime;
-
     #ifdef _WIN32
     if(!get_time_with_sscanf_from_string(date_a, &date_a_ts)){
         return -1;
@@ -105,9 +102,7 @@ int is_date_after(char *date_a, char *date_b)
 
 int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
 
-    int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;
-    memset(time_struct, 0, sizeof(time_struct));
-       
+    int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;      
    
    if ( sscanf(date, scanf_time_format_1, &year, &month, &day, &hour, &min, &sec) == 6 ) {
        time_struct->tm_year = year;

@@ -3,8 +3,8 @@ project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
 if (CMAKE_BUILD_TYPE MATCHES Release)
-message("Release Build: Enabling Optimizations (-O3)")
-set(CMAKE_C_FLAGS "-O3")
+    message("Release Build: Enabling Optimizations (-O3)")
+    set(CMAKE_C_FLAGS "-O3")
 endif()
 
 #default
@@ -12,6 +12,7 @@ set(CMAKE_CURRENT_BINARY_DIR "release")
 
 #if debug in arg, change folder name to "debug"
 if(CMAKE_BUILD_TYPE MATCHES Debug)
+     set(CMAKE_C_FLAGS "-Wall")
      set(CMAKE_CURRENT_BINARY_DIR "debug")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
