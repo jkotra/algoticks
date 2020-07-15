@@ -22,7 +22,7 @@ char benchmark_file[64] = "benchmark.json";
 
 void print_version_and_exit()
 {
-    printf("algoticks v1.2\n");
+    printf("algoticks v1.3\n");
     exit(0);
 }
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     struct Config config;
     struct Settings settings;
 
-    //check if req files really exist
+    //check if req. files exist, if no, create and exit!
     if (!is_file_exists(settings_file))
     {
         create_setting_config_benchmark_files(1);

@@ -211,6 +211,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         if (is_date_after(r.date, lastrow.date)){
                 dashboard.a = r.close;
                 dashboard.q = config.quantity;
+                strncpy(config.datasource, config.derivative.derivative_datasource, 512);
                 config.interval = config.derivative.derivative_interval;
                 break;
             }
