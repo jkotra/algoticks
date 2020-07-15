@@ -92,17 +92,18 @@ void close_algo_func() {
 
 // global vars for write_simresult_to_csv
 int simresult_file_header = false;
-char simresult_csv_header[1000] = "algo,pnl,datasource,symbol,candles,interval,target,stoploss,is_trailing_sl,trailing_sl_val,quantity,sliding,intraday,buy_signals,sell_signals,neutral_signals,trgt_hits,sl_hits,b_trgt_hits,s_trgt_hits,b_sl_hits,s_sl_hits,peak,bottom\n";
+char simresult_csv_header[1000] = "algo,pnl,datasource,derivative,symbol,candles,interval,target,stoploss,is_trailing_sl,trailing_sl_val,quantity,sliding,intraday,buy_signals,sell_signals,neutral_signals,trgt_hits,sl_hits,b_trgt_hits,s_trgt_hits,b_sl_hits,s_sl_hits,peak,bottom\n";
 
 void write_simresult_to_csv(algoticks_simresult simresult)
 {
     // config + sim result
     char buffer[4000];
 
-    sprintf(buffer, "%s,%f,%s,%s,%d,%d,%f,%f,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%f,%f\n",
+    sprintf(buffer, "%s,%f,%s,%s,%s,%d,%d,%f,%f,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%f,%f\n",
             simresult.config.algo,
             simresult.pnl,
             simresult.config.datasource,
+            simresult.config.derivative.derivative_datasource,
             simresult.config.symbol,
             simresult.config.candles,
             simresult.config.interval,
@@ -312,6 +313,7 @@ algoticks_config parse_config_from_json(char *filename)
 
     struct json_object *algo;
     struct json_object *datasource;
+    struct json_object *derivative;
     struct json_object *symbol;
     struct json_object *candles;
     struct json_object *interval;
@@ -326,7 +328,7 @@ algoticks_config parse_config_from_json(char *filename)
     struct json_object *intraday;
     struct json_object *skip_header;
 
-    struct Config config;
+    struct Config config = {0};
 
     parsed_json = json_tokener_parse(buffer);
 
@@ -363,6 +365,30 @@ algoticks_config parse_config_from_json(char *filename)
     config.intraday = json_object_get_boolean(intraday);
     config.skip_header = json_object_get_boolean(skip_header);
 
+    //parse derivative if exists.
+    int derivative_exists = json_object_object_get_ex(parsed_json, "derivative", &derivative);
+
+    if (derivative_exists){
+        struct json_object *derivative_datasource, *derivative_interval;
+
+        int derivative_datasource_exists = json_object_object_get_ex(derivative, "derivative_datasource", &derivative_datasource);
+        if (derivative_datasource_exists){
+            strncpy(config.derivative.derivative_datasource, json_object_get_string(derivative_datasource), 512);
+        }
+
+        int derivative_interval_exists = json_object_object_get_ex(derivative, "derivative_interval", &derivative_interval);
+
+        if (derivative_interval_exists) {
+            config.derivative.derivative_interval = json_object_get_int(derivative_interval);
+        }
+
+    }
+    else{
+        //set to None
+        strncpy(config.derivative.derivative_datasource, "None", 512);
+
+    }
+
     //close config file!
     fclose(fp);
 
@@ -393,6 +419,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
 
     struct json_object *algo;
     struct json_object *datasource;
+    struct json_object *derivative;
     struct json_object *symbol;
     struct json_object *interval;
 
@@ -407,7 +434,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     struct json_object *intraday;
     struct json_object *skip_header;
 
-    struct BenchmarkConfig benchmarkconfig;
+    struct BenchmarkConfig benchmarkconfig = {0};
 
     parsed_json = json_tokener_parse(buffer);
 
@@ -505,7 +532,30 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     }
 
     benchmarkconfig.skip_header = json_object_get_boolean(skip_header);
-    
+
+    //parse derivative if exists.
+    int derivative_exists = json_object_object_get_ex(parsed_json, "derivative", &derivative);
+
+    if (derivative_exists){
+        struct json_object *derivative_datasource, *derivative_interval;
+
+        int derivative_datasource_exists = json_object_object_get_ex(derivative, "derivative_datasource", &derivative_datasource);
+        if (derivative_datasource_exists){
+            strncpy(benchmarkconfig.derivative.derivative_datasource, json_object_get_string(derivative_datasource), 512);
+        }
+
+        int derivative_interval_exists = json_object_object_get_ex(derivative, "derivative_interval", &derivative_interval);
+
+        if (derivative_interval_exists) {
+            benchmarkconfig.derivative.derivative_interval = json_object_get_int(derivative_interval);
+        }
+
+    }
+    else{
+        //set to None
+        strncpy(benchmarkconfig.derivative.derivative_datasource, "None", 512);
+
+    }
     //close config file!
     fclose(fp);
 

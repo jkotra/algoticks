@@ -5,13 +5,16 @@
 #include "../include/dtypes.h"
 #include "../include/misc.h"
 #include "../include/sim.h"
+#include "../include/sim_derivative.h"
 #include "../include/benchmark.h"
+#include "../include/debug.h"
 
 int debug_flag = false;
 int debug_lvl = false;
 int benchmark_flag = false;
 int config_need_exit_flag = false;
 int live_datasource_flag = false;
+int derivative_flag = false;
 
 char settings_file[64] = "settings.json";
 char config_file[64] = "config.json";
@@ -26,10 +29,11 @@ void print_version_and_exit()
 void print_help_and_exit()
 {
 
-    printf("-V\t\t\tPrint Version and Exit.\n");
-    printf("-H\t\t\tPrint this message and Exit.\n");
+    printf("-V -v\t\t\tPrint Version and Exit.\n");
+    printf("-H -h\t\t\tPrint this message and Exit.\n");
     printf("-D\t\t\tEnable Debug.\n");
-    printf("-L\t\t\tIndicate datasource is updated in realtime.\n\n\n");
+    printf("-L\t\t\twait for new data at EOF\n");
+    printf("--derivative\t\tDerivative mode.\n\n\n");
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
@@ -47,25 +51,37 @@ int main(int argc, char **argv)
         {
 
             //version
-            if (strcmp(argv[i], "-V") == 0)
+            if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "-v") == 0)
             {
                 print_version_and_exit();
             }
 
             //help
-            else if (strcmp(argv[i], "-H") == 0)
+            else if (strcmp(argv[i], "-H") == 0 || strcmp(argv[i], "-h") == 0)
             {
                 print_help_and_exit();
             }
-            
+
+            //derivative
+            else if (strcmp(argv[i], "--derivative") == 0)
+            {
+                derivative_flag = true;
+            }
+
             //debug
             else if (strcmp(argv[i], "-D") == 0)
             {
                 debug_flag = true;
-                
+
+                int debug_lvl_arg = i + 1;
+
                 //if debug level present, parse it.
-                if (strcmp(&argv[i+1][0], "-") != 0){
-                    debug_lvl = atoi(&(argv[i+1])[0]);
+                if (argc > debug_lvl_arg)
+                {
+                    if (strcmp(&argv[debug_lvl_arg][0], "-") != 0)
+                    {
+                        debug_lvl = atoi(&(argv[debug_lvl_arg])[0]);
+                    }
                 }
             }
             else if (strcmp(argv[i], "-L") == 0)
@@ -109,27 +125,29 @@ int main(int argc, char **argv)
     struct Settings settings;
 
     //check if req files really exist
-    if (!is_file_exists(settings_file)){
+    if (!is_file_exists(settings_file))
+    {
         create_setting_config_benchmark_files(1);
         config_need_exit_flag = true;
     }
 
-    if (!is_file_exists(config_file)){
+    if (!is_file_exists(config_file))
+    {
         create_setting_config_benchmark_files(2);
         config_need_exit_flag = true;
     }
 
-    if ((is_file_exists(benchmark_file) == false) && (benchmark_flag == true)){
+    if ((is_file_exists(benchmark_file) == false) && (benchmark_flag == true))
+    {
         create_setting_config_benchmark_files(3);
         config_need_exit_flag = true;
     }
 
-    if (config_need_exit_flag == true){
+    if (config_need_exit_flag == true)
+    {
         printf("\nPlease edit settings.json, config.json and benchmark.json accordingly, program will use these configs on next run!\nBye!\n");
         exit(0);
     }
-
-
 
     settings = parse_settings_from_json(settings_file);
 
@@ -138,27 +156,40 @@ int main(int argc, char **argv)
     {
         settings.debug = true;
 
-        if (debug_lvl != false){
+        if (debug_lvl != false)
+        {
             settings.debug_level = debug_lvl;
         }
     }
 
-    if (live_datasource_flag == true){
+    if (derivative_flag == true)
+    {
+        settings.is_derivative = true;
+    }
+
+    if (live_datasource_flag == true)
+    {
         settings.is_live_data = true;
     }
 
     //set is_live_data to true as arg.
-    if (live_datasource_flag == true){
+    if (live_datasource_flag == true)
+    {
         settings.is_live_data = true;
     }
+
+    config = parse_config_from_json(config_file);
 
     if (benchmark_flag)
     {
         benchmark(benchmark_file, settings);
     }
+    else if (settings.is_derivative)
+    {
+        run_sim_w_derivative(settings, config);
+    }
     else
     {
-        config = parse_config_from_json(config_file);
         run_sim(settings, config);
     }
 

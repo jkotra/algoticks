@@ -54,6 +54,7 @@ void print_config_struct(algoticks_config config){
     printf("\n===*===\n");
     printf("[DEBUG] config.algo = %s\n", config.algo);
     printf("[DEBUG] config.datasource = %s\n", config.datasource);
+    printf("[DEBUG] config.derivative[derivative_datasource, derivative_interval] = %s %d\n", config.derivative.derivative_datasource, config.derivative.derivative_interval);
     printf("[DEBUG] config.symbol = %s\n", config.symbol);
     printf("[DEBUG] config.interval = %d\n", config.interval);
 

@@ -6,12 +6,14 @@
 #include "../include/benchmark.h"
 #include "../include/debug.h"
 #include "../include/sim.h"
+#include "../include/sim_derivative.h"
 
 void benchmark(char *benchmark_config_file, algoticks_settings settings)
 {
 
     //disable printing
     settings.print = false;
+    settings.is_live_data = false;
     struct BenchmarkConfig benchmarkconfig;
     benchmarkconfig = parse_benchmark_from_json(benchmark_config_file);
 
@@ -62,8 +64,10 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 struct Config config;
 
                                                 strncpy(config.algo, benchmarkconfig.algo[n_algo], 32);
-                                                strncpy(config.datasource, benchmarkconfig.datasource[n_datasource], 32);
+                                                strncpy(config.datasource, benchmarkconfig.datasource[n_datasource], 512);
                                                 strncpy(config.symbol, benchmarkconfig.symbol, 32);
+
+                                                config.derivative = benchmarkconfig.derivative;
 
                                                 config.candles = benchmarkconfig.candles[n_candles];
                                                 config.interval = benchmarkconfig.interval[n_interval];
@@ -83,8 +87,14 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 if (settings.debug == true && (settings.debug_level >= 4) == true){
                                                 print_config_struct(config);
                                                 }
+                                                
+                                                if (settings.is_derivative){
+                                                    run_sim_w_derivative(settings, config);
+                                                }
+                                                else{
+                                                    run_sim(settings, config);
+                                                }
 
-                                                run_sim(settings, config);
                                                 combination_completed++;
 
                                                 progress = ((float)combination_completed / total_combinations) * 100;

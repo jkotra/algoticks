@@ -6,12 +6,17 @@ typedef struct Settings
     int debug_level;
 
     int is_live_data;
+    int is_derivative;
 
-    
     int intraday_hour;
     int intraday_min;
     
 }algoticks_settings;
+
+typedef struct Dervative{
+    char derivative_datasource[512];
+    int derivative_interval;
+}algoticks_derivative;
 
 typedef struct BenchmarkConfig
 {
@@ -20,6 +25,9 @@ typedef struct BenchmarkConfig
 
     char datasource[1024][512];
     int n_datasource;
+
+    algoticks_derivative derivative;
+    int n_derivative;
 
     char symbol[32];
 
@@ -54,10 +62,12 @@ typedef struct BenchmarkConfig
     
 }algoticks_benchmarkconfig;
 
+
 typedef struct Config
 {
     char algo[32];
     char datasource[512];
+    algoticks_derivative derivative;
     char symbol[32];
     int candles;
     int interval;
@@ -73,6 +83,7 @@ typedef struct Config
 
     int skip_header;
 }algoticks_config;
+
 
 typedef struct Dashboard
 {
