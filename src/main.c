@@ -8,6 +8,7 @@
 #include "../include/benchmark.h"
 
 int debug_flag = false;
+int debug_lvl = false;
 int benchmark_flag = false;
 int config_need_exit_flag = false;
 int live_datasource_flag = false;
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
         for (int i = 0; i < argc; i++)
         {
 
-            // version
+            //version
             if (strcmp(argv[i], "-V") == 0)
             {
                 print_version_and_exit();
@@ -61,6 +62,11 @@ int main(int argc, char **argv)
             else if (strcmp(argv[i], "-D") == 0)
             {
                 debug_flag = true;
+                
+                //if debug level present, parse it.
+                if (strcmp(&argv[i+1][0], "-") != 0){
+                    debug_lvl = atoi(&(argv[i+1])[0]);
+                }
             }
             else if (strcmp(argv[i], "-L") == 0)
             {
@@ -131,6 +137,10 @@ int main(int argc, char **argv)
     if (debug_flag == true)
     {
         settings.debug = true;
+
+        if (debug_lvl != false){
+            settings.debug_level = debug_lvl;
+        }
     }
 
     if (live_datasource_flag == true){
