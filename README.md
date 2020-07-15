@@ -57,12 +57,9 @@ upon successful compilation, the binary executable along with config files are f
 
 ### Building on Windows
 
-**Note**:  *Algoticks* is slower in windows compared to Linux version. Windows optimization is being worked on, but is not a priority.
-
 * Install [JSON-C](https://github.com/json-c/json-c#building-on-unix-and-windows-with-vcpkg-)
 * [Install C and C++ support in Visual Studio](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019)
-* Install [Clang](https://releases.llvm.org/download.html)
-* [Ninja Build](https://github.com/ninja-build/ninja/releases)
+* Install [TDM-GCC](https://jmeubank.github.io/tdm-gcc/)
 
 `include` path is set to `C:/vcpkg/installed/x64-windows/include` in `CMakeLists.txt`. Edit the path if you installed `vcpkg` in some other directory.
 
@@ -72,30 +69,33 @@ upon successful compilation, the binary executable along with config files are f
 mkdir bin
 cd bin
 
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
-ninja
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+mingw32-make.exe
+
 ```
+
 
 ---
 
 ## Usage
 
 ```
--V			Print Version and Exit.
--H			Print this message and Exit.
--D			Enable Debug.
--L			Indicate datasource is updated in realtime.
+-V -v                   Print Version and Exit.
+-H -h                   Print this message and Exit.
+-D                      Enable Debug.
+-L                      wait for new data at EOF
+--derivative            Derivative mode.
 
 
---settings [*.JSON]			Custom settings file. Default: settings.json
---config [*.JSON]			Custom config file. Default: config.json
---benchmark -B [(Optional)[*.JSON]	Custom benchmark file. Default: benchmark.json
+--settings [*.JSON]                     Custom settings file. Default: settings.json
+--config [*.JSON]                       Custom config file. Default: config.json
+--benchmark -B [(Optional)[*.JSON]      Custom benchmark file. Default: benchmark.json
 
 
 ```
 ---
 
-## Tests
+## Testing
 
 Algoticks uses [check.h Unit Testing Framework](https://libcheck.github.io/check/) for testing.
 
