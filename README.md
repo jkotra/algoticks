@@ -93,6 +93,28 @@ ninja
 
 
 ```
+
+### Derivative
+
+Derivative` is a new feature introduced in v1.3.
+
+if derivative option is enabled (`--derivative`), the signals will be generated on `datasource`(considered here as `Index`) and position is taken on data from `derivative_datasource`.
+
+`datasource` and `derivative_datasource` must have matching dates and are sorted.
+
+ Derivative requires addition data source that should be specified in `config.json`/`settings.josn`:
+
+```json
+    "derivative": {
+    
+    "derivative_datasource": "NIFTY_JUL10500CE.csv",
+    "derivative_interval": 0
+    
+    },
+```
+
+while running, to indicate the presence of derivative, `--derivative` command line arg is to be used.
+
 ---
 
 ## Tests
