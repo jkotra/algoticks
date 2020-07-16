@@ -172,7 +172,11 @@ void create_setting_config_benchmark_files(int type)
     "\"intraday_min\": 15 \n }";
 
     char config[1000] = "{\n"
+    #ifdef _WIN32
+    "\"algo\": \"algorithms/Reds.dll\",\n"
+    #else
     "\"algo\": \"algorithms/Reds.so\",\n"
+    #endif
     "\"datasource\": \"example.csv\",\n"
     "\"symbol\": \"EXAMPLE\", \n"
     "\"candles\": 3, \n"
@@ -187,7 +191,11 @@ void create_setting_config_benchmark_files(int type)
     "\"skip_header\": true \n}\n";
 
     char benchmark[1000] = "{ \n"
+    #ifdef _WIN32
+    "\"algo\": [\"algorithms/Greens.dll\", \"algorithms/Reds.dll\"],\n"
+    #else
     "\"algo\": [\"algorithms/Greens.so\", \"algorithms/Reds.so\"],\n"
+    #endif
     "\"datasource\": [\"example.csv\"],\n"
     "\"symbol\": \"EXAMPLE\",\n"
     "\"candles\": [4,6,8],\n"

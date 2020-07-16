@@ -67,12 +67,18 @@ set_target_properties(algoticks
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
+if(WIN32)
+set(config_dir ${PROJECT_SOURCE_DIR}/assets/configs/windows)
+else()
+set(config_dir ${PROJECT_SOURCE_DIR}/assets/configs/linux)
+endif()
+
 #copy configs to bin/
-file(COPY ${PROJECT_SOURCE_DIR}/assets/config.json
+file(COPY ${config_dir}/config.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-file(COPY ${PROJECT_SOURCE_DIR}/assets/settings.json
+file(COPY ${config_dir}/settings.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-file(COPY ${PROJECT_SOURCE_DIR}/assets/benchmark.json
+file(COPY ${config_dir}/benchmark.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
      file(COPY ${PROJECT_SOURCE_DIR}/assets/example.csv
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
