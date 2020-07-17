@@ -22,7 +22,7 @@ Algoticks is an algorithmic trading simulator written in C.
 
 ---
 
-## Building (Linux)
+## Building
 
 ### Release
 
@@ -55,7 +55,7 @@ upon successful compilation, the binary executable along with config files are f
 
 ---
 
-### Building on Windows
+### Building on Windows (experimental)
 
 * Install [JSON-C](https://github.com/json-c/json-c#building-on-unix-and-windows-with-vcpkg-)
 * [Install C and C++ support in Visual Studio](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019)
@@ -73,7 +73,6 @@ cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 mingw32-make.exe
 
 ```
-
 
 ---
 

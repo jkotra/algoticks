@@ -16,11 +16,8 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
      set(CMAKE_CURRENT_BINARY_DIR "debug")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
-#create algo dir
-#file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms)
 
 include_directories(include /usr/include)
-include_directories(${PROJECT_SOURCE_DIR})
 
 if (WIN32)
 include_directories(C:/vcpkg/installed/x64-windows/include)
