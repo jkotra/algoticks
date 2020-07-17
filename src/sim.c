@@ -11,8 +11,8 @@
 #include "../include/misc.h"
 #include "../include/debug.h"
 
-
-algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config){
+algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config)
+{
 
     // open and read CSV file.
     FILE *fp;
@@ -36,20 +36,52 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     algo_func analyze = load_algo_func(config.algo);
 
     //initialize and malloc for series
-    struct Row* series;
-    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
-
+    struct Row *series;
+    series = (algoticks_row *)malloc((config.candles) * sizeof(algoticks_row));
 
     while (curr != EOF)
     {
 
-
         for (int i = 0; i < config.candles; i++)
         {
-            curr = read_csv(settings,config, fp, &series[i], curr);
+            /* load rows into series. if check_row_integrity() fails i.e
+            returns false due to bad row, `i` is decremented by -1 such the i remains constant
+            until a good row that passes check_row_integrity().
+            */
+            curr = read_csv(settings, config, fp, &series[i], curr);
+
+            if (settings.is_live_data)
+            {
+                if (check_row_integrity(series[i]) == false)
+                {
+                    i--;
+                }
+                else
+                {
+                    debug_msg(settings, 3, "SeriesReadRow", "csvutils.c", series[i].date);
+                }
+            }
+            else
+            {
+               debug_msg(settings, 3, "SeriesReadRow", "csvutils.c", series[i].date); 
+            }
         }
 
-        curr = read_csv(settings, config, fp, &storage, curr);
+        if (settings.is_live_data)
+        {
+            while (true)
+            {
+                curr = read_csv(settings, config, fp, &storage, curr);
+                if (check_row_integrity(storage) == true)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            curr = read_csv(settings, config, fp, &storage, curr);
+        }
 
         struct Signal signal;
         signal = analyze(series, config.candles);
@@ -79,12 +111,14 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         {
             struct PositionResult positionresult;
 
-            if (config.intraday == true){
-                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
+            if (config.intraday == true)
+            {
+                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true)
+                {
                     continue;
                 }
             }
-            
+
             positionresult = take_position(signal, fp, curr, settings, config, storage);
             curr = positionresult.curr;
 
@@ -99,19 +133,30 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             {
                 simresult.bottom = simresult.pnl;
             }
-            
 
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
-                if (signal.buy == true){ simresult.b_trgt_hits += 1; }
-                else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
+                if (signal.buy == true)
+                {
+                    simresult.b_trgt_hits += 1;
+                }
+                else if (signal.sell == true)
+                {
+                    simresult.s_trgt_hits += 1;
+                }
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
-                if (signal.buy == true){ simresult.b_sl_hits += 1; }
-                else if (signal.sell == true){ simresult.s_sl_hits += 1; }
+                if (signal.buy == true)
+                {
+                    simresult.b_sl_hits += 1;
+                }
+                else if (signal.sell == true)
+                {
+                    simresult.s_sl_hits += 1;
+                }
             }
             else
             {
@@ -129,10 +174,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
             continue;
         }
-        
+
         // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
-        if (config.sliding == true && (config.candles > 2) == true){
-            if (curr != -1){
+        if (config.sliding == true && (config.candles > 2) == true)
+        {
+            if (curr != -1)
+            {
                 curr = series[0].curr;
             }
         }
@@ -145,9 +192,8 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         {
             memset(&series[i], 0, sizeof(series[i]));
         }
-        
     }
-    
+
     //close datasource file.
     fclose(fp);
 
@@ -161,11 +207,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     return simresult;
 }
 
-algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow){
-     
+algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
+{
+
     //declare buffer for debug messages
     char *debug_msg_buffer;
-    debug_msg_buffer = (char*)malloc(512 * sizeof(char));
+    debug_msg_buffer = (char *)malloc(512 * sizeof(char));
 
     //initialize pos res.
     struct PositionResult positionresult = {0};
@@ -214,16 +261,16 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             {
                 strncpy(positionresult.hit_type, "T", 4);
             }
-            else{
+            else
+            {
                 strncpy(positionresult.hit_type, "SL", 4);
             }
-
 
             positionresult.eof = true;
             break;
         }
 
-        curr = read_csv(settings,config, fp, &pos_storage, curr);
+        curr = read_csv(settings, config, fp, &pos_storage, curr);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -238,7 +285,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
             print_dashboard(settings, config, dashboard);
         }
-        
+
         //intraday check condition.
         if (config.intraday)
         {
@@ -317,12 +364,13 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
     }
-    
-    if (positionresult.n_steps > 0){
-    sprintf(debug_msg_buffer, "%f", positionresult.pnl);
-    debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
+
+    if (positionresult.n_steps > 0)
+    {
+        sprintf(debug_msg_buffer, "%f", positionresult.pnl);
+        debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
     }
-    
+
     free(debug_msg_buffer);
     return positionresult;
 }

@@ -58,6 +58,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         for (int i = 0; i < config.candles; i++)
         {
             curr_i = read_csv(settings, config, index, &series[i], curr_i);
+            debug_msg(settings, 3, "ReadRow", "sim.c", series[i].date);
         }
 
         curr_i = read_csv(settings, config, index, &storage, curr_i);

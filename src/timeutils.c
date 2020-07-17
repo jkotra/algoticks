@@ -53,7 +53,6 @@ int is_date_after(char *date_a, char *date_b)
     struct tm date_a_ts;
     struct tm date_b_ts;
 
-    #ifdef _WIN32
     if(!get_time_with_sscanf_from_string(date_a, &date_a_ts)){
         return -1;
     }
@@ -61,21 +60,6 @@ int is_date_after(char *date_a, char *date_b)
     if(!get_time_with_sscanf_from_string(date_b, &date_b_ts)){
         return -1;
     }
-    #else
-    if(!strptime(date_a, strp_format_1, &date_a_ts))
-    {
-        if (!strptime(date_a, strp_format_2, &date_a_ts))
-        {
-            return -1;
-        }else{
-            strptime(date_b, strp_format_2, &date_b_ts);
-        }
-    }else
-    {
-        strptime(date_b, strp_format_1, &date_b_ts);
-    }
-
-    #endif
 
     date_a_ts.tm_year += 1900;
     date_b_ts.tm_year += 1900;

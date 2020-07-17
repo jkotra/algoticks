@@ -35,6 +35,16 @@ int header_map[MAXCSVHEAD] = {0};
 struct stat stat_info;
 unsigned int datasource_lastmodified = -1;
 
+int check_row_integrity(algoticks_row row){
+    //return true if all ok else false if close is 0 or date is NULL
+    if (row.close == 0 || row.date == NULL){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
 int change_in_modified_date(char* filename){
 
 
@@ -193,7 +203,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
                 //set_seek
                 fseek(fp, seek_offset, SEEK_SET);
 
-                debug_msg(settings, 2, "FileReopen_LiveMode","csvutils.c", config.datasource);
+                debug_msg(settings, 2, "DatasourceReopen","csvutils.c", config.datasource);
 
         }else {
         return EOF;
@@ -212,7 +222,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
     int curr_sp;
     
 
-    while(1) {
+    while(true) {
 
     //interval in config
     if ((config.interval > 0) == true && is_header_skipped == true){
@@ -337,7 +347,6 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
     *storage = tokenize_row(row);
     storage->curr = curr_sp;
 
-    debug_msg(settings, 3, "ReadRow", "csvutils.c", storage->date);
     
     return curr_sp;
 

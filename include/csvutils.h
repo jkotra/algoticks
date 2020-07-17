@@ -2,6 +2,7 @@
 #define MAXCSVHEAD 11
 
 /* Declarations */
+int check_row_integrity(algoticks_row row);
 int change_in_modified_date(char* filename);
 int reopen_datasource(char* filename, FILE** fp);
 algoticks_row tokenize_row(char *row);
