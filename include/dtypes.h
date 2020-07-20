@@ -15,6 +15,7 @@ typedef struct Settings
 
 typedef struct Dervative{
     char derivative_datasource[512];
+    char index_datasource[512]; //used for swapping
     int derivative_interval;
 }algoticks_derivative;
 

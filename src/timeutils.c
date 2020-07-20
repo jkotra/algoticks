@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include "../include/dtypes.h"
+#include "../include/csvutils.h"
 #include "../include/timeutils.h"
 
 const char *strp_format_1 = "%Y-%m-%d %H:%M:%S";
@@ -136,5 +138,33 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
    else{
        return false;
    }
+
+}
+
+int sync_curr(FILE *f, char* fname, char *date, int seek_offset, int debug){
+
+    struct Settings s = {0};
+    s.is_live_data = true;
+
+    struct Config c = {0};
+    strncpy(c.datasource, fname, 512);
+
+    int curr = seek_offset;
+
+
+    while(curr != EOF || curr != -1){
+        struct Row r;
+        curr = read_csv(s, c, f, &r, curr);
+
+        if (debug){ printf("%s <-> %s\n", r.date, date); }
+
+        if (is_date_after(r.date, date) == true){
+            return curr;
+        }
+
+    }
+
+    //if nothing, return null
+    return -1;
 
 }

@@ -42,46 +42,17 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     while (curr != EOF)
     {
 
-        for (int i = 0; i < config.candles; i++)
+        for (int i = 0; i < config.candles && curr != -1; i++)
         {
-            /* load rows into series. if check_row_integrity() fails i.e
-            returns false due to bad row, `i` is decremented by -1 such the i remains constant
-            until a good row that passes check_row_integrity().
-            */
             curr = read_csv(settings, config, fp, &series[i], curr);
-
-            if (settings.is_live_data)
-            {
-                if (check_row_integrity(series[i]) == false)
-                {
-                    i--;
-                }
-                else
-                {
-                    debug_msg(settings, 3, "SeriesReadRow", "csvutils.c", series[i].date);
-                }
-            }
-            else
-            {
-               debug_msg(settings, 3, "SeriesReadRow", "csvutils.c", series[i].date); 
-            }
+            debug_msg(settings, 3, "SeriesReadRow", "csvutils.c", series[i].date); 
         }
 
-        if (settings.is_live_data)
-        {
-            while (true)
-            {
-                curr = read_csv(settings, config, fp, &storage, curr);
-                if (check_row_integrity(storage) == true)
-                {
-                    break;
-                }
-            }
+        if (curr == -1){
+            break;
         }
-        else
-        {
-            curr = read_csv(settings, config, fp, &storage, curr);
-        }
+        
+        curr = read_csv(settings, config, fp, &storage, curr);
 
         struct Signal signal;
         signal = analyze(series, config.candles);
@@ -184,6 +155,13 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             }
         }
 
+        //update sim pnl to user if debug
+        if (settings.debug) {
+        char pnlmsg[12];
+        sprintf(pnlmsg, "%f", simresult.pnl);
+        debug_msg(settings, 1, "SimPnl", "sim.c", pnlmsg);
+        }
+
         //zero out storage
         memset(&storage, 0, sizeof(storage));
 
@@ -202,6 +180,9 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
     //free series mem.
     free(series);
+    
+    //make sure we read header in next iteration (benchmark scene)
+    reset_header_skip();
 
     write_simresult_to_csv(simresult);
     return simresult;

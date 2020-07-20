@@ -1,4 +1,6 @@
 /* Declarations */
+void check_config(algoticks_config config);
+void check_settings(algoticks_settings settings);
 algo_func load_algo_func(char *algo);
 void close_algo_func();
 void write_simresult_to_csv(algoticks_simresult simresult);

@@ -10,9 +10,13 @@
 
 int is_header_skipped = false;
 
+void reset_header_skip(){
+    is_header_skipped = false;
+}
+
 /*
 header_template holds the values that program expects to find in header of csv.
-header_map is initially set to -1 (ln ~139)
+header_map is initially set to -1
 
 Example:
 date,open,close,volume,high,low
@@ -26,7 +30,7 @@ date,open,close,volume,high,low
 
 header_map = {0,1,4,5,2,3,(Optional technical_indicator n)}
 
-technical_indicators is optional! it is by default set to None.
+`technical_indicators` is optional! it is set to None by default.
 */
 
 char header_template[MAXCSVHEAD][24] = {"date", "open", "high", "low", "close", "volume", "ti1", "ti2", "ti3", "ti_others"};
@@ -185,60 +189,7 @@ algoticks_row tokenize_row(char *row){
 
 }
 
-int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset){
-
-    if (feof(fp))
-    {
-        if (settings.is_live_data){
-            while ((change_in_modified_date(config.datasource) == false))
-            {
-                printf("checking for new data in %s...\r", config.datasource);
-                fflush(stdout);
-                }
-
-                //since we are using fgets() the new data written to data source MUST end with new line (\n)
-                //reopen
-                reopen_datasource(config.datasource, &fp);
-
-                //set_seek
-                fseek(fp, seek_offset, SEEK_SET);
-
-                debug_msg(settings, 2, "DatasourceReopen","csvutils.c", config.datasource);
-
-        }else {
-        return EOF;
-        }
-    }
-
-    if (seek_offset != 0)
-    {
-        fseek(fp, seek_offset, SEEK_SET);
-    }
-
-
-
-    // temp. storage array(s)
-    char row[MAXCHARPERLINE];
-    int curr_sp;
-    
-
-    while(true) {
-
-    //interval in config
-    if ((config.interval > 0) == true && is_header_skipped == true){
-        for (int i = 0; i < config.interval; i++)
-        {
-            fgets(row, MAXCHARPERLINE, fp);
-        }
-    }
-    
-
-    //get the row
-    fgets(row, MAXCHARPERLINE, fp);
-
-
-    if ((config.skip_header == true) && (is_header_skipped == false)){
-
+int process_csv_header(algoticks_settings settings, char *row){
         char *token;
         token = strtok(row, ",");
         int header_i = 0;
@@ -263,14 +214,12 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
             "low" = 3,
             "close" = 4,
             "volume" = 5,
-
             "ti1" = 6,
             "ti2" = 7,
             "ti3" = 9,
             "ti_others" = 10
             */
 
-            // Date
             if(strcmp(token, "date") == 0){ 
                 header_map[header_i] = 0; }
 
@@ -312,7 +261,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         }
 
 
-        /* DEBUG 
+        /* FOR DEBUG USE
         for (int i = 0; i < MAXCSVHEAD; i++)
         {
             printf("i:%d %d->%s\n",i, header_map[i], header_template[header_map[i]]);
@@ -322,30 +271,124 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         
         //skip the 1st row i.e header
         is_header_skipped = true;
-        continue;
-    }
-    else if (config.skip_header == false){
-        for (int i = 0; i < MAXCSVHEAD; i++)
-        {
-            header_map[i] = -1;
-        }
+        return true;
+}
 
-        //set to ohlcv
-        for (int i = 0; i < 5; i++)
-        {
-            header_map[i] = i;
-        }
-        
+void set_ohlcv_as_header() {
+    for (int i = 0; i < MAXCSVHEAD; i++){
+        header_map[i] = -1;
     }
 
+    //set to ohlcv
+    for (int i = 0; i < 5; i++)
+    {
+        header_map[i] = i;
+    }    
+}
+
+int check_eof(algoticks_settings settings, algoticks_config config, FILE *fp, int offset){
+
+    /*
+
+    return `true` if file is releaded.
+    return `EOF` if EOF.
+
+    */
+
+    if (feof(fp))
+    {
+        if (settings.is_live_data){
+            while ((change_in_modified_date(config.datasource) == false))
+            {
+                printf("checking for new data in %s...\r", config.datasource);
+                fflush(stdout);
+                }
+
+                //since we are using fgets() the new data written to data source MUST end with new line (\n)
+                //reopen file
+                reopen_datasource(config.datasource, &fp);
+
+                //set_seek
+                fseek(fp, offset, SEEK_SET);
+
+                debug_msg(settings, 2, "DatasourceReopen","csvutils.c", config.datasource);
+
+                return true;
+
+        }else
+        {
+        return EOF;
+        }
+    }
+
+    return false;
+}
+
+
+int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset){
+     
+    int eof_res = check_eof(settings, config, fp, seek_offset);
+    if (eof_res == EOF){
+        return EOF;
+    }
+
+    if (seek_offset != 0)
+    {
+        fseek(fp, seek_offset, SEEK_SET);
+    }
+    else if (seek_offset == 0){
+        //if file is new, header must be processed!
+        is_header_skipped = false;
+    }
+
+
+
+    // temp. storage array(s)
+    char row[MAXCHARPERLINE];
+    int curr_sp;
+    
+
+    while(true) {
+
+    //get the row
+    fgets(row, MAXCHARPERLINE, fp);
 
     //remove white space at end
     chomp(row);
 
-    curr_sp = ftell(fp);
 
+    if (config.skip_header){
+        if (is_header_skipped == false){
+            process_csv_header(settings, row);
+            is_header_skipped = true;
+        }
+    }
+    else{
+        set_ohlcv_as_header();
+        is_header_skipped = true;
+    }
+    
+    //get curr.
+    curr_sp = ftell(fp);
+    
     *storage = tokenize_row(row);
     storage->curr = curr_sp;
+
+
+    int eof_res = check_eof(settings, config, fp, seek_offset);
+    if (eof_res == EOF){
+        return EOF;
+    }
+    else if (eof_res == true){
+        //this means file is reloaded
+        continue;
+    }
+
+    if (settings.is_live_data){
+        if (check_row_integrity(*storage) == false){
+            continue;
+        }
+    }
 
     
     return curr_sp;

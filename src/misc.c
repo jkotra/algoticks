@@ -8,6 +8,62 @@
 #include "../include/debug.h"
 #include "../include/misc.h"
 
+void check_config(algoticks_config config){
+
+    if (config.candles <= 0){
+        printf("`candles` cannot be <= 0\n");
+        exit(1);
+    }
+
+    if (config.interval < 0){
+        printf("`interval` cannot be <= 0\n");
+        exit(1);
+    }
+
+    if (config.derivative.derivative_interval < 0){
+        printf("`derivative_interval` cannot be <= 0\n");
+        exit(1);
+    } 
+
+    if (config.quantity <= 0){
+        printf("`quantityl` cannot be <= 0\n");
+        exit(1);
+    }
+
+    if (config.target <= 0){
+        printf("`target` cannot be <= 0\n");
+        exit(1);
+    }    
+
+    if (config.stoploss <= 0){
+        printf("`stoploss` cannot be <= 0\n");
+        exit(1);
+    }    
+
+    if (config.trailing_sl_val <= 0){
+        printf("`trailing_sl_val` cannot be <= 0\n");
+        exit(1);
+    }            
+
+}
+
+void check_settings(algoticks_settings settings){
+    if (settings.debug_level <= -1){
+        printf("debug_level' cannot be negative!");
+        exit(0);
+    }
+
+    if (settings.intraday_hour > 24){
+        printf("`intraday_hour` cannot be > 24!");
+        exit(0);
+    }
+
+    if (settings.intraday_min > 60){
+        printf("`intraday_min` cannot be > 60");
+        exit(0);
+    }
+}
+
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 #include<dlfcn.h>
 

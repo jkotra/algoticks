@@ -55,10 +55,14 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     while (curr_i != EOF)
     {
 
-        for (int i = 0; i < config.candles; i++)
+        for (int i = 0; i < config.candles && curr_i != -1; i++)
         {
             curr_i = read_csv(settings, config, index, &series[i], curr_i);
-            debug_msg(settings, 3, "ReadRow", "sim.c", series[i].date);
+            debug_msg(settings, 3, "SeriesReadRow", "sim.c", series[i].date);
+        }
+
+        if (curr_i == -1){
+                break;
         }
 
         curr_i = read_csv(settings, config, index, &storage, curr_i);
@@ -164,6 +168,13 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
             }
         }
 
+        //update sim pnl to user if debug
+        if (settings.debug) {
+        char pnlmsg[12];
+        sprintf(pnlmsg, "%f", simresult.pnl);
+        debug_msg(settings, 1, "SimPnl", "sim.c", pnlmsg);
+        }
+
         //zero out storage
         memset(&storage, 0, sizeof(storage));
 
@@ -187,6 +198,9 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     curr_i = 0;
     curr_d = 0;
 
+    //make sure we read header in next iteration (benchmark scene)
+    reset_header_skip();
+
     write_simresult_to_csv(simresult);
     return simresult;
 }
@@ -200,24 +214,25 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     //initialize pos res.
     struct PositionResult positionresult = {0};
-
+    struct Row pos_storage;
     struct Dashboard dashboard;
+    
+    //set curr derivative
+    curr_d = sync_curr(derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
+    if (curr_i == -1){
+        printf("NIF\n");
+        exit(1);
+    }
+    
+    //copy index derivative into config.derivative.index_datasource for later use to set index curr.
+    strncpy(config.derivative.index_datasource ,config.datasource, 512);
+    strncpy(config.datasource, config.derivative.derivative_datasource, 512);
 
-    //reset curr that matches derivate
-    while (true){
+    curr_d = read_csv(settings, config, derivative_f, &pos_storage, curr_d);
 
-        struct Row r = {0};
-        curr_d = read_csv(settings, config, derivative_f, &r, curr_d);
-
-        if (is_date_after(r.date, lastrow.date)){
-                dashboard.a = r.close;
-                dashboard.q = config.quantity;
-                strncpy(config.datasource, config.derivative.derivative_datasource, 512);
-                config.interval = config.derivative.derivative_interval;
-                break;
-            }
-        }
-
+    //set required details in dashboard
+    dashboard.a = pos_storage.close;
+    dashboard.q = config.quantity;
 
     if (signal.buy == true)
     {
@@ -236,7 +251,6 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     //filter targets
     config = filter_boundaries(config, dashboard.is_short);
 
-    struct Row pos_storage;
 
     // infinite loop
     while (true)
@@ -368,18 +382,17 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     }
 
 
-    //reset curr that matches index
-    while (true){
-
-        struct Row r = {0};
-        curr_i = read_csv(settings, config, index_f, &r, curr_i);
-
-        if (is_date_after(r.date, pos_storage.date)){
-                positionresult.curr = r.curr;
-                break;
-            }
-        }
+    //set curr index
+    curr_i = sync_curr(index_f, config.derivative.index_datasource, pos_storage.date, curr_i, settings.debug);
+    if (curr_i == -1){
+        printf("NIF\n");
+        exit(1);
+    }
+    else{
+    positionresult.curr = curr_i;
+    }
     
     free(debug_msg_buffer);
+
     return positionresult;
 }

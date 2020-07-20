@@ -87,6 +87,8 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 if (settings.debug == true && (settings.debug_level >= 4) == true){
                                                 print_config_struct(config);
                                                 }
+
+                                                check_config(config);
                                                 
                                                 if (settings.is_derivative){
                                                     run_sim_w_derivative(settings, config);

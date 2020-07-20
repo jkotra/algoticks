@@ -20,6 +20,7 @@ char settings_file[64] = "settings.json";
 char config_file[64] = "config.json";
 char benchmark_file[64] = "benchmark.json";
 
+
 void print_version_and_exit()
 {
     printf("algoticks v1.3\n");
@@ -150,6 +151,7 @@ int main(int argc, char **argv)
     }
 
     settings = parse_settings_from_json(settings_file);
+    check_settings(settings);
 
     //set debug if passed as arg.
     if (debug_flag == true)
@@ -179,6 +181,7 @@ int main(int argc, char **argv)
     }
 
     config = parse_config_from_json(config_file);
+    check_config(config);
 
     if (benchmark_flag)
     {
