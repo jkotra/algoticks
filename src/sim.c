@@ -43,13 +43,25 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     while (curr != EOF)
     {
 
-
-        for (int i = 0; i < config.candles; i++)
+        //if interval == 0, this will be skipped!
+        for (int i = 0; i < config.interval && curr != -1; i++)
         {
-            curr = read_csv(settings,config, fp, &series[i], curr);
+            struct Row r;
+            curr = read_csv(settings, config, fp, config.datasource, &r, curr);
+            debug_msg(settings, 3, "IntervalSkipRow", "sim.c", r.date); 
         }
 
-        curr = read_csv(settings, config, fp, &storage, curr);
+        for (int i = 0; i < config.candles && curr != -1; i++)
+        {
+            curr = read_csv(settings,config, fp, config.datasource, &series[i], curr);
+            debug_msg(settings, 3, "SeriesRow", "sim.c", series[i].date); 
+        }
+
+        if (curr == -1){
+            break;
+        }
+
+        curr = read_csv(settings, config, fp, config.datasource, &storage, curr);
 
         struct Signal signal;
         signal = analyze(series, config.candles);
@@ -145,6 +157,11 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         {
             memset(&series[i], 0, sizeof(series[i]));
         }
+
+        //print simresult.pnl
+        char pnl[32];
+        sprintf(pnl, "%f", simresult.pnl);
+        debug_msg(settings, 1, "SimPnl", "sim.c", pnl);
         
     }
     
@@ -223,7 +240,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
 
-        curr = read_csv(settings,config, fp, &pos_storage, curr);
+        curr = read_csv(settings,config, fp, config.datasource, &pos_storage, curr);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {

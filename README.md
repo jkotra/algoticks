@@ -95,7 +95,7 @@ mingw32-make.exe
 
 ### Derivative
 
-Derivative` is a new feature introduced in v1.3.
+Derivative is a new feature introduced in v1.3.
 
 if derivative option is enabled (`--derivative`), the signals will be generated on `datasource`(considered here as `Index`) and position is taken on data from `derivative_datasource`.
 

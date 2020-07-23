@@ -10,6 +10,20 @@
 
 int is_header_skipped = false;
 
+void reset_header_skip(){
+    is_header_skipped = false;
+}
+
+int check_row_integrity(algoticks_row *row){
+    //return true if all ok else false if close is 0 or date is NULL
+    if (row->close == 0 || row->date == NULL){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
 /*
 header_template holds the values that program expects to find in header of csv.
 header_map is initially set to -1 (ln ~139)
@@ -175,60 +189,7 @@ algoticks_row tokenize_row(char *row){
 
 }
 
-int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algoticks_row *storage, int seek_offset){
-
-    if (feof(fp))
-    {
-        if (settings.is_live_data){
-            while ((change_in_modified_date(config.datasource) == false))
-            {
-                printf("checking for new data in %s...\r", config.datasource);
-                fflush(stdout);
-                }
-
-                //since we are using fgets() the new data written to data source MUST end with new line (\n)
-                //reopen
-                reopen_datasource(config.datasource, &fp);
-
-                //set_seek
-                fseek(fp, seek_offset, SEEK_SET);
-
-                debug_msg(settings, 2, "FileReopen_LiveMode","csvutils.c", config.datasource);
-
-        }else {
-        return EOF;
-        }
-    }
-
-    if (seek_offset != 0)
-    {
-        fseek(fp, seek_offset, SEEK_SET);
-    }
-
-
-
-    // temp. storage array(s)
-    char row[MAXCHARPERLINE];
-    int curr_sp;
-    
-
-    while(1) {
-
-    //interval in config
-    if ((config.interval > 0) == true && is_header_skipped == true){
-        for (int i = 0; i < config.interval; i++)
-        {
-            fgets(row, MAXCHARPERLINE, fp);
-        }
-    }
-    
-
-    //get the row
-    fgets(row, MAXCHARPERLINE, fp);
-
-
-    if ((config.skip_header == true) && (is_header_skipped == false)){
-
+int process_csv_header(algoticks_settings settings, char *row){
         char *token;
         token = strtok(row, ",");
         int header_i = 0;
@@ -253,14 +214,12 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
             "low" = 3,
             "close" = 4,
             "volume" = 5,
-
             "ti1" = 6,
             "ti2" = 7,
             "ti3" = 9,
             "ti_others" = 10
             */
 
-            // Date
             if(strcmp(token, "date") == 0){ 
                 header_map[header_i] = 0; }
 
@@ -293,7 +252,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
             else if(strcmp(token, "ti_others") == 0){ 
                 header_map[header_i] = 9; }            
 
-            else { printf("Unknown header element: %s\n", token);
+            else { 
                 header_map[header_i] = -1;
                 }
 
@@ -302,7 +261,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         }
 
 
-        /* DEBUG 
+        /* FOR DEBUG USE
         for (int i = 0; i < MAXCSVHEAD; i++)
         {
             printf("i:%d %d->%s\n",i, header_map[i], header_template[header_map[i]]);
@@ -312,32 +271,83 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, algo
         
         //skip the 1st row i.e header
         is_header_skipped = true;
-        continue;
-    }
-    else if (config.skip_header == false){
-        for (int i = 0; i < MAXCSVHEAD; i++)
-        {
-            header_map[i] = -1;
-        }
+        return true;
+}
 
-        //set to ohlcv
-        for (int i = 0; i < 5; i++)
-        {
-            header_map[i] = i;
-        }
-        
+void set_ohlcv_as_header() {
+    for (int i = 0; i < MAXCSVHEAD; i++){
+        header_map[i] = -1;
     }
+
+    //set to ohlcv
+    for (int i = 0; i < 5; i++)
+    {
+        header_map[i] = i;
+    }    
+}
+
+int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char *fname, algoticks_row *storage, int seek_offset){
+   while(true) {
+    if ( feof(fp) )
+    {
+        if (settings.is_live_data == true){
+            while ((change_in_modified_date(config.datasource) == false))
+            {
+                printf("checking for new data in %s ...\r", config.datasource);
+                fflush(stdout);
+                }
+
+                //since we are using fgets() the new data written to data source MUST end with new line (\n)
+                //reopen datasource
+                reopen_datasource(fname, &fp);
+
+                //set seek
+                fseek(fp, seek_offset, SEEK_SET);
+
+                debug_msg(settings, 2, "FileReopen","csvutils.c", config.datasource);
+
+        }else {
+        return EOF;
+        }
+    }
+
+    if (seek_offset != 0)
+    {
+        fseek(fp, seek_offset, SEEK_SET);
+    }
+
+
+    // temp. storage array(s)
+    char row[MAXCHARPERLINE];
+    int curr_sp;
+    
+
+    //read row string from file
+    fgets(row, MAXCHARPERLINE, fp);
 
 
     //remove white space at end
     chomp(row);
 
+    if (!is_header_skipped){
+        if (config.skip_header == true){
+            process_csv_header(settings, row);
+        }
+        else{
+            set_ohlcv_as_header();
+        }
+        is_header_skipped = true;
+    }
+
     curr_sp = ftell(fp);
 
     *storage = tokenize_row(row);
-    storage->curr = curr_sp;
 
-    debug_msg(settings, 3, "ReadRow", "csvutils.c", storage->date);
+    if (check_row_integrity(storage) == false){
+        continue;
+    }
+    
+    storage->curr = curr_sp;
     
     return curr_sp;
 

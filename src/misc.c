@@ -186,8 +186,8 @@ void create_setting_config_benchmark_files(int type)
     "\"stoploss\": 7, \n"
     "\"is_training_sl\": false, \n"
     "\"trailing_sl_val\": 1, \n\n"
-    "\"sliding\": false, \n"        
-    "\"intraday\": true, \n"
+    "\"sliding\": true, \n"        
+    "\"intraday\": false, \n"
     "\"skip_header\": true \n}\n";
 
     char benchmark[1000] = "{ \n"

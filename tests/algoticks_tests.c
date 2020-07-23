@@ -76,7 +76,7 @@ END_TEST
 START_TEST
 (__misc_c__filter_boundaries) {
   
-  algoticks_config x = parse_config_from_json("../assets/config.json");
+  algoticks_config x = parse_config_from_json("../assets/configs/linux/config.json");
   algoticks_config y;
 
   x.target = 15;
@@ -230,7 +230,7 @@ START_TEST
   
   //is a > b
   ck_assert_int_eq(is_date_after("2019-02-02 09:25:00","2015-02-02 09:20:00"), true);
-  ck_assert_int_eq(is_date_after("2012-01-01 09:25:00","2015-02-02 09:29:00"), false);
+  ck_assert_int_eq(is_date_after("2014-01-01 09:25:00","2015-01-01 09:00:00"), false);
 
 }
 END_TEST

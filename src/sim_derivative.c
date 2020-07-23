@@ -13,6 +13,7 @@
 
 int curr_i = 0;
 int curr_d = 0;
+char index_datasource[512];
 
 algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_config config)
 {
@@ -24,7 +25,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     // exit if file cannot be opened.
     if (index == NULL)
     {
-        printf("cannot Read datasource: %s \n", config.datasource);
+        printf("cannot read datasource: %s \n", config.datasource);
         exit(1);
     }
 
@@ -35,7 +36,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     // exit if file cannot be opened.
     if (derivative == NULL)
     {
-        printf("cannot Read derivative datasource: %s \n", config.datasource);
+        printf("cannot read derivative datasource: %s \n", config.derivative.derivative_datasource);
         exit(1);
     }
 
@@ -54,13 +55,27 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
 
     while (curr_i != EOF)
     {
-
-        for (int i = 0; i < config.candles; i++)
+        
+        //if interval == 0, this will be skipped!
+        for (int i = 0; i < config.interval && curr_i != -1; i++)
         {
-            curr_i = read_csv(settings, config, index, &series[i], curr_i);
+            struct Row r;
+            curr_i = read_csv(settings, config, index, config.datasource, &r, curr_i);
+            debug_msg(settings, 3, "IntervalSkipRow", "sim.c", r.date); 
+        }        
+
+        for (int i = 0; i < config.candles && curr_i != -1; i++)
+        {
+            curr_i = read_csv(settings, config, index, config.datasource, &series[i], curr_i);
+            debug_msg(settings, 3, "SeriesRow", "sim.c", series[i].date); 
         }
 
-        curr_i = read_csv(settings, config, index, &storage, curr_i);
+        curr_i = read_csv(settings, config, index, config.datasource, &storage, curr_i);
+
+        if (curr_i == -1){
+            break;
+        }
+
 
         struct Signal signal;
         signal = analyze(series, config.candles);
@@ -171,6 +186,11 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         {
             memset(&series[i], 0, sizeof(series[i]));
         }
+
+        //print simresult.pnl
+        char pnl[32];
+        sprintf(pnl, "%f", simresult.pnl);
+        debug_msg(settings, 1, "SimPnl", "sim.c", pnl);        
     }
 
     //close datasource(s) file.
@@ -193,9 +213,10 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 {
 
     //declare buffer for debug messages
-
     char *debug_msg_buffer;
     debug_msg_buffer = (char*)malloc(512 * sizeof(char));
+
+    struct Row pos_storage;
 
     //initialize pos res.
     struct PositionResult positionresult = {0};
@@ -203,19 +224,23 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     struct Dashboard dashboard;
 
     //reset curr that matches derivate
-    while (true){
+    curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
+    if (curr_d == -1){
+        printf("Error: NIF\n");
+        exit(1);
+    }
 
-        struct Row r = {0};
-        curr_d = read_csv(settings, config, derivative_f, &r, curr_d);
+    curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
 
-        if (is_date_after(r.date, lastrow.date)){
-                dashboard.a = r.close;
-                dashboard.q = config.quantity;
-                strncpy(config.datasource, config.derivative.derivative_datasource, 512);
-                config.interval = config.derivative.derivative_interval;
-                break;
-            }
-        }
+    //store index.datasource into index_datasource declared at start. (out of scope)
+    strncpy(index_datasource, config.datasource, 512);
+
+    // swap datasource with derivative_datasource.
+    strncpy(config.datasource, config.derivative.derivative_datasource, 512);
+
+    //set required details in dashboard
+    dashboard.a = pos_storage.close;
+    dashboard.q = config.quantity;
 
 
     if (signal.buy == true)
@@ -234,8 +259,6 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     //filter targets
     config = filter_boundaries(config, dashboard.is_short);
-
-    struct Row pos_storage;
 
     // infinite loop
     while (true)
@@ -265,7 +288,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             break;
         }
 
-        curr_d = read_csv(settings, config, derivative_f, &pos_storage, curr_d);
+        curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -368,16 +391,15 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
 
     //reset curr that matches index
-    while (true){
+    curr_i = sync_curr(settings, config, index_f, index_datasource, pos_storage.date, curr_i, settings.debug);
+    if (curr_i == -1){
+        printf("Error: NIF\n");
+        exit(1);
+    }
+    else{
+    positionresult.curr = curr_i;
+    }    
 
-        struct Row r = {0};
-        curr_i = read_csv(settings, config, index_f, &r, curr_i);
-
-        if (is_date_after(r.date, pos_storage.date)){
-                positionresult.curr = r.curr;
-                break;
-            }
-        }
     
     free(debug_msg_buffer);
     return positionresult;

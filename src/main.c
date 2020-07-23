@@ -167,15 +167,13 @@ int main(int argc, char **argv)
         settings.is_derivative = true;
     }
 
-    if (live_datasource_flag == true)
-    {
-        settings.is_live_data = true;
-    }
-
     //set is_live_data to true as arg.
     if (live_datasource_flag == true)
     {
         settings.is_live_data = true;
+    }
+    else{
+        settings.is_live_data = false;
     }
 
     config = parse_config_from_json(config_file);

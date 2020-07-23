@@ -11,8 +11,8 @@
     "is_training_sl": false,
     "trailing_sl_val": 1,
     
-    "sliding": false,
-    "intraday": true,
+    "sliding": true,
+    "intraday": false,
     "skip_header": true
 
 }

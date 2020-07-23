@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include "../include/dtypes.h"
+#include "../include/csvutils.h"
 #include "../include/timeutils.h"
 
 const char *strp_format_1 = "%Y-%m-%d %H:%M:%S";
@@ -53,7 +55,11 @@ int is_date_after(char *date_a, char *date_b)
     struct tm date_a_ts;
     struct tm date_b_ts;
 
-    #ifdef _WIN32
+    time_t x;
+    time_t y;
+
+    double diff;
+
     if(!get_time_with_sscanf_from_string(date_a, &date_a_ts)){
         return -1;
     }
@@ -61,44 +67,49 @@ int is_date_after(char *date_a, char *date_b)
     if(!get_time_with_sscanf_from_string(date_b, &date_b_ts)){
         return -1;
     }
-    #else
-    if(!strptime(date_a, strp_format_1, &date_a_ts))
-    {
-        if (!strptime(date_a, strp_format_2, &date_a_ts))
-        {
-            return -1;
-        }else{
-            strptime(date_b, strp_format_2, &date_b_ts);
-        }
-    }else
-    {
-        strptime(date_b, strp_format_1, &date_b_ts);
-    }
 
-    #endif
+    x = mktime(&date_a_ts);
+    y = mktime(&date_b_ts);
 
-    date_a_ts.tm_year += 1900;
-    date_b_ts.tm_year += 1900;
+    diff = difftime(x, y);
 
-    if (date_a_ts.tm_year >= date_b_ts.tm_year){
-        if (date_a_ts.tm_mon >= date_b_ts.tm_mon){
-            if (date_a_ts.tm_mday >= date_b_ts.tm_mday){
-                if (date_a_ts.tm_hour >= date_b_ts.tm_hour){
-                    if (date_a_ts.tm_min >= date_b_ts.tm_min){
-                        if (date_a_ts.tm_sec >= date_b_ts.tm_sec){
-
-                            return true;
-
-                        }
-                    }
-                }
-            }
-        }
+    if (diff >= 0){
+        return true;
     }
 
     return false;
 }
 
+int is_date_before(char *date_a, char *date_b)
+{
+
+    struct tm date_a_ts;
+    struct tm date_b_ts;
+
+    time_t x;
+    time_t y;
+
+    if(!get_time_with_sscanf_from_string(date_a, &date_a_ts)){
+        return -1;
+    }
+
+    if(!get_time_with_sscanf_from_string(date_b, &date_b_ts)){
+        return -1;
+    }
+
+
+    x = mktime(&date_a_ts);
+    y = mktime(&date_b_ts);
+
+    double diff = difftime(x,y);
+
+    if (diff <= 0){
+        return true;
+    }
+
+    return false;
+
+}
 
 int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
 
@@ -152,5 +163,30 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
    else{
        return false;
    }
+
+}
+
+int sync_curr(algoticks_settings settings, algoticks_config config,  FILE *f, char* fname, char *date, int seek_offset, int debug){
+
+    int curr = seek_offset;
+
+    while(curr != EOF || curr != -1){
+        struct Row r;
+        curr = read_csv(settings, config, f, fname, &r, curr);
+
+
+        if (debug){ printf("is %s > %s : %d\n", r.date, date, is_date_after(r.date, date)); }
+
+        if (is_date_after(r.date, date) == true){
+            return curr;
+        }
+        else if (is_date_after(r.date, date) == -1){
+            break;
+        }
+
+    }
+
+    //if nothing, return null
+    return -1;
 
 }
