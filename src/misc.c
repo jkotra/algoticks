@@ -83,6 +83,41 @@ void close_algo_func(){
 #ifdef _WIN32
 #include <windows.h>
 
+algoticks_cb_l load_cb(char *algo) {
+  
+  HINSTANCE hinstLib;
+  callback_func ProcAdd;
+
+  // Get a handle to the DLL module.
+  hinstLib = LoadLibrary(algo);
+
+  // If the handle is valid, try to get the function address.
+  if (hinstLib != NULL) {
+    ProcAdd = (algo_func) GetProcAddress(hinstLib, "callback_f");
+
+    // If the function address is valid, call the function.
+    if (NULL != ProcAdd) {
+      algoticks_cb_l l;
+      l.callback_func = ProcAdd;
+      l.handle = hinstLib;
+
+      return l;
+
+    } else {
+      printf("cannot open %s\n", algo);
+      exit(1);
+
+    }
+
+  }
+  else{
+      printf("cannot get handle on %s\n", algo);
+      exit(1);
+  }
+
+}
+
+
 HINSTANCE hinstLib;
 
 algo_func load_algo_func(char *algo) {

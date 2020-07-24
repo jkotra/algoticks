@@ -240,8 +240,9 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     //reset curr that matches derivate
     curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
     if (curr_d == -1){
-        printf("Error: NIF\n");
-        exit(1);
+        printf("Error: Date:%s NIF %s\n", lastrow.date, config.derivative.derivative_datasource);
+        positionresult.eof = true;
+        return positionresult;
     }
 
     curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
@@ -418,8 +419,8 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     //reset curr that matches index
     curr_i = sync_curr(settings, config, index_f, index_datasource, pos_storage.date, curr_i, settings.debug);
     if (curr_i == -1){
-        printf("Error: NIF\n");
-        exit(1);
+        printf("Error: Date:%s NIF %s\n", pos_storage.date, index_datasource);
+        positionresult.eof = true;
     }
     else{
     positionresult.curr = curr_i;

@@ -6,6 +6,8 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#else
+#include <windows.h>
 #endif
 
 void **cb;
@@ -49,7 +51,11 @@ int close_callbacks(){
 
 for (int i = 0; i < n; i++)
     {
+       #ifdef _WIN32
+       FreeLibrary(cb_h[i]);
+       #else
        dlclose(cb_h[i]);
+       #endif
     }
 
     free(cb);
