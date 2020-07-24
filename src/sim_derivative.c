@@ -10,6 +10,7 @@
 #include "../include/sim_derivative.h"
 #include "../include/misc.h"
 #include "../include/debug.h"
+#include "../include/callbacks.h"
 
 int curr_i = 0;
 int curr_d = 0;
@@ -48,6 +49,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     simresult.config = config;
 
     algo_func analyze = load_algo_func(config.algo);
+    load_callbacks(config);
 
     //initialize and malloc for series
     struct Row *series;
@@ -128,6 +130,15 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 simresult.bottom = simresult.pnl;
             }
 
+        //send callbacks
+        {
+        algoticks_event ev={0}; 
+        ev.from_sim=true;
+        strncpy(ev.date, positionresult.lastrow.date, 64);
+        ev.pnl = simresult.pnl;
+        send_callbacks(ev);
+        }            
+
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
@@ -139,6 +150,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_trgt_hits += 1;
                 }
+                {algoticks_event ev={0}; ev.t_h=true; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
@@ -151,6 +163,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_sl_hits += 1;
                 }
+                {algoticks_event ev={0}; ev.sl_h=true; send_callbacks(ev);}
             }
             else
             {
@@ -199,6 +212,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
 
     //close algo
     close_algo_func();
+    close_callbacks();
 
     //free series mem.
     free(series);
@@ -379,6 +393,17 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             break;
         }
 
+        {
+        //send callback from pos
+        algoticks_event ev = {0};
+        ev.from_pos = true;
+        strncpy(ev.date, pos_storage.date, 64);
+        ev.a = dashboard.a;
+        ev.b = dashboard.b;
+        ev.pnl = getPnL(dashboard);
+        send_callbacks(ev);
+        }        
+
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
     }
@@ -402,5 +427,6 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     
     free(debug_msg_buffer);
+    positionresult.lastrow = pos_storage;
     return positionresult;
 }

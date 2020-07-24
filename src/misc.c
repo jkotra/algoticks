@@ -11,6 +11,37 @@
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 #include<dlfcn.h>
 
+algoticks_cb_l load_cb(char *algo){
+    
+    void* handle;
+    callback_func callback;
+
+    handle = dlopen(algo, RTLD_LAZY);
+
+    if (!handle)
+    {
+        fprintf(stderr, "Error: %s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+
+    *(void **)(&callback) = dlsym(handle, "callback_f");
+
+    if (!callback)
+    {
+        fprintf(stderr, "Error: %s\n", dlerror());
+        dlclose(handle);
+        exit(EXIT_FAILURE);
+    }
+
+    algoticks_cb_l loader;
+    loader.callback_func = callback;
+    loader.handle = handle;
+
+    return loader;
+
+}
+
+//this is for algo loading
 void* handle;
 
 algo_func load_algo_func(char *algo){
@@ -325,6 +356,7 @@ algoticks_config parse_config_from_json(char *filename)
     struct json_object *symbol;
     struct json_object *candles;
     struct json_object *interval;
+    struct json_object *callbacks;
 
     struct json_object *target;
     struct json_object *stoploss;
@@ -335,6 +367,8 @@ algoticks_config parse_config_from_json(char *filename)
     struct json_object *sliding;
     struct json_object *intraday;
     struct json_object *skip_header;
+
+    struct json_object *tmp;
 
     struct Config config = {0};
 
@@ -395,6 +429,19 @@ algoticks_config parse_config_from_json(char *filename)
         //set to None
         strncpy(config.derivative.derivative_datasource, "None", 512);
 
+    }
+
+    //parse callbacks if exists.
+    int callbacks_exists = json_object_object_get_ex(parsed_json, "callbacks", &callbacks);
+
+    if (callbacks_exists){
+        config.n_callbacks = json_object_array_length(callbacks);
+
+        for (int i = 0; i < config.n_callbacks; i++)
+        {
+            tmp = json_object_array_get_idx(callbacks, i);
+            strncpy(config.callbacks[i], json_object_get_string(tmp), 64);
+        } 
     }
 
     //close config file!

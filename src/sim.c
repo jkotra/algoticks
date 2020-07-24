@@ -10,6 +10,7 @@
 #include "../include/sim.h"
 #include "../include/misc.h"
 #include "../include/debug.h"
+#include "../include/callbacks.h"
 
 
 algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config){
@@ -29,11 +30,13 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     struct Row storage;
 
     struct SimResult simresult = {0};
+    struct PositionResult positionresult = {0};
 
     //add config to simresult
     simresult.config = config;
 
     algo_func analyze = load_algo_func(config.algo);
+    load_callbacks(config);
 
     //initialize and malloc for series
     struct Row* series;
@@ -89,7 +92,6 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         if (signal.neutral != true)
         {
-            struct PositionResult positionresult;
 
             if (config.intraday == true){
                 if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
@@ -111,19 +113,29 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
             {
                 simresult.bottom = simresult.pnl;
             }
-            
+
+        //send callbacks
+        {
+        algoticks_event ev={0}; 
+        ev.from_sim=true;
+        strncpy(ev.date, positionresult.lastrow.date, 64);
+        ev.pnl = simresult.pnl;
+        send_callbacks(ev);
+        }   
 
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
                 if (signal.buy == true){ simresult.b_trgt_hits += 1; }
                 else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
+                {algoticks_event ev={0}; ev.t_h=true; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
                 if (signal.buy == true){ simresult.b_sl_hits += 1; }
                 else if (signal.sell == true){ simresult.s_sl_hits += 1; }
+                {algoticks_event ev={0}; ev.sl_h=true; send_callbacks(ev);}
             }
             else
             {
@@ -170,6 +182,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
     //close algo
     close_algo_func();
+    close_callbacks();
 
     //free series mem.
     free(series);
@@ -330,6 +343,17 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
             break;
         }
+        
+        {
+        //send callback from pos
+        algoticks_event ev = {0};
+        ev.from_pos = true;
+        strncpy(ev.date, pos_storage.date, 64);
+        ev.a = dashboard.a;
+        ev.b = dashboard.b;
+        ev.pnl = getPnL(dashboard);
+        send_callbacks(ev);
+        }
 
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
@@ -341,5 +365,6 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     }
     
     free(debug_msg_buffer);
+    positionresult.lastrow = pos_storage;
     return positionresult;
 }

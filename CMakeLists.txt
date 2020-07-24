@@ -27,6 +27,8 @@ endif()
 #GLOB all source files!
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
 
+#############ALGORITHMS#########################
+
 # add algorithm names to this list
 list(APPEND algorithms
     Greens
@@ -46,6 +48,27 @@ set_target_properties(${algo}
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms/
 )
 endforeach()
+
+###############//END//#########################
+
+#############CALLBACKS#########################
+
+# add algorithm names to this list
+list(APPEND callbacks
+     log)
+
+foreach(cb ${callbacks})
+message("Building callback:" ${cb})
+add_library(${cb} MODULE src/callbacks/${cb}.c)
+set_target_properties(${cb}
+    PROPERTIES
+    PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/callbacks/
+)
+endforeach()
+
+###############//END//######################
+
 
 add_executable(algoticks ${SRC_FILES})
 

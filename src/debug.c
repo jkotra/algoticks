@@ -41,12 +41,7 @@ void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc
     sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"msg\": \"%s\"}\n", hrt, op, loc, remarks);
 
     printf("%s", buffer);
-    
-    /*
-    FILE *fp;
-    fp = fopen("debug.log","a+");
-    fprintf(fp, buffer);
-    */
+
 
 }
 
@@ -57,6 +52,17 @@ void print_config_struct(algoticks_config config){
     printf("[DEBUG] config.derivative[derivative_datasource, derivative_interval] = %s %d\n", config.derivative.derivative_datasource, config.derivative.derivative_interval);
     printf("[DEBUG] config.symbol = %s\n", config.symbol);
     printf("[DEBUG] config.interval = %d\n", config.interval);
+    printf("[DEBUG] config.n_callbacks = %d\n", config.n_callbacks);
+
+    if (config.n_callbacks > 0){
+    printf("[DEBUG] config.callbacks =");
+    for (int i = 0; i < config.n_callbacks; i++)
+    {
+        printf(" %s ",config.callbacks[i]);
+    }
+    printf("\n");
+
+    }    
 
     printf("[DEBUG] config.candles = %d\n", config.candles);
     printf("[DEBUG] config.target = %f\n", config.target);

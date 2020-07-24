@@ -72,6 +72,9 @@ typedef struct Config
     int candles;
     int interval;
 
+    char callbacks[6][32];
+    int n_callbacks;
+
     double target;
     double stoploss;
     int is_training_sl;
@@ -140,6 +143,7 @@ typedef struct PositionResult {
 
     int curr;
     int eof;
+    algoticks_row lastrow;
     
 }algoticks_positionresult;
 
@@ -175,11 +179,38 @@ typedef struct Signal {
     int sell;
 }algoticks_signal;
 
-//function pointer - load_algo_func
+typedef struct Event {
+
+    int from_sim;
+    int from_pos;
+
+    algoticks_signal signal;
+    int t_h;
+    int sl_h;
+
+    int tsl;
+    int tsl_t;
+    float tsl_sl;
+    
+    char date[64];
+    float a;
+    float b;
+    float pnl;
+
+}algoticks_event;
+
+//function pointers
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 typedef algoticks_signal (*algo_func)(algoticks_row *, int);
+typedef int (*callback_func)(algoticks_event *);
 #endif
 
 #ifdef _WIN32
 typedef algoticks_signal (__cdecl *algo_func)(algoticks_row *, int);
+typedef int (__cdecl *callback_func)(algoticks_event *);
 #endif
+
+typedef struct CallbackLoader{
+    callback_func callback_func;
+    void *handle; //this need to be casted according to os
+}algoticks_cb_l;
