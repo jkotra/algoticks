@@ -320,6 +320,16 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
     // temp. storage array(s)
     char row[MAXCHARPERLINE];
     int curr_sp;
+
+
+    if (config.interval > 0 && is_header_skipped == true && settings.is_live_data == false){
+        for (int i = 0; i < config.interval; i++)
+        {
+            fgets(row, MAXCHARPERLINE, fp);
+            debug_msg(settings, 3, "SkipIntervalRow", "sim.c", row);
+        }
+
+    }
     
 
     //read row string from file

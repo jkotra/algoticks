@@ -46,14 +46,6 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     while (curr != EOF)
     {
 
-        //if interval == 0, this will be skipped!
-        for (int i = 0; i < config.interval && curr != -1; i++)
-        {
-            struct Row r;
-            curr = read_csv(settings, config, fp, config.datasource, &r, curr);
-            debug_msg(settings, 3, "IntervalSkipRow", "sim.c", r.date); 
-        }
-
         for (int i = 0; i < config.candles && curr != -1; i++)
         {
             curr = read_csv(settings,config, fp, config.datasource, &series[i], curr);
@@ -230,7 +222,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     {
         positionresult.n_steps++;
 
-        if (curr == EOF)
+        if (curr == EOF || curr == -1)
         {
             if (settings.debug)
             {

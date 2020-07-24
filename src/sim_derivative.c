@@ -19,6 +19,8 @@ char index_datasource[512];
 algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_config config)
 {
 
+    strncpy(index_datasource, config.datasource, 64);
+
     // open and read CSV file.
     FILE *index;
     index = fopen(config.datasource, "rb");
@@ -56,15 +58,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     series = (algoticks_row *)malloc((config.candles) * sizeof(algoticks_row));
 
     while (curr_i != EOF)
-    {
-        
-        //if interval == 0, this will be skipped!
-        for (int i = 0; i < config.interval && curr_i != -1; i++)
-        {
-            struct Row r;
-            curr_i = read_csv(settings, config, index, config.datasource, &r, curr_i);
-            debug_msg(settings, 3, "IntervalSkipRow", "sim.c", r.date); 
-        }        
+    {    
 
         for (int i = 0; i < config.candles && curr_i != -1; i++)
         {
@@ -245,12 +239,14 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         return positionresult;
     }
 
-    curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
+    //reset curr that matches derivate
+    curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
+    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
+        printf("Error: %s not found in %s\n", lastrow.date, config.derivative.derivative_datasource);
+        positionresult.eof = true;
+    }
 
-    //store index.datasource into index_datasource declared at start. (out of scope)
-    strncpy(index_datasource, config.datasource, 512);
-
-    // swap datasource with derivative_datasource.
+     // swap datasource with derivative_datasource.
     strncpy(config.datasource, config.derivative.derivative_datasource, 512);
 
     //set required details in dashboard
@@ -280,7 +276,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     {
         positionresult.n_steps++;
 
-        if (curr_d == EOF)
+        if (curr_d == EOF || curr_d == -1)
         {
             if (settings.debug)
             {
@@ -418,14 +414,13 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     //reset curr that matches index
     curr_i = sync_curr(settings, config, index_f, index_datasource, pos_storage.date, curr_i, settings.debug);
-    if (curr_i == -1){
-        printf("Error: Date:%s NIF %s\n", pos_storage.date, index_datasource);
+    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
+        printf("Error: %s not found in %s\n", pos_storage.date, index_datasource);
         positionresult.eof = true;
     }
     else{
     positionresult.curr = curr_i;
-    }    
-
+    }
     
     free(debug_msg_buffer);
     positionresult.lastrow = pos_storage;
