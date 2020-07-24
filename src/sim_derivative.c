@@ -14,7 +14,7 @@
 
 int curr_i = 0;
 int curr_d = 0;
-char index_datasource[512];
+char index_datasource[64];
 
 algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_config config)
 {

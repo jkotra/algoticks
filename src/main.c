@@ -188,7 +188,6 @@ int main(int argc, char **argv)
     }
     else
     {
-        print_config_struct(config);
         run_sim(settings, config);
     }
 
