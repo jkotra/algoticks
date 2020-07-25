@@ -1,4 +1,5 @@
 /* Declarations */
+algoticks_cb_l load_cb(char *algo);
 algo_func load_algo_func(char *algo);
 void close_algo_func();
 void write_simresult_to_csv(algoticks_simresult simresult);

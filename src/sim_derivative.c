@@ -10,13 +10,16 @@
 #include "../include/sim_derivative.h"
 #include "../include/misc.h"
 #include "../include/debug.h"
+#include "../include/callbacks.h"
 
 int curr_i = 0;
 int curr_d = 0;
-char index_datasource[512];
+char index_datasource[64];
 
 algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_config config)
 {
+
+    strncpy(index_datasource, config.datasource, 64);
 
     // open and read CSV file.
     FILE *index;
@@ -48,21 +51,14 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     simresult.config = config;
 
     algo_func analyze = load_algo_func(config.algo);
+    load_callbacks(config);
 
     //initialize and malloc for series
     struct Row *series;
     series = (algoticks_row *)malloc((config.candles) * sizeof(algoticks_row));
 
     while (curr_i != EOF)
-    {
-        
-        //if interval == 0, this will be skipped!
-        for (int i = 0; i < config.interval && curr_i != -1; i++)
-        {
-            struct Row r;
-            curr_i = read_csv(settings, config, index, config.datasource, &r, curr_i);
-            debug_msg(settings, 3, "IntervalSkipRow", "sim.c", r.date); 
-        }        
+    {    
 
         for (int i = 0; i < config.candles && curr_i != -1; i++)
         {
@@ -128,6 +124,15 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 simresult.bottom = simresult.pnl;
             }
 
+        //send callbacks
+        {
+        algoticks_event ev={0}; 
+        ev.from_sim=true;
+        strncpy(ev.date, positionresult.lastrow.date, 64);
+        ev.pnl = simresult.pnl;
+        send_callbacks(ev);
+        }            
+
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
@@ -139,6 +144,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_trgt_hits += 1;
                 }
+                {algoticks_event ev={0}; ev.t_h=true; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
@@ -151,6 +157,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_sl_hits += 1;
                 }
+                {algoticks_event ev={0}; ev.sl_h=true; send_callbacks(ev);}
             }
             else
             {
@@ -199,6 +206,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
 
     //close algo
     close_algo_func();
+    close_callbacks();
 
     //free series mem.
     free(series);
@@ -226,16 +234,19 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     //reset curr that matches derivate
     curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
     if (curr_d == -1){
-        printf("Error: NIF\n");
-        exit(1);
+        printf("Error: Date:%s NIF %s\n", lastrow.date, config.derivative.derivative_datasource);
+        positionresult.eof = true;
+        return positionresult;
     }
 
-    curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
+    //reset curr that matches derivate
+    curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
+    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
+        printf("Error: %s not found in %s\n", lastrow.date, config.derivative.derivative_datasource);
+        positionresult.eof = true;
+    }
 
-    //store index.datasource into index_datasource declared at start. (out of scope)
-    strncpy(index_datasource, config.datasource, 512);
-
-    // swap datasource with derivative_datasource.
+     // swap datasource with derivative_datasource.
     strncpy(config.datasource, config.derivative.derivative_datasource, 512);
 
     //set required details in dashboard
@@ -265,7 +276,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     {
         positionresult.n_steps++;
 
-        if (curr_d == EOF)
+        if (curr_d == EOF || curr_d == -1)
         {
             if (settings.debug)
             {
@@ -379,6 +390,17 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             break;
         }
 
+        {
+        //send callback from pos
+        algoticks_event ev = {0};
+        ev.from_pos = true;
+        strncpy(ev.date, pos_storage.date, 64);
+        ev.a = dashboard.a;
+        ev.b = dashboard.b;
+        ev.pnl = getPnL(dashboard);
+        send_callbacks(ev);
+        }        
+
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
     }
@@ -392,15 +414,15 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     //reset curr that matches index
     curr_i = sync_curr(settings, config, index_f, index_datasource, pos_storage.date, curr_i, settings.debug);
-    if (curr_i == -1){
-        printf("Error: NIF\n");
-        exit(1);
+    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
+        printf("Error: %s not found in %s\n", pos_storage.date, index_datasource);
+        positionresult.eof = true;
     }
     else{
     positionresult.curr = curr_i;
-    }    
-
+    }
     
     free(debug_msg_buffer);
+    positionresult.lastrow = pos_storage;
     return positionresult;
 }

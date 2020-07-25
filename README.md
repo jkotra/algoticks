@@ -116,6 +116,16 @@ while running, to indicate the presence of derivative, `--derivative` command li
 
 ---
 
+### Callbacks
+
+Callbacks are custom functions that are called if included in `config.json`
+
+```json
+    "derivative_interval": ["callbacks/log.so"],
+```
+
+---
+
 ## Testing
 
 Algoticks uses [check.h Unit Testing Framework](https://libcheck.github.io/check/) for testing.
