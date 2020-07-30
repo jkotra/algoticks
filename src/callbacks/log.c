@@ -2,40 +2,73 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include "../../include/dtypes.h"
+#include "../include/debug.h"
+#include "../include/misc.h"
 
-char log_header[128] = "date,pnl\n";
-int logheader_written = false;
 FILE *fp;
-FILE *fp2;
+char hrt[32];
+
+void get_hrt(char *hrt)
+{
+    time_t now;
+
+    //get time
+    time(&now);
+
+    sprintf(hrt, "%s", ctime(&now));
+    chomp(hrt);
+}
 
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-int callback_f(algoticks_event *event){
+    int callback_f(algoticks_event *event)
+{
 
-    if (fp == NULL){
-        fp = fopen("pnl.log","w");
+    if (fp == NULL)
+    {
+        fp = fopen("total.log", "w");
     }
-    if (fp2 == NULL){
-        fp2 = fopen("all.log","w");
-    }
-
-    if (!logheader_written){
-        fprintf(fp, log_header);
-        fprintf(fp2, log_header);
-        logheader_written = true;
-    }
-    
-    if (event->from_sim){
-    fprintf(fp, "%s,%f\n", event->date, event->pnl);
+    else if(fp != NULL){
+        fp = fopen("total.log", "a");
     }
 
-    if (event->from_pos){
-    fprintf(fp2, "%s,%f\n", event->date, event->pnl);
+    get_hrt(hrt);
+
+    if (event->signal.buy != false)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"signal\": \"Buy\" }\n", hrt);
     }
+
+    else if (event->signal.sell != false)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"signal\": \"Sell\" }\n", hrt);
+    }
+
+    else if (event->from_pos)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"positionPnL\": %f }\n", hrt, event->pnl);
+    }
+
+    else if (event->t_h)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"Hit\": \"Target\", \"simulationPnl\": %f }\n", hrt, event->pnl);
+    }
+
+    else if (event->sl_h)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"Hit\": \"SL\", \"simulationPnl\": %f }\n", hrt, event->pnl);
+    }
+
+    else if (event->tsl)
+    {
+        fprintf(fp, "{\"date\": \"%s\", \"Hit\": \"TSL\", \"T\": %f, \"SL\": %f }\n", hrt, event->tsl_t, event->tsl_sl);
+    }
+
+    fclose(fp);
 
 
     return true;
-
 }

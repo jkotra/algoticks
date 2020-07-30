@@ -99,7 +99,14 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
 
         if (signal.neutral != true)
         {
-            struct PositionResult positionresult;
+
+            {
+                algoticks_event ev={0};
+                ev.signal = signal;
+                send_callbacks(ev);
+            }
+
+            struct PositionResult positionresult = {0};
 
             if (config.intraday == true)
             {
@@ -124,15 +131,6 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 simresult.bottom = simresult.pnl;
             }
 
-        //send callbacks
-        {
-        algoticks_event ev={0}; 
-        ev.from_sim=true;
-        strncpy(ev.date, positionresult.lastrow.date, 64);
-        ev.pnl = simresult.pnl;
-        send_callbacks(ev);
-        }            
-
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
@@ -144,7 +142,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_trgt_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.t_h=true; send_callbacks(ev);}
+                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
@@ -157,7 +155,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_sl_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.sl_h=true; send_callbacks(ev);}
+                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else
             {
@@ -239,12 +237,8 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         return positionresult;
     }
 
-    //reset curr that matches derivate
-    curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
-    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
-        printf("Error: %s not found in %s\n", lastrow.date, config.derivative.derivative_datasource);
-        positionresult.eof = true;
-    }
+    curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
+    
 
      // swap datasource with derivative_datasource.
     strncpy(config.datasource, config.derivative.derivative_datasource, 512);

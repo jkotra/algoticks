@@ -84,6 +84,11 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
         if (signal.neutral != true)
         {
+            {
+                algoticks_event ev={0};
+                ev.signal = signal;
+                send_callbacks(ev);
+            }
 
             if (config.intraday == true){
                 if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
@@ -106,28 +111,19 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
                 simresult.bottom = simresult.pnl;
             }
 
-        //send callbacks
-        {
-        algoticks_event ev={0}; 
-        ev.from_sim=true;
-        strncpy(ev.date, positionresult.lastrow.date, 64);
-        ev.pnl = simresult.pnl;
-        send_callbacks(ev);
-        }   
-
             if (strcmp(positionresult.hit_type, "T") == 0)
             {
                 simresult.trgt_hits += 1;
                 if (signal.buy == true){ simresult.b_trgt_hits += 1; }
                 else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
-                {algoticks_event ev={0}; ev.t_h=true; send_callbacks(ev);}
+                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
                 if (signal.buy == true){ simresult.b_sl_hits += 1; }
                 else if (signal.sell == true){ simresult.s_sl_hits += 1; }
-                {algoticks_event ev={0}; ev.sl_h=true; send_callbacks(ev);}
+                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else
             {

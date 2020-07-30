@@ -189,7 +189,7 @@ typedef struct Event {
     int sl_h;
 
     int tsl;
-    int tsl_t;
+    float tsl_t;
     float tsl_sl;
     
     char date[64];

@@ -169,12 +169,11 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
 int sync_curr(algoticks_settings settings, algoticks_config config,  FILE *f, char* fname, char *date, int seek_offset, int debug){
 
     int curr = seek_offset;
+    if (debug) { printf("finding %s in %s\n", date, fname); }
 
     while(curr != EOF || curr != -1){
         struct Row r;
         curr = read_csv(settings, config, f, fname, &r, curr);
-
-
         if (debug){ printf("is %s > %s : %d\n", r.date, date, is_date_after(r.date, date)); }
 
         if (is_date_after(r.date, date) == true){
