@@ -101,7 +101,7 @@ if derivative option is enabled (`--derivative`), the signals will be generated 
 
 `datasource` and `derivative_datasource` must have matching dates and are sorted.
 
- Derivative requires addition data source that should be specified in `config.json`/`settings.josn`:
+ Derivative requires addition data source that should be specified in `config.json`:
 
 ```json
     "derivative": {
@@ -112,7 +112,7 @@ if derivative option is enabled (`--derivative`), the signals will be generated 
     },
 ```
 
-while running, to indicate the presence of derivative, `--derivative` command line arg is to be used.
+while running the program, to indicate the presence of derivative, `--derivative` command line arg is to be used.
 
 ---
 
