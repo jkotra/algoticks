@@ -9,11 +9,12 @@
 #include "../include/misc.h"
 
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <sys/socket.h>
-
 #include <netinet/in.h>
-
 #include <netdb.h>
+#endif
 
 int is_header_skipped = false;
 int is_socket_init = false;
@@ -23,6 +24,7 @@ void reset_header_skip(){
     is_header_skipped = false;
 }
 
+#ifndef _WIN32
 int socket_init(char *port){
     
     struct addrinfo hints;
@@ -59,6 +61,7 @@ int socket_init(char *port){
 
     return client;
 }
+#endif
 
 int check_row_integrity(algoticks_row *row){
     //return true if all ok else false if close is 0 or date is NULL
@@ -354,6 +357,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
 
         }else if (settings.is_live_data_socket == true){
 
+            #ifndef _WIN32
             printf("starting socket listining at %s:%s\n", "127.0.0.1", settings.socket_port);
 
             if (!is_socket_init){
@@ -393,6 +397,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
 
             debug_msg(settings, 2, "FileReopen","csvutils.c", config.datasource);
 
+            #endif
             
         }
         else {

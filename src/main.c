@@ -37,12 +37,12 @@ void print_help_and_exit()
     printf("-H -h\t\t\tPrint this message and Exit.\n");
     printf("-D\t\t\tEnable Debug.\n");
     printf("-L\t\t\twait for new data at EOF in datasource.\n");
-    printf("-S [PORT](Default: 5757)\t\t\twait for new data at EOF on TCP socket.\n");
+    printf("-S [PORT]\t\twait for new data at EOF on TCP socket.\n");
     printf("--derivative\t\tDerivative mode.\n\n\n");
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--benchmark -B [(Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
+    printf("--benchmark -B (Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
     exit(0);
 }
 
