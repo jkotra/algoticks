@@ -12,6 +12,8 @@ tests/**
 !tests/algoticks_tests.c
 !tests/CMakeLists.txt
 !stream_to_csv.py
+!stream_to_socket.py
+!tests/AAPL.csv
 
 build/**
 CMakeLists.txt.user

@@ -14,6 +14,7 @@ void benchmark(char *benchmark_config_file, algoticks_settings settings)
     //disable printing
     settings.print = false;
     settings.is_live_data = false;
+    settings.is_live_data_socket = false;
     struct BenchmarkConfig benchmarkconfig;
     benchmarkconfig = parse_benchmark_from_json(benchmark_config_file);
 

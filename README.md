@@ -116,6 +116,11 @@ while running the program, to indicate the presence of derivative, `--derivative
 
 ---
 
+## Live data from TCP socket.
+
+TODO
+
+
 ### Callbacks
 
 Callbacks are custom functions that are called if included in `config.json`
