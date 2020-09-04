@@ -14,6 +14,10 @@ int debug_lvl = false;
 int benchmark_flag = false;
 int config_need_exit_flag = false;
 int live_datasource_flag = false;
+int live_datasource_tcp_socket_flag = false;
+
+char tcp_socket_port[12] = "5757";
+
 int derivative_flag = false;
 
 char settings_file[64] = "settings.json";
@@ -22,7 +26,7 @@ char benchmark_file[64] = "benchmark.json";
 
 void print_version_and_exit()
 {
-    printf("algoticks v1.3\n");
+    printf("algoticks v1.4\n");
     exit(0);
 }
 
@@ -32,12 +36,13 @@ void print_help_and_exit()
     printf("-V -v\t\t\tPrint Version and Exit.\n");
     printf("-H -h\t\t\tPrint this message and Exit.\n");
     printf("-D\t\t\tEnable Debug.\n");
-    printf("-L\t\t\twait for new data at EOF\n");
+    printf("-L\t\t\twait for new data at EOF in datasource.\n");
+    printf("-S [PORT]\t\twait for new data at EOF on TCP socket.\n");
     printf("--derivative\t\tDerivative mode.\n\n\n");
 
     printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
     printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--benchmark -B [(Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
+    printf("--benchmark -B (Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
     exit(0);
 }
 
@@ -87,6 +92,23 @@ int main(int argc, char **argv)
             else if (strcmp(argv[i], "-L") == 0)
             {
                 live_datasource_flag = true;
+                live_datasource_tcp_socket_flag = false;
+            }
+
+            else if (strcmp(argv[i], "-S") == 0)
+            {
+                live_datasource_flag = false;
+                live_datasource_tcp_socket_flag = true;
+                
+                if (argc > i+1){
+                    char next_arg[6];
+                    strncpy(next_arg, argv[i+1], 6);
+                    if (next_arg[0] != '-') {
+                        strncpy(tcp_socket_port, argv[i + 1], 12);
+                    }
+                }
+
+                
             }
 
             // for --settings
@@ -171,8 +193,23 @@ int main(int argc, char **argv)
     if (live_datasource_flag == true)
     {
         settings.is_live_data = true;
+        settings.is_live_data_socket = false;
     }
-    else{
+    else if (live_datasource_tcp_socket_flag == true)
+    {
+
+        settings.is_live_data_socket = true;
+        settings.is_live_data = false;
+
+        strncpy(settings.socket_port, tcp_socket_port, 6);
+        
+        // socket feature not supported on windows (yet!)
+        #ifdef _WIN32
+        settings.is_live_data_socket = false;
+        #endif
+    }
+    else
+    {
         settings.is_live_data = false;
     }
 

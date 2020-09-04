@@ -6,6 +6,8 @@ typedef struct Settings
     int debug_level;
 
     int is_live_data;
+    int is_live_data_socket;
+    char socket_port[12];
     int is_derivative;
 
     int intraday_hour;

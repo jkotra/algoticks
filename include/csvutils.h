@@ -3,9 +3,10 @@
 
 /* Declarations */
 void reset_header_skip();
+int socket_init(char* port);
 int check_row_integrity(algoticks_row *row);
 int change_in_modified_date(char* filename);
-int reopen_datasource(char* filename, FILE** fp);
+int reopen_datasource(char* filename, FILE** fp, char* mode);
 algoticks_row tokenize_row(char *row);
 void set_ohlcv_as_header();
 int process_csv_header(algoticks_settings settings, char *row);

@@ -5,10 +5,17 @@
 #include <time.h>
 #include "../../include/dtypes.h"
 #include "../include/debug.h"
-#include "../include/misc.h"
 
 FILE *fp;
 char hrt[32];
+
+void chomp(char *s)
+{
+    /* This removes newline at end of string */
+    while (*s && *s != '\n' && *s != '\r')
+        s++;
+    *s = 0;
+}
 
 void get_hrt(char *hrt)
 {
