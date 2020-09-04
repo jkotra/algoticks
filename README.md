@@ -116,9 +116,11 @@ while running the program, to indicate the presence of derivative, `--derivative
 
 ---
 
-## Live data from TCP socket.
+## Feed Live data from a TCP socket.
 
-TODO
+from version `v1.4` live data can be fed into algoticks from a TCP socket. use `-S [PORT]` to listen to specific port on localhost(127.0.0.1) for data.
+
+for example, client, refer to [stream_to_socket.py](tests/stream_to_socket.py)
 
 
 ### Callbacks

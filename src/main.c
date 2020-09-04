@@ -99,12 +99,13 @@ int main(int argc, char **argv)
             {
                 live_datasource_flag = false;
                 live_datasource_tcp_socket_flag = true;
-
-                char next_arg[6];
-                strncpy(next_arg, argv[i+1], 6);
-
-                if (next_arg[0] != '-') {
-                    strncpy(tcp_socket_port, argv[i + 1], 12);
+                
+                if (argc > i+1){
+                    char next_arg[6];
+                    strncpy(next_arg, argv[i+1], 6);
+                    if (next_arg[0] != '-') {
+                        strncpy(tcp_socket_port, argv[i + 1], 12);
+                    }
                 }
 
                 

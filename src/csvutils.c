@@ -45,7 +45,8 @@ int socket_init(char *port){
     {
         return -1;
     }
-
+    
+    printf("waiting on connection on %s:%s\n", "127.0.0.1", port);
     listen(socketfd, 1); // this is blocking.
 
     struct sockaddr_storage client_addr; //to store client addr
@@ -358,13 +359,15 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
         }else if (settings.is_live_data_socket == true){
 
             #ifndef _WIN32
-            printf("starting socket listining at %s:%s\n", "127.0.0.1", settings.socket_port);
+            
 
             if (!is_socket_init){
+                
                 client_d = socket_init(settings.socket_port);
 
                 if (client_d < 0){
                     printf("error creating socket!\n");
+                    exit(1);
                 }
 
                 is_socket_init = true;
@@ -379,7 +382,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
 
             if (bytes_received <= 1){
                 //conn closed
-                printf("connection closed\n");
+                printf("connection closed!\n");
                 exit(1);
             }
 
