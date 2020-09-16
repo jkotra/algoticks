@@ -36,7 +36,7 @@ int socket_init(char *port){
     hints.ai_socktype = SOCK_STREAM; // TCP
     hints.ai_flags = AI_PASSIVE;     // PASSIVE mode
 
-    getaddrinfo(0, port, &hints, &bind_addr);
+    getaddrinfo("127.0.0.1", port, &hints, &bind_addr);
 
     //init socket
     int socketfd = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol);
