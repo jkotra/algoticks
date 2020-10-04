@@ -46,7 +46,7 @@ int socket_init(char *port){
         return -1;
     }
     
-    printf("waiting on connection on %s:%s\n", "127.0.0.1", port);
+    printf("waiting for connection on %s:%s\n", "127.0.0.1", port);
     listen(socketfd, 1); // this is blocking.
 
     struct sockaddr_storage client_addr; //to store client addr
