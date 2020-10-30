@@ -63,7 +63,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         for (int i = 0; i < config.candles && curr_i != -1; i++)
         {
             curr_i = read_csv(settings, config, index, config.datasource, &series[i], curr_i);
-            debug_msg(settings, 3, "SeriesRow", "sim.c", series[i].date); 
+            debug_msg(settings, 3, "SeriesRow", "sim_derivative.c", series[i].date); 
         }
 
         curr_i = read_csv(settings, config, index, config.datasource, &storage, curr_i);
@@ -79,17 +79,17 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         if (signal.buy == true)
         {
             simresult.buy_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Buy");
+            debug_msg(settings, 1, "signal", "sim_derivative.c", "Buy");
         }
         else if (signal.sell == true)
         {
             simresult.sell_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Sell");
+            debug_msg(settings, 1, "signal", "sim_derivative.c", "Sell");
         }
         else if (signal.neutral == true)
         {
             simresult.neutral_signals += 1;
-            debug_msg(settings, 3, "signal", "sim.c", "Neutral");
+            debug_msg(settings, 3, "signal", "sim_derivative.c", "Neutral");
         }
         else
         {
@@ -159,7 +159,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
             }
             else
             {
-                debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
+                debug_msg(settings, 1, "Hit", "sim_derivative.c", "Position did not hit any boundary");
             }
 
             if (positionresult.eof == true)
@@ -195,7 +195,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         //print simresult.pnl
         char pnl[32];
         sprintf(pnl, "%f", simresult.pnl);
-        debug_msg(settings, 1, "SimPnl", "sim.c", pnl);        
+        debug_msg(settings, 1, "SimPnl", "sim_derivative.c", pnl);        
     }
 
     //close datasource(s) file.
@@ -274,9 +274,9 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         {
             if (settings.debug)
             {
-                debug_msg(settings, 1, "EOF", "sim.c", config.datasource);
+                debug_msg(settings, 1, "EOF", "sim_derivative.c", config.datasource);
                 sprintf(debug_msg_buffer, "%d", curr_d);
-                debug_msg(settings, 2, "derivative_curr", "sim.c", debug_msg_buffer);
+                debug_msg(settings, 2, "derivative_curr", "sim_derivative.c", debug_msg_buffer);
             }
             positionresult.pnl = getPnL(dashboard);
 
@@ -320,7 +320,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             {
                 //debug msg
                 sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings.intraday_hour, settings.intraday_min, pos_storage.date);
-                debug_msg(settings, 2, "intraday_squareoff", "sim.c", debug_msg_buffer);
+                debug_msg(settings, 2, "intraday_squareoff", "sim_derivative.c", debug_msg_buffer);
 
                 positionresult.pnl = getPnL(dashboard);
 
@@ -339,7 +339,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
         if (is_target_hit(dashboard, config.target) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim.c", "Target Hit!");
+            debug_msg(settings, 1, "Hit", "sim_derivative.c", "Target Hit!");
 
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
@@ -358,7 +358,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
                 }
 
                 sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
-                debug_msg(settings, 1, "TSL_Adjust", "sim.c", debug_msg_buffer);
+                debug_msg(settings, 1, "TSL_Adjust", "sim_derivative.c", debug_msg_buffer);
 
                 continue;
             }
@@ -368,7 +368,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
         if (is_stoploss_hit(dashboard, config.stoploss) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim.c", "SL Hit!");
+            debug_msg(settings, 1, "Hit", "sim_derivative.c", "SL Hit!");
 
             positionresult.pnl = getPnL(dashboard);
 
@@ -402,7 +402,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     if (positionresult.n_steps > 0)
     {
         sprintf(debug_msg_buffer, "%f", positionresult.pnl);
-        debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
+        debug_msg(settings, 1, "PosPnl", "sim_derivative.c", debug_msg_buffer);
     }
 
 
