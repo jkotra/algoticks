@@ -9,6 +9,27 @@
 #include "../include/benchmark.h"
 #include "../include/debug.h"
 
+struct program_args
+{
+    int debug;
+    char *debug_level;
+
+    int benchmark;
+
+    int live_datasource;
+    int live_datasource_socket;
+    char *tcp_socket_port;
+
+    int derivative;
+
+    char *settings_f;
+    char *config_f;
+    char *benchmark_f;
+
+    /* WINDOWS ONLY */
+    char *program_args_f;
+};
+
 #if defined(__linux__)
 #include <argp.h>
 
@@ -35,27 +56,6 @@ static struct argp_option options[] = {
     {"benchmarkfile", 'B', "FILE", 0, "Benchmark file."},
     {"settingsfile", 'S', "FILE", 0, "settings file."},
     {0}
-};
-
-struct program_args
-{
-    int debug;
-    char *debug_level;
-
-    int benchmark;
-
-    int live_datasource;
-    int live_datasource_socket;
-    char *tcp_socket_port;
-
-    int derivative;
-
-    char *settings_f;
-    char *config_f;
-    char *benchmark_f;
-
-    /* WINDOWS ONLY */
-    char *program_args_f;
 };
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
@@ -127,7 +127,14 @@ int main(int argc, char **argv)
 
     //in windows, we only take in single settings file.
     #ifdef _WIN32
-    strncpy(arguments.settings_f, argv[1], 32);
+    for (size_t i = 0; i < argc; i++)
+    {
+        if(strstr(argv[i], ".json") != NULL){
+            arguments.settings_f = argv[i];
+            break;
+        }
+    }
+    
     #endif
 
     struct Config config;
@@ -138,7 +145,15 @@ int main(int argc, char **argv)
     #ifdef _WIN32
     arguments.config_f = settings.config_f;
     arguments.benchmark_f = settings.benchmark_f;
+
+    //not supported currently
+    settings.is_live_data_socket = false;
     #endif
+    
+    // mutually exclusive ways to feed data.
+    if (settings.is_live_data && settings.is_live_data_socket){
+        settings.is_live_data_socket = false;
+    }
 
     #if defined(__linux__)
     if (arguments.debug) {

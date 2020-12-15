@@ -359,7 +359,7 @@ algoticks_settings parse_settings_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "debug_level", &debug_level);
 
     json_object_object_get_ex(parsed_json, "derivative", &derivative);
-    json_object_object_get_ex(parsed_json, "benchmark", &benchmark_f);
+    json_object_object_get_ex(parsed_json, "benchmark", &benchmark);
 
     json_object_object_get_ex(parsed_json, "config_f", &config_f);
     json_object_object_get_ex(parsed_json, "benchmark_f", &benchmark_f);
@@ -380,6 +380,7 @@ algoticks_settings parse_settings_from_json(char *filename)
     settings.is_benchmark = json_object_get_boolean(benchmark);
 
     settings.is_live_data = json_object_get_boolean(is_live_data);
+    
     settings.is_live_data_socket = json_object_get_boolean(socket);
     strncpy(settings.socket_port, json_object_get_string(socket_port), 5);
 

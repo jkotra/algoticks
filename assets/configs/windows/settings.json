@@ -4,6 +4,8 @@
     "debug": false,
     "debug_level": 1,
 
+    "is_live_data": false,
+
     "derivative": false,
     "benchmark": false,
 
