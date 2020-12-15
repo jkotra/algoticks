@@ -9,222 +9,168 @@
 #include "../include/benchmark.h"
 #include "../include/debug.h"
 
-int debug_flag = false;
-int debug_lvl = false;
-int benchmark_flag = false;
-int config_need_exit_flag = false;
-int live_datasource_flag = false;
-int live_datasource_tcp_socket_flag = false;
+#if defined(__linux__)
+#include <argp.h>
 
-char tcp_socket_port[12] = "5757";
+const char *argp_program_version =
+    "algoticks v1.5";
+const char *argp_program_bug_address =
+    "<jagadeesh@stdin.top>";
 
-int derivative_flag = false;
+/* Program documentation. */
+static char doc[] =
+    "Algoticks - algorithmic trading simulator.";
 
-char settings_file[64] = "settings.json";
-char config_file[64] = "config.json";
-char benchmark_file[64] = "benchmark.json";
+/* The options we understand. */
+static struct argp_option options[] = {
+    {"debug", 'D', "LEVEL", 0, "Debug mode."},
 
-void print_version_and_exit()
+    {"live", 'l', 0, 0, "Live mode. Wait for date at EOF"},
+    {"derivative", 'd', 0, 0, "Derivative mode"},
+    {"benchmark", 'b', 0, 0, "Benchmark mode"},
+    {"socket", 's', "PORT",  0, "Stream to/from socket."},
+
+
+    {"configfile", 'C', "FILE", 0, "Config file."},
+    {"benchmarkfile", 'B', "FILE", 0, "Benchmark file."},
+    {"settingsfile", 'S', "FILE", 0, "settings file."},
+    {0}
+};
+
+struct program_args
 {
-    printf("algoticks v1.4.1\n");
-    exit(0);
+    int debug;
+    char *debug_level;
+
+    int benchmark;
+
+    int live_datasource;
+    int live_datasource_socket;
+    char *tcp_socket_port;
+
+    int derivative;
+
+    char *settings_f;
+    char *config_f;
+    char *benchmark_f;
+
+    /* WINDOWS ONLY */
+    char *program_args_f;
+};
+
+static error_t parse_opt(int key, char *arg, struct argp_state *state)
+{
+    /* Get the input argument from argp_parse, which we
+     know is a pointer to our arguments structure. */
+    struct program_args *arguments = state->input;
+
+    switch (key)
+    {
+    case 'D':
+        arguments->debug = 1;
+        arguments->debug_level = arg;
+        break;
+    case 'l':
+        arguments->live_datasource = 1;
+        break;
+
+    case 'd':
+        arguments->derivative = 1;
+        break;
+
+    case 'b':
+        arguments->benchmark = 1;
+        break;
+
+    case 's':
+        arguments->live_datasource_socket = 1;
+        arguments->tcp_socket_port = arg;
+        break;
+
+    case 'C':
+        arguments->config_f = arg;
+        break;
+
+    case 'B':
+        arguments->benchmark_f = arg;
+        break;
+
+    case 'S':
+        arguments->settings_f = arg;
+        break;        
+
+    default:
+        return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
 }
 
-void print_help_and_exit()
-{
-
-    printf("-V -v\t\t\tPrint Version and Exit.\n");
-    printf("-H -h\t\t\tPrint this message and Exit.\n");
-    printf("-D\t\t\tEnable Debug.\n");
-    printf("-L\t\t\twait for new data at EOF in datasource.\n");
-    printf("-S [PORT]\t\twait for new data at EOF on TCP socket.\n");
-    printf("--derivative\t\tDerivative mode.\n\n\n");
-
-    printf("--settings [*.JSON]\t\t\tCustom settings file. Default: settings.json\n");
-    printf("--config [*.JSON]\t\t\tCustom config file. Default: config.json\n");
-    printf("--benchmark -B (Optional)[*.JSON]\tCustom benchmark file. Default: benchmark.json\n");
-    exit(0);
-}
+static struct argp argp = { options, parse_opt, 0, doc };
+#endif
 
 int main(int argc, char **argv)
 {
 
-    if (argc > 1)
-    {
+    struct program_args arguments = {0};
 
-        for (int i = 0; i < argc; i++)
-        {
+    /* Defaults */
+    arguments.config_f = "config.json";
+    arguments.benchmark_f = "benchmark.json";
+    arguments.settings_f = "settings.json";
+    arguments.tcp_socket_port = "6060";
+    arguments.debug = false;
+    arguments.debug_level = 0;
+    
+    #if defined(__linux__)
+    argp_parse (&argp, argc, argv, 0, 0, &arguments);
+    #endif
 
-            //version
-            if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "-v") == 0)
-            {
-                print_version_and_exit();
-            }
-
-            //help
-            else if (strcmp(argv[i], "-H") == 0 || strcmp(argv[i], "-h") == 0)
-            {
-                print_help_and_exit();
-            }
-
-            //derivative
-            else if (strcmp(argv[i], "--derivative") == 0)
-            {
-                derivative_flag = true;
-            }
-
-            //debug
-            else if (strcmp(argv[i], "-D") == 0)
-            {
-                debug_flag = true;
-
-                int debug_lvl_arg = i + 1;
-
-                //if debug level present, parse it.
-                if (argc > debug_lvl_arg)
-                {
-                    if (strcmp(&argv[debug_lvl_arg][0], "-") != 0)
-                    {
-                        debug_lvl = atoi(&(argv[debug_lvl_arg])[0]);
-                    }
-                }
-            }
-            else if (strcmp(argv[i], "-L") == 0)
-            {
-                live_datasource_flag = true;
-                live_datasource_tcp_socket_flag = false;
-            }
-
-            else if (strcmp(argv[i], "-S") == 0)
-            {
-                live_datasource_flag = false;
-                live_datasource_tcp_socket_flag = true;
-                
-                if (argc > i+1){
-                    char next_arg[6];
-                    strncpy(next_arg, argv[i+1], 6);
-                    if (next_arg[0] != '-') {
-                        strncpy(tcp_socket_port, argv[i + 1], 12);
-                    }
-                }
-
-                
-            }
-
-            // for --settings
-            else if (strcmp(argv[i], "--settings") == 0)
-            {
-                strncpy(settings_file, argv[i + 1], 64);
-            }
-
-            // for --config
-            else if (strcmp(argv[i], "--config") == 0)
-            {
-                strncpy(config_file, argv[i + 1], 64);
-            }
-
-            // for --benchmark
-            else if ((strcmp(argv[i], "--benchmark") == 0) || (strcmp(argv[i], "-B") == 0))
-            {
-                // if custom .jsom file provided.
-                if (i + 1 < argc)
-                {
-                    strncpy(benchmark_file, argv[i + 1], 64);
-                }
-
-                benchmark_flag = 1;
-            }
-
-            else
-            {
-                // unknown arg.
-                continue;
-            }
-        }
-    }
+    //in windows, we only take in single settings file.
+    #ifdef _WIN32
+    strncpy(arguments.settings_f, argv[1], 32);
+    #endif
 
     struct Config config;
     struct Settings settings;
 
-    //check if req. files exist, if no, create and exit!
-    if (!is_file_exists(settings_file))
-    {
-        create_setting_config_benchmark_files(1);
-        config_need_exit_flag = true;
-    }
+    settings = parse_settings_from_json(arguments.settings_f);
 
-    if (!is_file_exists(config_file))
-    {
-        create_setting_config_benchmark_files(2);
-        config_need_exit_flag = true;
-    }
+    #ifdef _WIN32
+    arguments.config_f = settings.config_f;
+    arguments.benchmark_f = settings.benchmark_f;
+    #endif
 
-    if ((is_file_exists(benchmark_file) == false) && (benchmark_flag == true))
-    {
-        create_setting_config_benchmark_files(3);
-        config_need_exit_flag = true;
-    }
-
-    if (config_need_exit_flag == true)
-    {
-        printf("\nPlease edit settings.json, config.json and benchmark.json accordingly, program will use these configs on next run!\nBye!\n");
-        exit(0);
-    }
-
-    settings = parse_settings_from_json(settings_file);
-
-    //set debug if passed as arg.
-    if (debug_flag == true)
-    {
+    #if defined(__linux__)
+    if (arguments.debug) {
         settings.debug = true;
-
-        if (debug_lvl != false)
-        {
-            settings.debug_level = debug_lvl;
-        }
+        settings.debug_level = atoi(arguments.debug_level);
     }
 
-    if (derivative_flag == true)
-    {
+    strncpy(settings.socket_port, arguments.tcp_socket_port, 5);
+
+    if (arguments.derivative){
         settings.is_derivative = true;
     }
 
-    //set is_live_data to true as arg.
-    if (live_datasource_flag == true)
-    {
+    if (arguments.live_datasource){
         settings.is_live_data = true;
-        settings.is_live_data_socket = false;
     }
-    else if (live_datasource_tcp_socket_flag == true)
-    {
 
+    if (arguments.live_datasource_socket){
         settings.is_live_data_socket = true;
-        settings.is_live_data = false;
-
-        strncpy(settings.socket_port, tcp_socket_port, 6);
-        
-        // socket feature not supported on windows (yet!)
-        #ifdef _WIN32
-        settings.is_live_data_socket = false;
-        #endif
+        strncpy(settings.socket_port, arguments.tcp_socket_port, 5);
     }
-    else
-    {
-        settings.is_live_data = false;
-    }
+    #endif
 
-    config = parse_config_from_json(config_file);
+    config = parse_config_from_json(arguments.config_f);
 
-    if (benchmark_flag)
-    {
-        benchmark(benchmark_file, settings);
+    if (arguments.benchmark || settings.is_benchmark){
+        run_benchmark(arguments.benchmark_f, settings);
     }
-    else if (settings.is_derivative)
-    {
+    else if(arguments.derivative || settings.is_derivative){
         run_sim_w_derivative(settings, config);
     }
-    else
-    {
+    else{
         run_sim(settings, config);
     }
 

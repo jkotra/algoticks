@@ -5,10 +5,14 @@ typedef struct Settings
     int debug;
     int debug_level;
 
+    char config_f[512];
+    char benchmark_f[512];
+
     int is_live_data;
     int is_live_data_socket;
     char socket_port[12];
     int is_derivative;
+    int is_benchmark; /* for windows usage */
 
     int intraday_hour;
     int intraday_min;
