@@ -4,6 +4,15 @@
     "debug": false,
     "debug_level": 1,
 
+    "derivative": false,
+    "benchmark": false,
+
+    "config_f": "config.json",
+    "benchmark_f": "benchmark.json",
+
+    "socket": false,
+    "socket_port": "5757",
+
     "intraday_hour": 15,
     "intraday_min": 15
 }
