@@ -32,6 +32,7 @@ void* socket_init(char *port){
 
     int rc = zmq_bind (responder, addr);
     assert (rc == 0);
+    printf("* TCP socket listening at %s\n", addr);
     
     return responder;
 }
@@ -343,10 +344,10 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
             }
             
             if (settings.debug && settings.debug_level > 2){
-            printf("waiting for new data from 127.0.0.1: %s\n", settings.socket_port);
+            printf("waiting for new data from 127.0.0.1:%s\n", settings.socket_port);
             }
             
-            char* buffer[4096];
+            char buffer[4096];
 
             while(true){
             int bytes = zmq_recv (client_d, buffer, 4096, 0);

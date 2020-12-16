@@ -55,23 +55,30 @@ upon successful compilation, the binary executable along with config files are f
 
 ---
 
+
 ### Building on Windows (experimental)
 
-* Install [JSON-C](https://github.com/json-c/json-c#building-on-unix-and-windows-with-vcpkg-)
-* [Install C and C++ support in Visual Studio](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019)
-* Install [TDM-GCC](https://jmeubank.github.io/tdm-gcc/)
+1. Install [MSYS2](https://www.msys2.org/)
+2. Add the following to System PATH:
+```
+C:\msys64\mingw64\include
+C:\msys64\mingw64\bin
+C:\msys64\mingw64\lib
+C:\msys64\usr\bin
+```
 
-`include` path is set to `C:/vcpkg/installed/x64-windows/include` in `CMakeLists.txt`. Edit the path if you installed `vcpkg` in some other directory.
+Run the following commands in MSYS2 terminal:
+```
+pacman -S base-devel
+cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+```
 
-`lib` path is set to `C:/vcpkg/installed/x64-windows/lib` in `CMakeLists.txt`. Edit the path if you installed `vcpkg` in some other directory.
-
+Run the following in CMD from repository root directory
 ```
 mkdir bin
 cd bin
-
-cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
-mingw32-make.exe
-
+cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+make
 ```
 
 ---
