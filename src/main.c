@@ -145,9 +145,6 @@ int main(int argc, char **argv)
     #ifdef _WIN32
     arguments.config_f = settings.config_f;
     arguments.benchmark_f = settings.benchmark_f;
-
-    //not supported currently
-    settings.is_live_data_socket = false;
     #endif
     
     // mutually exclusive ways to feed data.

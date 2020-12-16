@@ -1,7 +1,7 @@
 language: c
 
 before_install:
-  - sudo apt-get -y install libjson-c-dev
+  - sudo apt-get -y install libjson-c-dev libzmq3-dev
   - sudo apt-get -y install cmake
 
 compiler:

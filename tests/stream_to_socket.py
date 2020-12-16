@@ -2,12 +2,18 @@
 
 import socket
 import time
+import argparse
 
-HOST = '127.0.0.1'
-PORT = 5757
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-a',dest="a", type=str, default="127.0.0.1")
+parser.add_argument('-p',dest="p", type=int, default=5757)
+
+
+args = parser.parse_args()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
+    s.connect((args.a, args.p))
 
     for line in open("AAPL.csv", "r").readlines():
         line = bytes("{}\0".format(line), encoding="utf-8")

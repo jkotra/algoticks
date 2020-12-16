@@ -19,11 +19,6 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 include_directories(include /usr/include)
 
-if (WIN32)
-include_directories(C:/vcpkg/installed/x64-windows/include)
-link_directories(C:/vcpkg/installed/x64-windows/lib)
-endif()
-
 #GLOB all source files!
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
 
@@ -74,6 +69,7 @@ add_executable(algoticks ${SRC_FILES})
 
 #link required libs
 target_link_libraries(algoticks PRIVATE json-c)
+target_link_libraries(algoticks PRIVATE zmq)
 
 if(NOT WIN32)
      target_link_libraries(algoticks PRIVATE dl)

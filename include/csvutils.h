@@ -3,7 +3,7 @@
 
 /* Declarations */
 void reset_header_skip();
-int socket_init(char* port);
+void* socket_init(char* port);
 int check_row_integrity(algoticks_row *row);
 int change_in_modified_date(char* filename);
 int reopen_datasource(char* filename, FILE** fp, char* mode);
