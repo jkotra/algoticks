@@ -46,10 +46,10 @@ static char doc[] =
 static struct argp_option options[] = {
     {"debug", 'D', "LEVEL", 0, "Debug mode."},
 
-    {"live", 'l', 0, 0, "Live mode. Wait for date at EOF"},
+    {"live", 'l', 0, 0, "Live mode. Wait for data at EOF"},
     {"derivative", 'd', 0, 0, "Derivative mode"},
     {"benchmark", 'b', 0, 0, "Benchmark mode"},
-    {"socket", 's', "PORT",  0, "Stream to/from socket."},
+    {"socket", 's', "PORT",  0, "Open socket to receive data at EOF"},
 
 
     {"configfile", 'C', "FILE", 0, "Config file."},

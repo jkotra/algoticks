@@ -104,7 +104,7 @@ Report bugs to <jagadeesh@stdin.top>.
 
 ### Derivative
 
-Derivative is a new feature introduced in v1.3.
+Derivative is a new feature introduced in `v1.3`.
 
 if derivative option is enabled (`--derivative`), the signals will be generated on `datasource`(considered here as `Index`) and position is taken on data from `derivative_datasource`.
 
@@ -129,7 +129,7 @@ To use derivative mode, use `-d` arg.
 
 (Linux Only)
 
-from version `v1.4` live data can be fed into algoticks from a TCP socket. use `-S [PORT]` to listen to specific port on localhost(127.0.0.1) for data.
+from version `v1.4` live data can be fed into algoticks from a TCP socket. use `-s [PORT]` to listen to specific port on localhost(127.0.0.1) for data.
 
 for example, client, refer to [stream_to_socket.py](tests/stream_to_socket.py)
 
