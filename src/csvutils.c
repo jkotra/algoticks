@@ -245,7 +245,7 @@ int process_csv_header(algoticks_settings settings, char *row){
         int header_i = 0;
 
         //set header_map to -1
-        for (int i = 0; i <= MAXCSVHEAD; i++)
+        for (int i = 0; i < MAXCSVHEAD; i++)
         {
             header_map[i] = -1;
         }
