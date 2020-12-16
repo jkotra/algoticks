@@ -74,6 +74,7 @@ add_executable(algoticks ${SRC_FILES})
 
 #link required libs
 target_link_libraries(algoticks PRIVATE json-c)
+target_link_libraries(algoticks PRIVATE zmq)
 
 if(NOT WIN32)
      target_link_libraries(algoticks PRIVATE dl)

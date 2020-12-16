@@ -10,59 +10,31 @@
 
 #include <sys/types.h>
 
-#ifndef _WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#endif
+#include <zmq.h>
+#include<assert.h>
+
 
 int is_header_skipped = false;
 int is_socket_init = false;
-int client_d = 0;
+void* client_d = 0;
 
 void reset_header_skip(){
     is_header_skipped = false;
 }
 
-#ifndef _WIN32
-int socket_init(char *port){
+
+void* socket_init(char *port){
+
+    void *context = zmq_ctx_new ();
+    void *responder = zmq_socket (context, ZMQ_STREAM);
+    char addr[18] = "tcp://127.0.0.1:";
+    strcat(addr, port); //addr+port
+
+    int rc = zmq_bind (responder, addr);
+    assert (rc == 0);
     
-    struct addrinfo hints;
-    struct addrinfo *bind_addr;
-
-    memset(&hints, 0, sizeof(hints)); //zero out!
-
-    hints.ai_family = AF_INET;       // ipv4
-    hints.ai_socktype = SOCK_STREAM; // TCP
-    hints.ai_flags = AI_PASSIVE;     // PASSIVE mode
-
-    getaddrinfo("127.0.0.1", port, &hints, &bind_addr);
-
-    //init socket
-    int socketfd = socket(bind_addr->ai_family, bind_addr->ai_socktype, bind_addr->ai_protocol);
-
-    if (bind(socketfd, bind_addr->ai_addr, bind_addr->ai_addrlen) == -1)
-    {
-        return -1;
-    }
-    
-    printf("waiting for connection on %s:%s\n", "127.0.0.1", port);
-    listen(socketfd, 1); // this is blocking.
-
-    struct sockaddr_storage client_addr; //to store client addr
-    socklen_t client_addr_len;           //length of client addr;
-
-    int client = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
-
-    if (client == -1)
-    {
-        printf("cannot accept connection from client!\n");
-        return -1;
-    }
-
-    return client;
+    return responder;
 }
-#endif
 
 int check_row_integrity(algoticks_row *row){
     //return true if all ok else false if close is 0 or date is NULL
@@ -358,9 +330,6 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
 
         }else if (settings.is_live_data_socket == true){
 
-            #ifndef _WIN32
-            
-
             if (!is_socket_init){
                 
                 client_d = socket_init(settings.socket_port);
@@ -372,35 +341,30 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
 
                 is_socket_init = true;
             }
-
+            
+            if (settings.debug && settings.debug_level > 2){
             printf("waiting for new data from 127.0.0.1: %s\n", settings.socket_port);
+            }
+            
+            char* buffer[4096];
 
+            while(true){
+            int bytes = zmq_recv (client_d, buffer, 4096, 0);
 
-            //read from socket
-            char resp[4096];
-            int bytes_received = recv(client_d, resp, 4096, 0);
-
-            if (bytes_received <= 1){
-                //conn closed
-                printf("connection closed!\n");
-                exit(1);
+            if (bytes > 5){
+                break;
             }
 
-            printf("received data: %s\n", resp);
+            }
 
             reopen_datasource(fname, &fp, "a");
-
-            fprintf(fp, "%s", resp);
-
+            fprintf(fp, "%s", buffer);
             reopen_datasource(fname, &fp, "rb");
-
 
             //set seek
             fseek(fp, seek_offset, SEEK_SET);
 
             debug_msg(settings, 2, "FileReopen","csvutils.c", config.datasource);
-
-            #endif
             
         }
         else {
