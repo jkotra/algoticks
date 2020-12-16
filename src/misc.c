@@ -331,6 +331,16 @@ algoticks_settings parse_settings_from_json(char *filename)
     struct json_object *debug;
     struct json_object *debug_level;
 
+    struct json_object *derivative;
+    struct json_object *benchmark;
+
+    struct json_object *config_f;
+    struct json_object *benchmark_f;
+
+    struct json_object *is_live_data;
+    struct json_object *socket;
+    struct json_object *socket_port;
+
     struct json_object *intraday_hour;
     struct json_object *intraday_min;
 
@@ -348,6 +358,16 @@ algoticks_settings parse_settings_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "debug", &debug);
     json_object_object_get_ex(parsed_json, "debug_level", &debug_level);
 
+    json_object_object_get_ex(parsed_json, "derivative", &derivative);
+    json_object_object_get_ex(parsed_json, "benchmark", &benchmark);
+
+    json_object_object_get_ex(parsed_json, "config_f", &config_f);
+    json_object_object_get_ex(parsed_json, "benchmark_f", &benchmark_f);
+
+    json_object_object_get_ex(parsed_json, "is_live_data", &is_live_data);
+    json_object_object_get_ex(parsed_json, "socket", &socket);
+    json_object_object_get_ex(parsed_json, "socket_port", &socket_port);
+
     json_object_object_get_ex(parsed_json, "intraday_hour", &intraday_hour);
     json_object_object_get_ex(parsed_json, "intraday_min", &intraday_min);
 
@@ -355,6 +375,17 @@ algoticks_settings parse_settings_from_json(char *filename)
     settings.colors = json_object_get_boolean(colors);
     settings.debug = json_object_get_boolean(debug);
     settings.debug_level = json_object_get_int(debug_level);
+
+    settings.is_derivative = json_object_get_boolean(derivative);
+    settings.is_benchmark = json_object_get_boolean(benchmark);
+
+    settings.is_live_data = json_object_get_boolean(is_live_data);
+    
+    settings.is_live_data_socket = json_object_get_boolean(socket);
+    strncpy(settings.socket_port, json_object_get_string(socket_port), 5);
+
+    strncpy(settings.config_f, json_object_get_string(config_f), 512);
+    strncpy(settings.benchmark_f, json_object_get_string(benchmark_f), 512);
 
     settings.intraday_hour = json_object_get_int(intraday_hour);
     settings.intraday_min = json_object_get_int(intraday_min);

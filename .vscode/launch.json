@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/debug/algoticks",
-            "args": ["-D", "-S","9898"],
+            "args": ["-D","1", "-s", "7117"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/debug/",
             "environment": [],

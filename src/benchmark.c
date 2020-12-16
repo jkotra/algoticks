@@ -8,7 +8,7 @@
 #include "../include/sim.h"
 #include "../include/sim_derivative.h"
 
-void benchmark(char *benchmark_config_file, algoticks_settings settings)
+void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
 {
 
     //disable printing
