@@ -73,7 +73,7 @@ pacman -S base-devel
 cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-Run the following in CMD from repository root directory
+Run the following in CMD from repository root directory:
 ```
 mkdir bin
 cd bin
@@ -134,11 +134,9 @@ To use derivative mode, use `-d` arg.
 
 ## Feed Live data from a TCP socket.
 
-(Linux Only)
-
 from version `v1.4` live data can be fed into algoticks from a TCP socket. use `-s [PORT]` to listen to specific port on localhost(127.0.0.1) for data.
 
-for example, client, refer to [stream_to_socket.py](tests/stream_to_socket.py)
+for example, refer to [stream_to_socket.py](tests/stream_to_socket.py)
 
 
 ### Callbacks
@@ -179,6 +177,7 @@ Running suite(s): Algoticks
 ### Timeline
 
 Start of development: 13-Jun-2020
+
 Repository made public: 02-Jul-2020
 
 ---
