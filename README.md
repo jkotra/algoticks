@@ -79,16 +79,25 @@ mingw32-make.exe
 ## Usage
 
 ```
--V -v                   Print Version and Exit.
--H -h                   Print this message and Exit.
--D                      Enable Debug.
--L                      wait for new data at EOF
---derivative            Derivative mode.
+Usage: algoticks [OPTION...]
+Algoticks - algorithmic trading simulator.
 
+  -b, --benchmark            Benchmark mode
+  -B, --benchmarkfile=FILE   Benchmark file.
+  -C, --configfile=FILE      Config file.
+  -d, --derivative           Derivative mode
+  -D, --debug=LEVEL          Debug mode.
+  -l, --live                 Live mode. Wait for date at EOF
+  -s, --socket=PORT          Stream to/from socket.
+  -S, --settingsfile=FILE    settings file.
+  -?, --help                 Give this help list
+      --usage                Give a short usage message
+  -V, --version              Print program version
 
---settings [*.JSON]                     Custom settings file. Default: settings.json
---config [*.JSON]                       Custom config file. Default: config.json
---benchmark -B [(Optional)[*.JSON]      Custom benchmark file. Default: benchmark.json
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+
+Report bugs to <jagadeesh@stdin.top>.
 
 
 ```
@@ -112,11 +121,13 @@ if derivative option is enabled (`--derivative`), the signals will be generated 
     },
 ```
 
-while running the program, to indicate the presence of derivative, `--derivative` command line arg is to be used.
+To use derivative mode, use `-d` arg.
 
 ---
 
 ## Feed Live data from a TCP socket.
+
+(Linux Only)
 
 from version `v1.4` live data can be fed into algoticks from a TCP socket. use `-S [PORT]` to listen to specific port on localhost(127.0.0.1) for data.
 
@@ -128,7 +139,7 @@ for example, client, refer to [stream_to_socket.py](tests/stream_to_socket.py)
 Callbacks are custom functions that are called if included in `config.json`
 
 ```json
-    "derivative_interval": ["callbacks/log.so"],
+    "callbacks": ["callbacks/log.so"],
 ```
 
 ---
@@ -161,7 +172,6 @@ Running suite(s): Algoticks
 ### Timeline
 
 Start of development: 13-Jun-2020
-
 Repository made public: 02-Jul-2020
 
 ---
