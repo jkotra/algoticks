@@ -88,7 +88,7 @@ Algoticks - algorithmic trading simulator.
   -d, --derivative           Derivative mode
   -D, --debug=LEVEL          Debug mode.
   -l, --live                 Live mode. Wait for date at EOF
-  -s, --socket=PORT          Stream to/from socket.
+  -s, --socket=PORT          Open socket to receive data at EOF
   -S, --settingsfile=FILE    settings file.
   -?, --help                 Give this help list
       --usage                Give a short usage message
