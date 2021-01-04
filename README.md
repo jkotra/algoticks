@@ -69,7 +69,7 @@ C:\msys64\usr\bin
 
 Run the following commands in MSYS2 terminal:
 ```
-pacman -S base-devel
+pacman -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-json-c mingw-w64-x86_64-zeromq
 cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
