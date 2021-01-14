@@ -11,7 +11,8 @@ def main():
     
     #delete bin folder
     os.mkdir("../bin/")
-
+    
+    #change current dir
     os.chdir("../bin/")
     
     cmake_cmd = "cmake -G \"MSYS Makefiles\" -DCMAKE_BUILD_TYPE=release .."
@@ -23,10 +24,11 @@ def main():
     filename = "algoticks_{}_windows_x86_64"
     
     
-    v = input("algoticks version?")
+    v = input("algoticks version? (example: 1.0.0)")
     filename = filename.format(v)
+
     print(filename + ".zip")
-    input("Does this look right?")
+    input("Does this look right? press any key..\n Ctrl+C to Abort.")
 
     shutil.make_archive(filename, 'zip', "release")
 
