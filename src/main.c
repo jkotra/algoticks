@@ -125,7 +125,7 @@ int main(int argc, char **argv)
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
     #endif
 
-    //in windows, we only take in single settings file.
+    //in windows, we only take in single settings file as arg.
     #ifdef _WIN32
     for (size_t i = 0; i < argc; i++)
     {
