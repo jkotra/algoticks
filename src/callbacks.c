@@ -93,7 +93,7 @@ algoticks_event make_event_from_position(algoticks_row pos_storage, algoticks_da
 
     algoticks_event ev = {0};
 
-    strncpy(ev.date, pos_storage.date, 64);
+    strncpy(ev.date, pos_storage.date, 32);
     ev.a = dashboard.a;
     ev.b = dashboard.b;
     ev.pnl = getPnL(dashboard);

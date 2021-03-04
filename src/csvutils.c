@@ -49,7 +49,7 @@ int check_row_integrity(algoticks_row *row){
 
 /*
 header_template holds the values that program expects to find in header of csv.
-header_map is initially set to -1 (ln ~139)
+header_map is initially set to -1
 
 Example:
 date,open,close,volume,high,low

@@ -43,6 +43,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
 
     int combination_completed = 1;
     float progress = 0;
+    size_t len;
 
     for (int n_algo = 0; n_algo < benchmarkconfig.n_algo; n_algo++)
     {
@@ -69,16 +70,19 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 // make a new config struct
                                                 struct Config config;
                                                 
-                                                config.algo = (char*) malloc(64 * sizeof(char));
-                                                config.datasource = (char*) malloc(512 * sizeof(char)); 
-                                                config.symbol = (char*) malloc(64 * sizeof(char));
-
+                                                len = strlen(benchmarkconfig.algo_arr[n_algo]);
+                                                config.algo = (char*) malloc(len * sizeof(char));
                                                 strcpy(config.algo, benchmarkconfig.algo_arr[n_algo]);
+
+                                                len = strlen(benchmarkconfig.datasource_arr[n_datasource]);
+                                                config.datasource = (char*) malloc(len * sizeof(char)); 
                                                 strcpy(config.datasource, benchmarkconfig.datasource_arr[n_datasource]);
+
+                                                len = strlen(benchmarkconfig.symbol);
+                                                config.symbol = (char*) malloc(len * sizeof(char));
                                                 strcpy(config.symbol, benchmarkconfig.symbol);
 
                                                 config.derivative = benchmarkconfig.derivative;
-
                                                 config.candles = benchmarkconfig.candles_arr[n_candles];
                                                 config.interval = benchmarkconfig.interval_arr[n_interval];
 

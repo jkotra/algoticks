@@ -43,7 +43,7 @@ algoticks_settings parse_settings_from_json(char *filename)
     struct json_object *intraday_hour;
     struct json_object *intraday_min;
 
-    struct Settings settings;
+    struct Settings settings = {0};
 
     parsed_json = json_tokener_parse(buffer);
 
@@ -84,15 +84,15 @@ algoticks_settings parse_settings_from_json(char *filename)
     
     len = json_object_get_string_len(socket_port);
     settings.socket_port = (char*) malloc(len * sizeof(char));
-    strncpy(settings.socket_port, json_object_get_string(socket_port), len);
+    strcpy(settings.socket_port, json_object_get_string(socket_port));
 
     len = json_object_get_string_len(config_f);
     settings.config_f = (char*) malloc(len * sizeof(char));
-    strncpy(settings.config_f, json_object_get_string(config_f), len);
+    strcpy(settings.config_f, json_object_get_string(config_f));
     
     len = json_object_get_string_len(benchmark_f);
     settings.benchmark_f = (char*) malloc(len * sizeof(char));
-    strncpy(settings.benchmark_f, json_object_get_string(benchmark_f), len);
+    strcpy(settings.benchmark_f, json_object_get_string(benchmark_f));
 
 
     settings.intraday_hour = json_object_get_int(intraday_hour);
@@ -171,15 +171,15 @@ algoticks_config parse_config_from_json(char *filename)
 
     len = json_object_get_string_len(algo);
     config.algo = (char*) malloc(len * sizeof(char));
-    strncpy(config.algo, json_object_get_string(algo), len);
+    strcpy(config.algo, json_object_get_string(algo));
 
     len = json_object_get_string_len(datasource);
     config.datasource = (char*) malloc(len * sizeof(char));
-    strncpy(config.datasource, json_object_get_string(datasource), len);
+    strcpy(config.datasource, json_object_get_string(datasource));
 
     len = json_object_get_string_len(symbol);
     config.symbol = (char*) malloc(len * sizeof(char));
-    strncpy(config.symbol, json_object_get_string(symbol), len);
+    strcpy(config.symbol, json_object_get_string(symbol));
 
 
 
@@ -205,7 +205,7 @@ algoticks_config parse_config_from_json(char *filename)
 
             len = json_object_get_string_len(derivative_datasource);
             config.derivative.derivative_datasource = (char*) malloc(len * sizeof(char));
-            strncpy(config.derivative.derivative_datasource, json_object_get_string(derivative_datasource), len);
+            strcpy(config.derivative.derivative_datasource, json_object_get_string(derivative_datasource));
 
         }
 
@@ -219,7 +219,7 @@ algoticks_config parse_config_from_json(char *filename)
     else{
         //set to None
         config.derivative.derivative_datasource = (char*) malloc(5);
-        strncpy(config.derivative.derivative_datasource, "None", 5);
+        strcpy(config.derivative.derivative_datasource, "None");
         config.derivative.derivative_interval = 0;
 
     }
@@ -311,7 +311,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     
     len = json_object_get_string_len(symbol);
     benchmarkconfig.symbol = (char*) malloc(len * sizeof(char));
-    strncpy(benchmarkconfig.symbol, json_object_get_string(symbol), len);
+    strcpy(benchmarkconfig.symbol, json_object_get_string(symbol));
 
     benchmarkconfig.n_algo = json_object_array_length(algo);
     benchmarkconfig.algo_arr = (char**) malloc(benchmarkconfig.n_algo + 1 * sizeof(char));
@@ -321,7 +321,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         tmp = json_object_array_get_idx(algo, i);
         len = json_object_get_string_len(tmp);
         benchmarkconfig.algo_arr[i] = (char*) malloc(len * sizeof(char));
-        strncpy(benchmarkconfig.algo_arr[i], json_object_get_string(tmp), len+1);
+        strcpy(benchmarkconfig.algo_arr[i], json_object_get_string(tmp));
     }
 
 
@@ -333,7 +333,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         tmp = json_object_array_get_idx(datasource, i);
         len = json_object_get_string_len(tmp);
         benchmarkconfig.datasource_arr[i] = (char*) malloc(len * sizeof(char));
-        strncpy(benchmarkconfig.datasource_arr[i], json_object_get_string(tmp), len);
+        strcpy(benchmarkconfig.datasource_arr[i], json_object_get_string(tmp));
     }
 
     /* DERIVATIVE */
@@ -347,7 +347,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
 
             len = json_object_get_string_len(derivative_datasource);
             benchmarkconfig.derivative.derivative_datasource = (char*) malloc(len * sizeof(char));
-            strncpy(benchmarkconfig.derivative.derivative_datasource, json_object_get_string(derivative_datasource), len);
+            strcpy(benchmarkconfig.derivative.derivative_datasource, json_object_get_string(derivative_datasource));
 
         }
 
@@ -361,7 +361,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     else{
         //set to None
         benchmarkconfig.derivative.derivative_datasource = (char*) malloc(5);
-        strncpy(benchmarkconfig.derivative.derivative_datasource, "None", 5);
+        strcpy(benchmarkconfig.derivative.derivative_datasource, "None");
         benchmarkconfig.derivative.derivative_interval = 0;
     }
 
