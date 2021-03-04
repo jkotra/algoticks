@@ -1,5 +1,5 @@
 #define MAXCHARPERLINE 1024
-#define MAXCSVHEAD 11
+#define MAXCSVHEAD 12
 
 /* Declarations */
 void reset_header_skip();

@@ -40,7 +40,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
 
     //initialize and malloc for series
     struct Row* series;
-    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
+    series = (algoticks_row*) malloc((config.candles) * sizeof(algoticks_row));
 
 
     while (curr != EOF)
@@ -85,8 +85,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.neutral != true)
         {
             {
-                algoticks_event ev={0};
-                ev.signal = signal;
+                algoticks_event ev = make_event_from_signal(signal);
                 send_callbacks(ev);
             }
 
@@ -116,19 +115,21 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
                 simresult.trgt_hits += 1;
                 if (signal.buy == true){ simresult.b_trgt_hits += 1; }
                 else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
-                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
                 if (signal.buy == true){ simresult.b_sl_hits += 1; }
                 else if (signal.sell == true){ simresult.s_sl_hits += 1; }
-                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else
             {
                 debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
             }
+
+            //send callback
+            algoticks_event ev = make_event_from_positionresult(positionresult);
+            send_callbacks(ev);
 
             if (positionresult.eof == true)
             {
@@ -175,7 +176,11 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     //free series mem.
     free(series);
 
-    write_simresult_to_csv(simresult);
+    write_simresult_to_csv(&simresult);
+
+    //free_algoticks_settings(&settings);
+    free_algoticks_config(&config);
+
     return simresult;
 }
 
@@ -292,7 +297,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
 
-            if (config.is_training_sl)
+            if (config.is_trailing_sl)
             {
                 config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
 
@@ -332,16 +337,11 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
         
-        {
+
         //send callback from pos
-        algoticks_event ev = {0};
-        ev.from_pos = true;
-        strncpy(ev.date, pos_storage.date, 64);
-        ev.a = dashboard.a;
-        ev.b = dashboard.b;
-        ev.pnl = getPnL(dashboard);
+        algoticks_event ev = make_event_from_position(pos_storage, dashboard);
         send_callbacks(ev);
-        }
+
 
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));

@@ -2,9 +2,11 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdbool.h>
+#include <stdlib.h>
 #include "../include/dtypes.h"
 #include "../include/debug.h"
 #include "../include/misc.h"
+#include "../include/parser.h"
 
 
 void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks){
@@ -45,6 +47,24 @@ void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc
 
 }
 
+void debug_msg_simple(char *msg){
+
+    //HRT = Human readable time
+    char hrt[32];
+    time_t now;
+    //get time
+    time(&now);
+    sprintf(hrt, "%s", ctime(&now));
+    //remove new line at end
+    chomp(hrt);
+    
+    char *buffer;
+    buffer = (char*) malloc(sizeof(msg) + sizeof(hrt) + 12);
+    sprintf(buffer, "{\"date\": \"%s\", \"msg\": \"%s\"}\n", hrt, msg);
+    printf("%s", buffer);
+    
+}
+
 void print_config_struct(algoticks_config config){
     printf("\n===*===\n");
     printf("[DEBUG] config.algo = %s\n", config.algo);
@@ -67,7 +87,7 @@ void print_config_struct(algoticks_config config){
     printf("[DEBUG] config.candles = %d\n", config.candles);
     printf("[DEBUG] config.target = %f\n", config.target);
     printf("[DEBUG] config.stoploss = %f\n", config.stoploss);
-    printf("[DEBUG] config.is_trailing_sl = %d\n", config.is_training_sl);
+    printf("[DEBUG] config.is_trailing_sl = %d\n", config.is_trailing_sl);
     printf("[DEBUG] config.trailing_sl_val = %f\n", config.trailing_sl_val);
     printf("[DEBUG] config.quantity = %d\n", config.quantity);
 

@@ -1,6 +1,6 @@
 /* Declarations */
 void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks);
-
+void debug_msg_simple(char* msg);
 /* struct debug */
 void print_config_struct(algoticks_config config);
 void print_dashboard_struct(algoticks_dashboard dashboard);

@@ -9,11 +9,14 @@
 #include "../include/misc.h"
 #include "../include/timeutils.h"
 #include "../include/csvutils.h"
+#include "../include/parser.h"
 #include "../include/dashboard.h"
 
 /*
 
 Tests for:
+
+
 
 from misc.c:
 void write_simresult_to_csv(algoticks_simresult simresult);
@@ -52,7 +55,7 @@ START_TEST
 (__misc_c__write_simresult_to_csv) {
 
   algoticks_simresult sr = {0};
-  write_simresult_to_csv(sr);
+  write_simresult_to_csv(&sr);
   int res = is_file_exists("results.csv");
 
   ck_assert_int_eq(res, true);

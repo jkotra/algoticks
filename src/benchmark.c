@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include "../include/dtypes.h"
 #include "../include/misc.h"
 #include "../include/benchmark.h"
 #include "../include/debug.h"
 #include "../include/sim.h"
 #include "../include/sim_derivative.h"
+#include "../include/parser.h"
 
 void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
 {
+    
+    
 
     //disable printing
     settings.print = false;
@@ -17,6 +21,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
     settings.is_live_data_socket = false;
     struct BenchmarkConfig benchmarkconfig;
     benchmarkconfig = parse_benchmark_from_json(benchmark_config_file);
+    
 
     //total 11 fields in config = 11 loops
 
@@ -28,7 +33,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
 
     total_combinations *= benchmarkconfig.n_target;
     total_combinations *= benchmarkconfig.n_stoploss;
-    total_combinations *= benchmarkconfig.n_is_training_sl;
+    total_combinations *=  benchmarkconfig.n_is_trailing_sl;
     total_combinations *= benchmarkconfig.n_trailing_sl_val;
     total_combinations *= benchmarkconfig.n_quantity;
     total_combinations *= benchmarkconfig.n_sliding;
@@ -51,7 +56,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                     {
                         for (int n_stoploss = 0; n_stoploss < benchmarkconfig.n_stoploss; n_stoploss++)
                         {
-                            for (int n_is_training_sl = 0; n_is_training_sl < benchmarkconfig.n_is_training_sl; n_is_training_sl++)
+                            for (int n_is_training_sl = 0; n_is_training_sl < benchmarkconfig.n_is_trailing_sl; n_is_training_sl++)
                             {
                                 for (int n_trailing_sl_val = 0; n_trailing_sl_val < benchmarkconfig.n_trailing_sl_val; n_trailing_sl_val++)
                                 {
@@ -61,24 +66,28 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                         {
                                             for (int n_intraday = 0; n_intraday < benchmarkconfig.n_intraday; n_intraday++)
                                             {
-                                                /* make a new struct here */
+                                                // make a new config struct
                                                 struct Config config;
+                                                
+                                                config.algo = (char*) malloc(64 * sizeof(char));
+                                                config.datasource = (char*) malloc(512 * sizeof(char)); 
+                                                config.symbol = (char*) malloc(64 * sizeof(char));
 
-                                                strncpy(config.algo, benchmarkconfig.algo[n_algo], 32);
-                                                strncpy(config.datasource, benchmarkconfig.datasource[n_datasource], 512);
-                                                strncpy(config.symbol, benchmarkconfig.symbol, 32);
+                                                strcpy(config.algo, benchmarkconfig.algo_arr[n_algo]);
+                                                strcpy(config.datasource, benchmarkconfig.datasource_arr[n_datasource]);
+                                                strcpy(config.symbol, benchmarkconfig.symbol);
 
                                                 config.derivative = benchmarkconfig.derivative;
 
-                                                config.candles = benchmarkconfig.candles[n_candles];
-                                                config.interval = benchmarkconfig.interval[n_interval];
+                                                config.candles = benchmarkconfig.candles_arr[n_candles];
+                                                config.interval = benchmarkconfig.interval_arr[n_interval];
 
-                                                config.target = benchmarkconfig.target[n_target];
-                                                config.stoploss = benchmarkconfig.stoploss[n_stoploss];
-                                                config.is_training_sl = benchmarkconfig.is_training_sl[n_is_training_sl];
-                                                config.trailing_sl_val = benchmarkconfig.trailing_sl_val[n_trailing_sl_val];
-                                                config.quantity = benchmarkconfig.quantity[n_quantity];
-                                                
+                                                config.target = benchmarkconfig.target_arr[n_target];
+                                                config.stoploss = benchmarkconfig.stoploss_arr[n_stoploss];
+                                                config.is_trailing_sl = benchmarkconfig.is_trailing_sl[n_is_training_sl];
+                                                config.trailing_sl_val = benchmarkconfig.trailing_sl_val_arr[n_trailing_sl_val];
+                                                config.quantity = benchmarkconfig.quantity_arr[n_quantity];
+                                                config.n_callbacks = 0;
                                                 config.sliding = benchmarkconfig.sliding[n_sliding];
                                                 config.intraday = benchmarkconfig.intraday[n_intraday];
 
@@ -112,4 +121,5 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
             }
         }
     }
+
 }

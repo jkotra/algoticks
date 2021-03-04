@@ -5,12 +5,12 @@ typedef struct Settings
     int debug;
     int debug_level;
 
-    char config_f[512];
-    char benchmark_f[512];
+    char *config_f;
+    char *benchmark_f;
 
     int is_live_data;
     int is_live_data_socket;
-    char socket_port[12];
+    char *socket_port;
     int is_derivative;
     int is_benchmark; /* for windows usage */
 
@@ -20,79 +20,79 @@ typedef struct Settings
 }algoticks_settings;
 
 typedef struct Dervative{
-    char derivative_datasource[512];
+    char *derivative_datasource;
     int derivative_interval;
 }algoticks_derivative;
 
-typedef struct BenchmarkConfig
-{
-    char algo[1024][32];
-    int n_algo;
-
-    char datasource[1024][512];
-    int n_datasource;
-
-    algoticks_derivative derivative;
-    int n_derivative;
-
-    char symbol[32];
-
-    int candles[1024];
-    int n_candles;
-
-    int interval[1024];
-    int n_interval;
-
-    double target[1024];
-    int n_target;
-
-    double stoploss[1024];
-    int n_stoploss;
-
-    int is_training_sl[2];
-    int n_is_training_sl;
-
-    double trailing_sl_val[1024];
-    int n_trailing_sl_val;
-
-    int quantity[1024];
-    int n_quantity;
-
-    int sliding[2];
-    int n_sliding;
-
-    int intraday[2];
-    int n_intraday;
-
-    int skip_header;
-    
-}algoticks_benchmarkconfig;
 
 
 typedef struct Config
 {
-    char algo[32];
-    char datasource[512];
+    char *algo;
+    char *datasource;
     algoticks_derivative derivative;
-    char symbol[32];
+    char *symbol;
     int candles;
     int interval;
 
-    char callbacks[6][32];
+    char **callbacks;
     int n_callbacks;
 
     double target;
     double stoploss;
-    int is_training_sl;
+    int is_trailing_sl; /* FLAG */
     double trailing_sl_val;
     int quantity;
     
-    int sliding;
-    int intraday;
+    int sliding; /* FLAG */
+    int intraday; /* FLAG */
 
-    int skip_header;
+    int skip_header; /* FLAG */
 }algoticks_config;
 
+typedef struct BenchmarkConfig
+{
+
+    char *symbol;
+
+    int n_algo;
+    char **algo_arr;
+    
+    int n_datasource;
+    char **datasource_arr;
+
+    algoticks_derivative derivative;
+
+    int n_candles;
+    int *candles_arr;
+
+    int n_interval;
+    int *interval_arr;
+
+    int n_target;
+    double *target_arr;
+
+    int n_stoploss;
+    double *stoploss_arr;
+    
+    int n_is_trailing_sl;
+    int *is_trailing_sl; /* array of bool */
+
+    int n_trailing_sl_val;
+    double *trailing_sl_val_arr;
+
+    int n_quantity; 
+    int *quantity_arr;
+    
+    int n_sliding;
+    int *sliding; /* array of bool */
+
+    int n_intraday;
+    int *intraday; /* array of bool */
+
+    int skip_header;
+    
+}algoticks_benchmarkconfig;
 
 typedef struct Dashboard
 {
@@ -194,11 +194,11 @@ typedef struct Event {
     int t_h;
     int sl_h;
 
-    int tsl;
-    float tsl_t;
-    float tsl_sl;
+    int tsl; /* trailing SL */
+    float tsl_t; /* trailing SL target */
+    float tsl_sl; /* trailing SL stoploss */
     
-    char date[64];
+    char date[32];
     float a;
     float b;
     float pnl;

@@ -101,8 +101,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         {
 
             {
-                algoticks_event ev={0};
-                ev.signal = signal;
+                algoticks_event ev = make_event_from_signal(signal);
                 send_callbacks(ev);
             }
 
@@ -142,7 +141,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_trgt_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
+                
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
@@ -155,12 +154,16 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_sl_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
+               
             }
             else
             {
                 debug_msg(settings, 1, "Hit", "sim_derivative.c", "Position did not hit any boundary");
             }
+
+            //send callback
+            algoticks_event ev = make_event_from_positionresult(positionresult);
+            send_callbacks(ev);            
 
             if (positionresult.eof == true)
             {
@@ -212,7 +215,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     curr_i = 0;
     curr_d = 0;
 
-    write_simresult_to_csv(simresult);
+    write_simresult_to_csv(&simresult);
     return simresult;
 }
 algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FILE *index_f, FILE *derivative_f, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
@@ -344,7 +347,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
 
-            if (config.is_training_sl)
+            if (config.is_trailing_sl)
             {
                 config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
 
@@ -386,12 +389,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
         {
         //send callback from pos
-        algoticks_event ev = {0};
-        ev.from_pos = true;
-        strncpy(ev.date, pos_storage.date, 64);
-        ev.a = dashboard.a;
-        ev.b = dashboard.b;
-        ev.pnl = getPnL(dashboard);
+        algoticks_event ev = make_event_from_position(pos_storage, dashboard);
         send_callbacks(ev);
         }        
 
