@@ -7,6 +7,7 @@
 #include "../include/sim_derivative.h"
 #include "../include/benchmark.h"
 #include "../include/parser.h"
+#include "../include/misc.h"
 #include "../include/debug.h"
 
 struct program_args
@@ -184,6 +185,8 @@ int main(int argc, char **argv)
     else{
         run_sim(settings, config);
     }
-
+    
+    free_algoticks_settings(&settings);
+    
     return 0;
 }

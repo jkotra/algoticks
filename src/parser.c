@@ -83,15 +83,15 @@ algoticks_settings parse_settings_from_json(char *filename)
     settings.is_live_data_socket = json_object_get_boolean(socket);
     
     len = json_object_get_string_len(socket_port);
-    settings.socket_port = (char*) malloc(len);
+    settings.socket_port = (char*) malloc(len * sizeof(char));
     strncpy(settings.socket_port, json_object_get_string(socket_port), len);
 
     len = json_object_get_string_len(config_f);
-    settings.config_f = (char*) malloc(len);
+    settings.config_f = (char*) malloc(len * sizeof(char));
     strncpy(settings.config_f, json_object_get_string(config_f), len);
     
     len = json_object_get_string_len(benchmark_f);
-    settings.benchmark_f = (char*) malloc(len);
+    settings.benchmark_f = (char*) malloc(len * sizeof(char));
     strncpy(settings.benchmark_f, json_object_get_string(benchmark_f), len);
 
 
@@ -170,15 +170,15 @@ algoticks_config parse_config_from_json(char *filename)
     
 
     len = json_object_get_string_len(algo);
-    config.algo = (char*) malloc(len);
+    config.algo = (char*) malloc(len * sizeof(char));
     strncpy(config.algo, json_object_get_string(algo), len);
 
     len = json_object_get_string_len(datasource);
-    config.datasource = (char*) malloc(len);
+    config.datasource = (char*) malloc(len * sizeof(char));
     strncpy(config.datasource, json_object_get_string(datasource), len);
 
     len = json_object_get_string_len(symbol);
-    config.symbol = (char*) malloc(len);
+    config.symbol = (char*) malloc(len * sizeof(char));
     strncpy(config.symbol, json_object_get_string(symbol), len);
 
 
@@ -204,7 +204,7 @@ algoticks_config parse_config_from_json(char *filename)
         if (derivative_datasource_exists){
 
             len = json_object_get_string_len(derivative_datasource);
-            config.derivative.derivative_datasource = (char*) malloc(len);
+            config.derivative.derivative_datasource = (char*) malloc(len * sizeof(char));
             strncpy(config.derivative.derivative_datasource, json_object_get_string(derivative_datasource), len);
 
         }
@@ -310,7 +310,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     json_object_object_get_ex(parsed_json, "skip_header", &skip_header);
     
     len = json_object_get_string_len(symbol);
-    benchmarkconfig.symbol = (char*) malloc(len);
+    benchmarkconfig.symbol = (char*) malloc(len * sizeof(char));
     strncpy(benchmarkconfig.symbol, json_object_get_string(symbol), len);
 
     benchmarkconfig.n_algo = json_object_array_length(algo);
@@ -346,7 +346,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
         if (derivative_datasource_exists){
 
             len = json_object_get_string_len(derivative_datasource);
-            benchmarkconfig.derivative.derivative_datasource = (char*) malloc(len);
+            benchmarkconfig.derivative.derivative_datasource = (char*) malloc(len * sizeof(char));
             strncpy(benchmarkconfig.derivative.derivative_datasource, json_object_get_string(derivative_datasource), len);
 
         }
