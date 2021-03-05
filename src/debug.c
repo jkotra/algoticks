@@ -9,58 +9,39 @@
 #include "../include/parser.h"
 
 
-void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks){
+void debug_msg(bool settings_debug, int settings_debug_level, int msg_debug_level, char *file_name, const char *function, int line_n, char *message){
     
+
     //check if debug is enabled!
-    if (settings.debug != true){
+    if (settings_debug != true){
         return;
     }
 
     //if debug level less then 0 or greater then 3.
-    if ( (debug_level <= 0) == true || (settings.debug_level > 3) == true ){
+    if ( (settings_debug_level <= 0) == true){
         return;
     }
 
     // if less then required debug level.
-    if (settings.debug_level < debug_level){
+    if (settings_debug_level < msg_debug_level){
         return;
     }
 
-    //HRT = Human readable time
-    char hrt[32];
 
-    time_t now;
-
-    //get time
-    time(&now);
-
-    sprintf(hrt, "%s", ctime(&now));
-
-    //remove new line at end
-    chomp(hrt);
-
-    char buffer[5000];
-    sprintf(buffer, "{\"date\": \"%s\", \"op\": \"%s\", \"loc\": \"%s\", \"msg\": \"%s\"}\n", hrt, op, loc, remarks);
+    char *buffer = (char*) malloc(512 * sizeof(char));
+    sprintf(buffer, "{\"date\": \"%s %s\", \"file\": \"%s\", \"func\": \"%s\", \"line_n\": %d, \"msg\": \"%s\"}\n",
+                     __DATE__, __TIME__, file_name, function, line_n, message);
 
     printf("%s", buffer);
-
+    free(buffer);
 
 }
 
 void debug_msg_simple(char *msg){
-
-    //HRT = Human readable time
-    char hrt[32];
-    time_t now;
-    //get time
-    time(&now);
-    sprintf(hrt, "%s", ctime(&now));
-    //remove new line at end
-    chomp(hrt);
     
     char *buffer;
-    buffer = (char*) malloc(sizeof(msg) + sizeof(hrt) + 12);
-    sprintf(buffer, "{\"date\": \"%s\", \"msg\": \"%s\"}\n", hrt, msg);
+    buffer = (char*) malloc(sizeof(msg));
+    sprintf(buffer, "{\"date\": \"%s %s\", \"msg\": \"%s\"}\n", __DATE__, __TIME__, msg);
     printf("%s", buffer);
     
 }

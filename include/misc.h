@@ -6,7 +6,7 @@ void write_simresult_to_csv(algoticks_simresult *simresult);
 void create_setting_config_benchmark_files(int type);
 int is_file_exists(const char * filename);
 void chomp(char *s);
-algoticks_config filter_boundaries(algoticks_config config, int is_short);
+void filter_boundaries(algoticks_config *config, int is_short);
 int is_target_hit(algoticks_dashboard dashboard, float target);
 int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss);
 float brokerage_calc();

@@ -180,10 +180,10 @@ int main(int argc, char **argv)
         run_benchmark(arguments.benchmark_f, settings);
     }
     else if(arguments.derivative || settings.is_derivative){
-        run_sim_w_derivative(settings, config);
+        run_sim_w_derivative(&settings, &config);
     }
     else{
-        run_sim(settings, config);
+        run_sim(&settings, &config);
     }
     
     free_algoticks_settings(&settings);

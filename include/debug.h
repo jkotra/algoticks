@@ -1,5 +1,5 @@
 /* Declarations */
-void debug_msg(algoticks_settings settings, int debug_level, char *op, char *loc, char *remarks);
+void debug_msg(bool settings_debug, int settings_debug_level, int msg_debug_level, char *file_name, const char *function, int line_n, char *message);
 void debug_msg_simple(char* msg);
 /* struct debug */
 void print_config_struct(algoticks_config config);

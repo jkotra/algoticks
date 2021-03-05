@@ -224,25 +224,23 @@ int is_file_exists(const char *filename)
     return 0;
 }
 
-algoticks_config filter_boundaries(algoticks_config config, int is_short)
+void filter_boundaries(algoticks_config *config, int is_short)
 {
 
     if (is_short == true)
     {
 
-        config.target = -(fabs(config.target));
-        config.stoploss = fabs(config.stoploss);
-        config.trailing_sl_val = -(fabs(config.trailing_sl_val));
+        config->target = -(fabs(config->target));
+        config->stoploss = fabs(config->stoploss);
+        config->trailing_sl_val = -(fabs(config->trailing_sl_val));
     }
     else
     {
 
-        config.target = fabs(config.target);
-        config.stoploss = -(fabs(config.stoploss));
-        config.trailing_sl_val = fabs(config.trailing_sl_val);
+        config->target = fabs(config->target);
+        config->stoploss = -(fabs(config->stoploss));
+        config->trailing_sl_val = fabs(config->trailing_sl_val);
     }
-
-    return config;
 }
 
 //essential boundary checking fuctions

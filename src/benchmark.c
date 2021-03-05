@@ -103,10 +103,10 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 }
                                                 
                                                 if (settings.is_derivative){
-                                                    run_sim_w_derivative(settings, config);
+                                                    run_sim_w_derivative(&settings, &config);
                                                 }
                                                 else{
-                                                    run_sim(settings, config);
+                                                    run_sim(&settings, &config);
                                                 }
 
                                                 combination_completed++;

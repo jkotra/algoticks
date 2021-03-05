@@ -1,4 +1,4 @@
-int load_callbacks(algoticks_config config);
+int load_callbacks(algoticks_config *config);
 int send_callbacks(algoticks_event events);
 int close_callbacks();
 algoticks_event make_event_from_positionresult(algoticks_positionresult positionresult);

@@ -166,7 +166,7 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
 
 }
 
-int sync_curr(algoticks_settings settings, algoticks_config config,  FILE *f, char* fname, char *date, int seek_offset, int debug){
+int sync_curr(algoticks_settings *settings, algoticks_config *config,  FILE *f, char* fname, char *date, int seek_offset, int debug){
 
     int curr = seek_offset;
     if (debug) { printf("finding %s in %s\n", date, fname); }

@@ -85,11 +85,11 @@ START_TEST
   x.target = 15;
   x.stoploss = 20;
 
-  y = filter_boundaries(x,false);
+  filter_boundaries(&x, false);
   ck_assert_int_eq(y.target, 15);
   ck_assert_int_eq(y.stoploss, -20);
 
-  y = filter_boundaries(x,true);
+  filter_boundaries(&x,true);
   ck_assert_int_eq(y.target, -15);
   ck_assert_int_eq(y.stoploss, 20);
 
