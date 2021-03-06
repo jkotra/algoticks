@@ -99,7 +99,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 
                                                 //print config combination to user if debug is enabled and debug level greater then 3.
                                                 if (settings.debug == true && (settings.debug_level >= 4) == true){
-                                                print_config_struct(config);
+                                                print_config_struct(&config);
                                                 }
                                                 
                                                 if (settings.is_derivative){

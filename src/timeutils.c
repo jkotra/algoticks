@@ -6,7 +6,9 @@
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/timeutils.h"
+#include "../include/debug.h"
 
+char debug_buffer[512];
 const char *strp_format_1 = "%Y-%m-%d %H:%M:%S";
 const char *scanf_format_notime = "%4d-%2d-%2d";
 const char *scanf_time_format_1 = "%4d-%2d-%2d %2d:%2d:%2d";
@@ -169,12 +171,14 @@ int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
 int sync_curr(algoticks_settings *settings, algoticks_config *config,  FILE *f, char* fname, char *date, int seek_offset, int debug){
 
     int curr = seek_offset;
-    if (debug) { printf("finding %s in %s\n", date, fname); }
+    sprintf(debug_buffer, "finding %s in %s\n", date, fname);
+    debug_msg(settings->debug, settings->debug_level, 3, __FILE__, __FUNCTION__, __LINE__, debug_buffer);
 
     while(curr != EOF || curr != -1){
         struct Row r;
         curr = read_csv(settings, config, f, fname, &r, curr);
-        if (debug){ printf("is %s > %s : %d\n", r.date, date, is_date_after(r.date, date)); }
+        sprintf(debug_buffer, "is %s > %s : %d\n", r.date, date, is_date_after(r.date, date));
+        debug_msg(settings->debug, settings->debug_level, 4, __FILE__, __FUNCTION__, __LINE__, debug_buffer);
 
         if (is_date_after(r.date, date) == true){
             return curr;
