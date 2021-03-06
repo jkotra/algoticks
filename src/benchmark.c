@@ -71,15 +71,15 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 struct Config config;
                                                 
                                                 len = strlen(benchmarkconfig.algo_arr[n_algo]);
-                                                config.algo = (char*) malloc(len * sizeof(char));
+                                                config.algo = (char*) malloc((len+1) * sizeof(char));
                                                 strcpy(config.algo, benchmarkconfig.algo_arr[n_algo]);
 
                                                 len = strlen(benchmarkconfig.datasource_arr[n_datasource]);
-                                                config.datasource = (char*) malloc(len * sizeof(char)); 
+                                                config.datasource = (char*) malloc((len+1) * sizeof(char)); 
                                                 strcpy(config.datasource, benchmarkconfig.datasource_arr[n_datasource]);
 
                                                 len = strlen(benchmarkconfig.symbol);
-                                                config.symbol = (char*) malloc(len * sizeof(char));
+                                                config.symbol = (char*) malloc((len+1) * sizeof(char));
                                                 strcpy(config.symbol, benchmarkconfig.symbol);
 
                                                 config.derivative = benchmarkconfig.derivative;

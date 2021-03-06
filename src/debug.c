@@ -28,7 +28,7 @@ void debug_msg(bool settings_debug, int settings_debug_level, int msg_debug_leve
     }
 
 
-    char *buffer = (char*) malloc(512 * sizeof(char) + 1);
+    char *buffer = (char*) malloc(512 * sizeof(char));
     sprintf(buffer, "{\"date\": \"%s %s\", \"file\": \"%s\", \"func\": \"%s\", \"line_n\": %d, \"msg\": \"%s\"}\n",
                      __DATE__, __TIME__, file_name, function, line_n, message);
 
