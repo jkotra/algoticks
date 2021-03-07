@@ -114,6 +114,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 progress = ((float)combination_completed / total_combinations) * 100;
                                                 printf("%d/%d (%f%%)\r", combination_completed, total_combinations, progress);
                                                 fflush(stdout);
+                                                free_algoticks_config(&config);
                                             }
                                         }
                                     }
@@ -125,5 +126,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
             }
         }
     }
+
+    free_algoticks_benchmark(&benchmarkconfig);
 
 }

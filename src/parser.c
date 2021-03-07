@@ -312,7 +312,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     strcpy(benchmarkconfig.symbol, json_object_get_string(symbol));
 
     benchmarkconfig.n_algo = json_object_array_length(algo);
-    benchmarkconfig.algo_arr = (char**) malloc(benchmarkconfig.n_algo + 1 * sizeof(char));
+    benchmarkconfig.algo_arr = (char**) malloc(benchmarkconfig.n_algo * sizeof(char));
 
     for (size_t i = 0; i < benchmarkconfig.n_algo; i++)
     {

@@ -214,7 +214,6 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks
     curr_d = 0;
 
     write_simresult_to_csv(&simresult);
-    free_algoticks_config(config);
 
     return simresult;
 }

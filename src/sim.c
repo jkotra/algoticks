@@ -177,8 +177,6 @@ algoticks_simresult run_sim(algoticks_settings *settings, algoticks_config *conf
 
     write_simresult_to_csv(&simresult);
 
-    free_algoticks_config(config);
-
     return simresult;
 }
 

@@ -358,3 +358,35 @@ void free_algoticks_settings(algoticks_settings *settings){
     free(settings->benchmark_f);
     free(settings->socket_port);
 }
+
+void free_algoticks_benchmark(algoticks_benchmarkconfig *benchmark){
+
+    free(benchmark->symbol);
+
+    for (size_t i = 0; i < benchmark->n_algo; i++)
+    {
+        free(benchmark->algo_arr[i]);
+    }
+    free(benchmark->algo_arr);
+
+
+    for (size_t i = 0; i < benchmark->n_datasource; i++)
+    {
+        free(benchmark->datasource_arr[i]);
+    }
+    free(benchmark->datasource_arr);
+
+   if (benchmark->derivative.derivative_datasource != NULL){
+       free(benchmark->derivative.derivative_datasource);
+   }
+
+   free(benchmark->candles_arr);
+   free(benchmark->interval_arr);
+   free(benchmark->target_arr);
+   free(benchmark->stoploss_arr);
+   free(benchmark->is_trailing_sl);
+   free(benchmark->trailing_sl_val_arr);
+   free(benchmark->quantity_arr);
+   free(benchmark->sliding);
+   free(benchmark->intraday);
+}

@@ -14,3 +14,4 @@ void convert_to_lowercase(char *str);
 void remove_quotes(char *str);
 void free_algoticks_config(algoticks_config *config);
 void free_algoticks_settings(algoticks_settings *settings);
+void free_algoticks_benchmark(algoticks_benchmarkconfig *benchmark);
