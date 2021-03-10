@@ -20,7 +20,6 @@ Tests for:
 
 from misc.c:
 void write_simresult_to_csv(algoticks_simresult simresult);
-void create_setting_config_benchmark_files(int type);
 algoticks_config filter_boundaries(algoticks_config config, int is_short);
 int is_target_hit(algoticks_dashboard dashboard, float target);
 int is_stoploss_hit(algoticks_dashboard dashboard, float stoploss);
@@ -62,36 +61,22 @@ START_TEST
 }
 END_TEST
 
-START_TEST
-(__misc_c__create_setting_config_benchmark_files) {
-
-  create_setting_config_benchmark_files(1);
-  create_setting_config_benchmark_files(2);
-  create_setting_config_benchmark_files(3);
-
-  ck_assert_int_eq(is_file_exists("settings.json"), true);
-  ck_assert_int_eq(is_file_exists("config.json"), true);
-  ck_assert_int_eq(is_file_exists("benchmark.json"), true);
-
-}
-END_TEST
 
 START_TEST
 (__misc_c__filter_boundaries) {
   
   algoticks_config x = parse_config_from_json("../assets/configs/linux/config.json");
-  algoticks_config y;
 
   x.target = 15;
   x.stoploss = 20;
 
   filter_boundaries(&x, false);
-  ck_assert_int_eq(y.target, 15);
-  ck_assert_int_eq(y.stoploss, -20);
+  ck_assert_int_eq(x.target, 15);
+  ck_assert_int_eq(x.stoploss, -20);
 
   filter_boundaries(&x,true);
-  ck_assert_int_eq(y.target, -15);
-  ck_assert_int_eq(y.stoploss, 20);
+  ck_assert_int_eq(x.target, -15);
+  ck_assert_int_eq(x.stoploss, 20);
 
 }
 END_TEST
@@ -232,8 +217,11 @@ START_TEST
 (__timeutils_c__is_date_after) {
   
   //is a > b
-  ck_assert_int_eq(is_date_after("2019-02-02 09:25:00","2015-02-02 09:20:00"), true);
-  ck_assert_int_eq(is_date_after("2014-01-01 09:25:00","2015-01-01 09:00:00"), false);
+  ck_assert_int_eq(is_date_after("2019-02-02 09:25:00", "2015-02-02 09:20:00"), true);
+  ck_assert_int_eq(is_date_after("2014-02-02 09:25:00", "2015-02-02 09:20:00"), false);
+
+  ck_assert_int_eq(is_date_before("2014-01-01 09:25:00", "2015-01-01 09:00:00"), true);
+  ck_assert_int_eq(is_date_before("2013-01-01 09:25:00", "2010-01-01 09:00:00"), false);
 
 }
 END_TEST
