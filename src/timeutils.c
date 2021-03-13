@@ -20,7 +20,7 @@ const char *scanf_time_format_2 = "%4d/%2d/%2d %2d:%2d:%2d";
 int is_date_over_or_eq_intraday(char *date, int intraday_hour, int intraday_min)
 {
     
-    struct tm date_ts;
+    struct tm date_ts = {0};
     
     #ifdef _WIN32
     if (!get_time_with_sscanf_from_string(date, &date_ts))
@@ -54,8 +54,8 @@ int is_date_over_or_eq_intraday(char *date, int intraday_hour, int intraday_min)
 int is_date_after(char *date_a, char *date_b)
 {
 
-    struct tm date_a_ts;
-    struct tm date_b_ts;
+    struct tm date_a_ts = {0};
+    struct tm date_b_ts = {0};
 
     time_t x;
     time_t y;
@@ -85,8 +85,8 @@ int is_date_after(char *date_a, char *date_b)
 int is_date_before(char *date_a, char *date_b)
 {
 
-    struct tm date_a_ts;
-    struct tm date_b_ts;
+    struct tm date_a_ts = {0};
+    struct tm date_b_ts = {0};
 
     time_t x;
     time_t y;
