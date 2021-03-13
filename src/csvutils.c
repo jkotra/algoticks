@@ -121,7 +121,6 @@ algoticks_row tokenize_row(char *row){
     char *token;
     struct Row data;
     memset(&data, 0, sizeof(data));
-    strncpy(data.technical_indicators.ti_others, "None", 2048);
 
     int row_pos = 0;
     int header_i = 0;
@@ -195,7 +194,8 @@ algoticks_row tokenize_row(char *row){
             
             if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti_others_p = true;
-            strncpy(data.technical_indicators.ti_others, token,2048);
+            data.technical_indicators.ti_others = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(data.technical_indicators.ti_others, token);
         }
         else
         {

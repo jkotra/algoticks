@@ -117,9 +117,9 @@ typedef struct row_ti{
     float ti3;
 
     int is_ti_others_p;
-    char ti_others[2048];
+    char *ti_others;
 
-}algoticks_tow_ti;
+}algoticks_row_ti;
 
 typedef struct Row
 {
@@ -131,7 +131,7 @@ typedef struct Row
     float close;
     int volume;
 
-    algoticks_tow_ti technical_indicators;
+    algoticks_row_ti technical_indicators;
 
     int curr;
     int n_rows; //this is to be set in case of Row array of non-predetermined size.
