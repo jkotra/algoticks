@@ -14,12 +14,17 @@
 
 int curr_i = 0;
 int curr_d = 0;
-char index_datasource[64];
+char *index_datasource;
+char *derivative_datasource;
 
 algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks_config *config)
 {
 
-    strncpy(index_datasource, config->datasource, 64);
+    index_datasource = (char*) malloc((strlen(config->datasource) + 1) * sizeof(char));
+    strcpy(index_datasource, config->datasource);
+
+    derivative_datasource = (char*) malloc((strlen(config->derivative.derivative_datasource) + 1) * sizeof(char));
+    strcpy(derivative_datasource, config->derivative.derivative_datasource);
 
     // open and read CSV file.
     FILE *index;
@@ -215,6 +220,9 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks
 
     write_simresult_to_csv(&simresult);
 
+    //only this need to be free'd here. datasource will be free'd at misc.c free_algoticks_config
+    free(derivative_datasource);
+
     return simresult;
 }
 algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FILE *index_f, FILE *derivative_f, algoticks_settings *settings, algoticks_config *config, algoticks_row lastrow)
@@ -242,8 +250,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     curr_d = read_csv(settings, config, derivative_f, config->derivative.derivative_datasource, &pos_storage, curr_d);
 
-    // swap datasource with derivative_datasource.
-    strncpy(config->datasource, config->derivative.derivative_datasource, 512);
+    config->datasource = derivative_datasource;
 
     //set required details in dashboard
     dashboard.a = pos_storage.close;
@@ -414,5 +421,6 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     free(debug_msg_buffer);
     positionresult.lastrow = pos_storage;
+    config->datasource = index_datasource;
     return positionresult;
 }

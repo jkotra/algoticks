@@ -11,7 +11,7 @@ while True:
         csv_file = open("../bin/debug/example.csv", "a")
         for line in open("AAPL.csv", "r").readlines():
 
-            csv_file.write(line);
+            csv_file.write(line)
             time.sleep(1)
 
     except KeyboardInterrupt:

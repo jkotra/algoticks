@@ -68,7 +68,8 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                             for (int n_intraday = 0; n_intraday < benchmarkconfig.n_intraday; n_intraday++)
                                             {
                                                 // make a new config struct
-                                                struct Config config;
+                                                algoticks_config config;
+                                                algoticks_derivative derivative;
                                                 
                                                 len = strlen(benchmarkconfig.algo_arr[n_algo]);
                                                 config.algo = (char*) malloc((len+1) * sizeof(char));
@@ -82,7 +83,11 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 config.symbol = (char*) malloc((len+1) * sizeof(char));
                                                 strcpy(config.symbol, benchmarkconfig.symbol);
 
-                                                config.derivative = benchmarkconfig.derivative;
+                                                derivative.derivative_datasource = (char*) malloc((strlen(benchmarkconfig.derivative.derivative_datasource) + 1) * sizeof(char));
+                                                strcpy(derivative.derivative_datasource, benchmarkconfig.derivative.derivative_datasource);
+                                                derivative.derivative_interval = benchmarkconfig.derivative.derivative_interval;
+                                                config.derivative = derivative;
+
                                                 config.candles = benchmarkconfig.candles_arr[n_candles];
                                                 config.interval = benchmarkconfig.interval_arr[n_interval];
 

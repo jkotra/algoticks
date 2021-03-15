@@ -338,7 +338,7 @@ void free_algoticks_config(algoticks_config *config){
     free(config->datasource);
     free(config->symbol);
 
-    if (config->derivative.derivative_interval != 0){
+    if (config->derivative.derivative_datasource != NULL){
         free(config->derivative.derivative_datasource);
     }
     
