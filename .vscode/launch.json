@@ -4,12 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "(gdb) Launch (Windows)",
+            "name": "(gdb) Launch (Linux)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/debug/algoticks.exe",
-            "args": [],
+            "program": "${workspaceFolder}/bin/debug/algoticks",
+            "args": ["-D","1"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/debug/",
             "environment": [],
@@ -23,13 +24,13 @@
                 }
             ]
         },
-
+        
         {
-            "name": "(gdb) Launch (Linux)",
+            "name": "(gdb) Launch (Windows)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/debug/algoticks",
-            "args": ["-D","1"],
+            "program": "${workspaceFolder}/bin/debug/algoticks.exe",
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin/debug/",
             "environment": [],

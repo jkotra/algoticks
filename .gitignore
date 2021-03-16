@@ -2,7 +2,6 @@ bin/**
 *.o
 *.csv
 !example.csv
-.vscode/launch.json
 
 output.log
 debug.log

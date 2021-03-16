@@ -113,7 +113,7 @@ int is_date_before(char *date_a, char *date_b)
 
 }
 
-int get_time_with_sscanf_from_string(char* date, struct tm *time_struct){
+int get_time_with_sscanf_from_string(char *date, struct tm *time_struct){
 
     int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;      
    
@@ -183,13 +183,13 @@ int sync_curr(algoticks_settings *settings, algoticks_config *config,  FILE *f, 
         if (is_date_after(r.date, date) == true){
             return curr;
         }
-        else if (is_date_after(r.date, date) == -1){
+        else if (is_date_after(r.date, date) == false){
             break;
         }
 
     }
 
-    //if nothing, return null
+    //if nothing, return -1 indicating error.
     return -1;
 
 }

@@ -48,8 +48,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks
         exit(1);
     }
 
-    struct Row storage;
-
+    struct Row storage = {0};
     struct SimResult simresult = {0};
 
     //add config to simresult. required for writing result to csv.
