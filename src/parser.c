@@ -145,7 +145,7 @@ algoticks_config parse_config_from_json(char *filename)
 
     struct json_object *tmp;
 
-    struct Config config;
+    struct Config config = {0};
 
     parsed_json = json_tokener_parse(buffer);
 
@@ -289,7 +289,7 @@ algoticks_benchmarkconfig parse_benchmark_from_json(char *filename)
     struct json_object *intraday;
     struct json_object *skip_header;
 
-    struct BenchmarkConfig benchmarkconfig;
+    struct BenchmarkConfig benchmarkconfig = {0};
 
     parsed_json = json_tokener_parse(buffer);
 

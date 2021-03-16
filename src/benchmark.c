@@ -99,7 +99,7 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 config.is_trailing_sl = benchmarkconfig.is_trailing_sl[n_is_training_sl];
                                                 config.trailing_sl_val = benchmarkconfig.trailing_sl_val_arr[n_trailing_sl_val];
                                                 config.quantity = benchmarkconfig.quantity_arr[n_quantity];
-                                                config.n_callbacks = 0;
+                                                config.n_callbacks = 0; //not supported in benchmark
                                                 config.sliding = benchmarkconfig.sliding[n_sliding];
                                                 config.intraday = benchmarkconfig.intraday[n_intraday];
 
@@ -116,13 +116,13 @@ void run_benchmark(char *benchmark_config_file, algoticks_settings settings)
                                                 else{
                                                     run_sim(&settings, &config);
                                                 }
+                                                free_algoticks_config(&config);
 
                                                 combination_completed++;
 
                                                 progress = ((float)combination_completed / total_combinations) * 100;
                                                 printf("%d/%d (%f%%)\r", combination_completed, total_combinations, progress);
                                                 fflush(stdout);
-                                                free_algoticks_config(&config);
                                             }
                                         }
                                     }

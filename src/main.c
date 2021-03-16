@@ -186,11 +186,8 @@ int main(int argc, char **argv)
         run_sim(&settings, &config);
     }
     
-    //must NOT be a benchmark.
-    if (!arguments.benchmark || !settings.is_benchmark){
-        free_algoticks_config(&config);
-    }
-    
+
+    free_algoticks_config(&config);
     free_algoticks_settings(&settings);
     
     return 0;
