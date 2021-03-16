@@ -59,6 +59,7 @@ upon successful compilation, the binary executable along with config files are f
 ### Building on Windows (experimental)
 
 1. Install [MSYS2](https://www.msys2.org/)
+2. Install [CMake for Windows.](https://cmake.org/download/)
 2. Add the following to System PATH:
 ```
 C:\msys64\mingw64\include
@@ -67,17 +68,16 @@ C:\msys64\mingw64\lib
 C:\msys64\usr\bin
 ```
 
-Run the following commands in MSYS2 terminal:
+Run the following commands in `mingw64.exe` terminal:
 ```
 pacman -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-json-c mingw-w64-x86_64-zeromq
-cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-Run the following in CMD from repository root directory:
+Run the following commands from repository root directory:
 ```
 mkdir bin
 cd bin
-cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+cmake -G "MSYS Makefiles" ..
 make
 ```
 
