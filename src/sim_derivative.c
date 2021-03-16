@@ -242,7 +242,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     curr_d = sync_curr(settings, config, derivative_f, config->derivative.derivative_datasource, lastrow.date, curr_d, settings->debug);
     if (curr_d == -1)
     {
-        printf("Error: Date:%s NIF %s\n", lastrow.date, config->derivative.derivative_datasource);
+        printf("Error: %s not in file %s", lastrow.date, config->derivative.derivative_datasource);
         positionresult.eof = true;
         return positionresult;
     }
