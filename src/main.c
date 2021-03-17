@@ -186,7 +186,6 @@ int main(int argc, char **argv)
         run_sim(&settings, &config);
     }
     
-
     free_algoticks_config(&config);
     free_algoticks_settings(&settings);
     
