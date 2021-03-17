@@ -263,7 +263,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         {
 
             //check if over intraday squareoff time!
-            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings->intraday_min, settings->intraday_hour);
+            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings->intraday_hour, settings->intraday_min);
 
             if (intraday_check == true)
             {
