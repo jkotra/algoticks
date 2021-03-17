@@ -49,7 +49,7 @@ int check_row_integrity(algoticks_row *row){
 
 /*
 header_template holds the values that program expects to find in header of csv.
-header_map is initially set to -1 (ln ~139)
+header_map is initially set to -1
 
 Example:
 date,open,close,volume,high,low
@@ -121,7 +121,6 @@ algoticks_row tokenize_row(char *row){
     char *token;
     struct Row data;
     memset(&data, 0, sizeof(data));
-    strncpy(data.technical_indicators.ti_others, "None", 2048);
 
     int row_pos = 0;
     int header_i = 0;
@@ -195,7 +194,8 @@ algoticks_row tokenize_row(char *row){
             
             if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti_others_p = true;
-            strncpy(data.technical_indicators.ti_others, token,2048);
+            data.technical_indicators.ti_others = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(data.technical_indicators.ti_others, token);
         }
         else
         {
@@ -212,7 +212,7 @@ algoticks_row tokenize_row(char *row){
 
 }
 
-int process_csv_header(algoticks_settings settings, char *row){
+int process_csv_header(algoticks_settings *settings, char *row){
         char *token;
         token = strtok(row, ",");
         int header_i = 0;
@@ -228,7 +228,7 @@ int process_csv_header(algoticks_settings settings, char *row){
             chomp(token);
             convert_to_lowercase(token);
 
-            debug_msg(settings, 2, "ReadHeader","csvutils.c",token);
+            debug_msg(settings->debug, settings->debug_level, 4, __FILE__, __FUNCTION__, __LINE__, token);
 
             /*
             "date" = 0,
@@ -309,14 +309,14 @@ void set_ohlcv_as_header() {
     }    
 }
 
-int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char *fname, algoticks_row *storage, int seek_offset){
+int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, char *fname, algoticks_row *storage, int seek_offset){
    while(true) {
     if ( feof(fp) )
     {
-        if (settings.is_live_data == true){
-            while ((change_in_modified_date(config.datasource) == false))
+        if (settings->is_live_data == true){
+            while ((change_in_modified_date(config->datasource) == false))
             {
-                printf("checking for new data in %s ...\r", config.datasource);
+                printf("checking for new data in %s ...\r", config->datasource);
                 fflush(stdout);
                 }
 
@@ -327,13 +327,13 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
                 //set seek
                 fseek(fp, seek_offset, SEEK_SET);
 
-                debug_msg(settings, 2, "FileReopen","csvutils.c", config.datasource);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, config->datasource);
 
-        }else if (settings.is_live_data_socket == true){
+        }else if (settings->is_live_data_socket == true){
 
             if (!is_socket_init){
                 
-                client_d = socket_init(settings.socket_port);
+                client_d = socket_init(settings->socket_port);
 
                 if (client_d < 0){
                     printf("error creating socket!\n");
@@ -343,8 +343,8 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
                 is_socket_init = true;
             }
             
-            if (settings.debug && settings.debug_level > 2){
-            printf("waiting for new data from 127.0.0.1:%s\n", settings.socket_port);
+            if (settings->debug && settings->debug_level > 2){
+            printf("waiting for new data from 127.0.0.1:%s\n", settings->socket_port);
             }
             
             char buffer[4096];
@@ -365,7 +365,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
             //set seek
             fseek(fp, seek_offset, SEEK_SET);
 
-            debug_msg(settings, 2, "FileReopen","csvutils.c", config.datasource);
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, config->datasource);
             
         }
         else {
@@ -384,11 +384,11 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
     int curr_sp;
 
 
-    if (config.interval > 0 && is_header_skipped == true && settings.is_live_data == false){
-        for (int i = 0; i < config.interval; i++)
+    if (config->interval > 0 && is_header_skipped == true && settings->is_live_data == false){
+        for (int i = 0; i < config->interval; i++)
         {
             fgets(row, MAXCHARPERLINE, fp);
-            debug_msg(settings, 3, "SkipIntervalRow", "sim.c", row);
+            debug_msg(settings->debug, settings->debug_level, 4, __FILE__, __FUNCTION__, __LINE__, row);
         }
 
     }
@@ -402,7 +402,7 @@ int read_csv(algoticks_settings settings,algoticks_config config, FILE *fp, char
     chomp(row);
 
     if (!is_header_skipped){
-        if (config.skip_header == true){
+        if (config->skip_header == true){
             process_csv_header(settings, row);
         }
         else{

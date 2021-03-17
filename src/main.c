@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../include/dtypes.h"
-#include "../include/misc.h"
 #include "../include/sim.h"
 #include "../include/sim_derivative.h"
 #include "../include/benchmark.h"
+#include "../include/parser.h"
+#include "../include/misc.h"
 #include "../include/debug.h"
 
 struct program_args
@@ -34,7 +35,7 @@ struct program_args
 #include <argp.h>
 
 const char *argp_program_version =
-    "algoticks v1.5";
+    "algoticks v2.0";
 const char *argp_program_bug_address =
     "<jagadeesh@stdin.top>";
 
@@ -158,8 +159,6 @@ int main(int argc, char **argv)
         settings.debug_level = atoi(arguments.debug_level);
     }
 
-    strncpy(settings.socket_port, arguments.tcp_socket_port, 5);
-
     if (arguments.derivative){
         settings.is_derivative = true;
     }
@@ -170,6 +169,7 @@ int main(int argc, char **argv)
 
     if (arguments.live_datasource_socket){
         settings.is_live_data_socket = true;
+        settings.socket_port = (char*) malloc(5 * sizeof(char));
         strncpy(settings.socket_port, arguments.tcp_socket_port, 5);
     }
     #endif
@@ -180,11 +180,14 @@ int main(int argc, char **argv)
         run_benchmark(arguments.benchmark_f, settings);
     }
     else if(arguments.derivative || settings.is_derivative){
-        run_sim_w_derivative(settings, config);
+        run_sim_w_derivative(&settings, &config);
     }
     else{
-        run_sim(settings, config);
+        run_sim(&settings, &config);
     }
-
+    
+    free_algoticks_config(&config);
+    free_algoticks_settings(&settings);
+    
     return 0;
 }

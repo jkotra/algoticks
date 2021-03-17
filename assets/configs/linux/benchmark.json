@@ -8,7 +8,7 @@
     "quantity": [10],
     "target": [1.5,2,2.5],
     "stoploss": [2,2.5,3,3.5],
-    "is_training_sl": [true,false],
+    "is_trailing_sl": [true,false],
     "trailing_sl_val": [1,2,3],
     
     "sliding": [true, false],

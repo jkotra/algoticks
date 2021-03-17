@@ -13,17 +13,17 @@
 #include "../include/callbacks.h"
 
 
-algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config){
+algoticks_simresult run_sim(algoticks_settings *settings, algoticks_config *config){
 
     // open and read CSV file.
     FILE *fp;
-    fp = fopen(config.datasource, "rb");
+    fp = fopen(config->datasource, "rb");
     int curr = 0;
 
     // exit if file cannot be opened.
     if (fp == NULL)
     {
-        printf("cannot Read datasource: %s \n", config.datasource);
+        printf("cannot Read datasource: %s \n", config->datasource);
         exit(1);
     }
 
@@ -32,49 +32,49 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     struct SimResult simresult = {0};
     struct PositionResult positionresult = {0};
 
-    //add config to simresult
-    simresult.config = config;
+    //add config to simresult. required for writing result to csv.
+    simresult.config = *config;
 
-    algo_func analyze = load_algo_func(config.algo);
+    algo_func analyze = load_algo_func(config->algo);
     load_callbacks(config);
 
     //initialize and malloc for series
     struct Row* series;
-    series = (algoticks_row*)malloc((config.candles) * sizeof(algoticks_row));
+    series = (algoticks_row*) malloc((config->candles) * sizeof(algoticks_row));
 
 
     while (curr != EOF)
     {
 
-        for (int i = 0; i < config.candles && curr != -1; i++)
+        for (int i = 0; i < config->candles && curr != -1; i++)
         {
-            curr = read_csv(settings,config, fp, config.datasource, &series[i], curr);
-            debug_msg(settings, 3, "SeriesRow", "sim.c", series[i].date); 
+            curr = read_csv(settings, config, fp, config->datasource, &series[i], curr);
+            debug_msg(settings->debug, settings->debug_level, 3, __FILE__, __FUNCTION__, __LINE__, series[i].date);
         }
 
         if (curr == -1){
             break;
         }
 
-        curr = read_csv(settings, config, fp, config.datasource, &storage, curr);
+        curr = read_csv(settings, config, fp, config->datasource, &storage, curr);
 
         struct Signal signal;
-        signal = analyze(series, config.candles);
+        signal = analyze(series, config->candles);
 
         if (signal.buy == true)
         {
             simresult.buy_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Buy");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Buy");
         }
         else if (signal.sell == true)
         {
             simresult.sell_signals += 1;
-            debug_msg(settings, 1, "signal", "sim.c", "Sell");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Sell");
         }
         else if (signal.neutral == true)
         {
             simresult.neutral_signals += 1;
-            debug_msg(settings, 3, "signal", "sim.c", "Neutral");
+            debug_msg(settings->debug, settings->debug_level, 2, __FILE__, __FUNCTION__, __LINE__, "Neutral");
         }
         else
         {
@@ -85,13 +85,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         if (signal.neutral != true)
         {
             {
-                algoticks_event ev={0};
-                ev.signal = signal;
+                algoticks_event ev = make_event_from_signal(signal);
                 send_callbacks(ev);
             }
 
-            if (config.intraday == true){
-                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true){
+            if (config->intraday == true){
+                if (is_date_over_or_eq_intraday(storage.date, settings->intraday_hour, settings->intraday_min) == true){
                     continue;
                 }
             }
@@ -116,19 +115,21 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
                 simresult.trgt_hits += 1;
                 if (signal.buy == true){ simresult.b_trgt_hits += 1; }
                 else if (signal.sell == true){ simresult.s_trgt_hits += 1; }
-                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
                 simresult.sl_hits += 1;
                 if (signal.buy == true){ simresult.b_sl_hits += 1; }
                 else if (signal.sell == true){ simresult.s_sl_hits += 1; }
-                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else
             {
-                debug_msg(settings, 1, "Hit", "sim.c", "Position did not hit any boundary");
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Position did not hit any boundary");
             }
+
+            //send callback
+            algoticks_event ev = make_event_from_positionresult(positionresult);
+            send_callbacks(ev);
 
             if (positionresult.eof == true)
             {
@@ -143,7 +144,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         }
         
         // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
-        if (config.sliding == true && (config.candles > 2) == true){
+        if (config->sliding == true && (config->candles > 2) == true){
             if (curr != -1){
                 curr = series[0].curr;
             }
@@ -153,7 +154,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         memset(&storage, 0, sizeof(storage));
 
         //zero out series
-        for (int i = 0; i < config.candles; i++)
+        for (int i = 0; i < config->candles; i++)
         {
             memset(&series[i], 0, sizeof(series[i]));
         }
@@ -161,8 +162,7 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
         //print simresult.pnl
         char pnl[32];
         sprintf(pnl, "%f", simresult.pnl);
-        debug_msg(settings, 1, "SimPnl", "sim.c", pnl);
-        
+        debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, pnl);
     }
     
     //close datasource file.
@@ -175,11 +175,12 @@ algoticks_simresult run_sim(algoticks_settings settings, algoticks_config config
     //free series mem.
     free(series);
 
-    write_simresult_to_csv(simresult);
+    write_simresult_to_csv(&simresult);
+
     return simresult;
 }
 
-algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings settings, algoticks_config config, algoticks_row lastrow){
+algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int curr, algoticks_settings *settings, algoticks_config *config, algoticks_row lastrow){
      
     //declare buffer for debug messages
     char *debug_msg_buffer;
@@ -192,7 +193,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
     //set dashboard values
     dashboard.a = lastrow.close;
-    dashboard.q = config.quantity;
+    dashboard.q = config->quantity;
 
     if (signal.buy == true)
     {
@@ -209,7 +210,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     }
 
     //filter targets
-    config = filter_boundaries(config, dashboard.is_short);
+    filter_boundaries(config, dashboard.is_short);
 
     struct Row pos_storage;
 
@@ -220,11 +221,11 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
 
         if (curr == EOF || curr == -1)
         {
-            if (settings.debug)
+            if (settings->debug)
             {
-                debug_msg(settings, 1, "EOF", "sim.c", config.datasource);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, config->datasource); 
                 sprintf(debug_msg_buffer, "%d", curr);
-                debug_msg(settings, 2, "fp_curr", "sim.c", debug_msg_buffer);
+                debug_msg(settings->debug, settings->debug_level, 2, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
             }
             positionresult.pnl = getPnL(dashboard);
 
@@ -241,7 +242,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
 
-        curr = read_csv(settings,config, fp, config.datasource, &pos_storage, curr);
+        curr = read_csv(settings,config, fp, config->datasource, &pos_storage, curr);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -252,23 +253,22 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
         strncpy(dashboard.date, pos_storage.date, 32);
         positionresult.curr = curr;
 
-        if (settings.print == true)
+        if (settings->print == true)
         {
             print_dashboard(settings, config, dashboard);
         }
         
         //intraday check condition.
-        if (config.intraday)
+        if (config->intraday)
         {
 
             //check if over intraday squareoff time!
-            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings.intraday_min, settings.intraday_hour);
+            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings->intraday_min, settings->intraday_hour);
 
             if (intraday_check == true)
             {
-                //debug msg
-                sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings.intraday_hour, settings.intraday_min, pos_storage.date);
-                debug_msg(settings, 2, "intraday_squareoff", "sim.c", debug_msg_buffer);
+                sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings->intraday_hour, settings->intraday_min, pos_storage.date);
+                debug_msg(settings->debug, settings->debug_level, 2, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
 
                 positionresult.pnl = getPnL(dashboard);
 
@@ -285,28 +285,28 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             }
         }
 
-        if (is_target_hit(dashboard, config.target) == true)
+        if (is_target_hit(dashboard, config->target) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim.c", "Target Hit!");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Target Hit!");
 
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
 
-            if (config.is_training_sl)
+            if (config->is_trailing_sl)
             {
-                config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
+                config->target = (dashboard.b - dashboard.a) + config->trailing_sl_val;
 
                 if (dashboard.is_short)
                 {
-                    config.stoploss += config.trailing_sl_val;
+                    config->stoploss += config->trailing_sl_val;
                 }
                 else
                 {
-                    config.stoploss -= -config.trailing_sl_val;
+                    config->stoploss -= -config->trailing_sl_val;
                 }
 
-                sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
-                debug_msg(settings, 1, "TSL_Adjust", "sim.c", debug_msg_buffer);
+                sprintf(debug_msg_buffer, "T:%f SL:%f", config->target, config->stoploss);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
 
                 continue;
             }
@@ -314,9 +314,9 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
 
-        if (is_stoploss_hit(dashboard, config.stoploss) == true)
+        if (is_stoploss_hit(dashboard, config->stoploss) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim.c", "SL Hit!");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "SL Hit!");
 
             positionresult.pnl = getPnL(dashboard);
 
@@ -332,16 +332,11 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
             break;
         }
         
-        {
+
         //send callback from pos
-        algoticks_event ev = {0};
-        ev.from_pos = true;
-        strncpy(ev.date, pos_storage.date, 64);
-        ev.a = dashboard.a;
-        ev.b = dashboard.b;
-        ev.pnl = getPnL(dashboard);
+        algoticks_event ev = make_event_from_position(pos_storage, dashboard);
         send_callbacks(ev);
-        }
+
 
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
@@ -349,7 +344,7 @@ algoticks_positionresult take_position(algoticks_signal signal, FILE *fp, int cu
     
     if (positionresult.n_steps > 0){
     sprintf(debug_msg_buffer, "%f", positionresult.pnl);
-    debug_msg(settings, 1, "PosPnl", "sim.c", debug_msg_buffer);
+    debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
     }
     
     free(debug_msg_buffer);

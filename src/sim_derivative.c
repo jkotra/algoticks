@@ -14,82 +14,83 @@
 
 int curr_i = 0;
 int curr_d = 0;
-char index_datasource[64];
+char *index_datasource_ptr;
+char *derivative_datasource_ptr;
 
-algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_config config)
+algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks_config *config)
 {
 
-    strncpy(index_datasource, config.datasource, 64);
+    index_datasource_ptr = config->datasource;
+    derivative_datasource_ptr = config->derivative.derivative_datasource;
 
     // open and read CSV file.
     FILE *index;
-    index = fopen(config.datasource, "rb");
+    index = fopen(config->datasource, "rb");
 
     // exit if file cannot be opened.
     if (index == NULL)
     {
-        printf("cannot read datasource: %s \n", config.datasource);
+        printf("cannot read datasource: %s \n", config->datasource);
         exit(1);
     }
 
     // open and read CSV file.
     FILE *derivative;
-    derivative = fopen(config.derivative.derivative_datasource, "rb");
+    derivative = fopen(config->derivative.derivative_datasource, "rb");
 
     // exit if file cannot be opened.
     if (derivative == NULL)
     {
-        printf("cannot read derivative datasource: %s \n", config.derivative.derivative_datasource);
+        printf("cannot read derivative datasource: %s \n", config->derivative.derivative_datasource);
         exit(1);
     }
 
-    struct Row storage;
-
+    struct Row storage = {0};
     struct SimResult simresult = {0};
 
-    //add config to simresult
-    simresult.config = config;
+    //add config to simresult. required for writing result to csv.
+    simresult.config = *config;
 
-    algo_func analyze = load_algo_func(config.algo);
+    algo_func analyze = load_algo_func(config->algo);
     load_callbacks(config);
 
     //initialize and malloc for series
     struct Row *series;
-    series = (algoticks_row *)malloc((config.candles) * sizeof(algoticks_row));
+    series = (algoticks_row *)malloc((config->candles) * sizeof(algoticks_row));
 
     while (curr_i != EOF)
-    {    
+    {
 
-        for (int i = 0; i < config.candles && curr_i != -1; i++)
+        for (int i = 0; i < config->candles && curr_i != -1; i++)
         {
-            curr_i = read_csv(settings, config, index, config.datasource, &series[i], curr_i);
-            debug_msg(settings, 3, "SeriesRow", "sim_derivative.c", series[i].date); 
+            curr_i = read_csv(settings, config, index, config->datasource, &series[i], curr_i);
+            debug_msg(settings->debug, settings->debug_level, 3, __FILE__, __FUNCTION__, __LINE__, series[i].date);
         }
 
-        curr_i = read_csv(settings, config, index, config.datasource, &storage, curr_i);
+        curr_i = read_csv(settings, config, index, config->datasource, &storage, curr_i);
 
-        if (curr_i == -1){
+        if (curr_i == -1)
+        {
             break;
         }
 
-
         struct Signal signal;
-        signal = analyze(series, config.candles);
+        signal = analyze(series, config->candles);
 
         if (signal.buy == true)
         {
             simresult.buy_signals += 1;
-            debug_msg(settings, 1, "signal", "sim_derivative.c", "Buy");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Buy");
         }
         else if (signal.sell == true)
         {
             simresult.sell_signals += 1;
-            debug_msg(settings, 1, "signal", "sim_derivative.c", "Sell");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Sell");
         }
         else if (signal.neutral == true)
         {
             simresult.neutral_signals += 1;
-            debug_msg(settings, 3, "signal", "sim_derivative.c", "Neutral");
+            debug_msg(settings->debug, settings->debug_level, 2, __FILE__, __FUNCTION__, __LINE__, "Neutral");
         }
         else
         {
@@ -101,16 +102,15 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         {
 
             {
-                algoticks_event ev={0};
-                ev.signal = signal;
+                algoticks_event ev = make_event_from_signal(signal);
                 send_callbacks(ev);
             }
 
             struct PositionResult positionresult = {0};
 
-            if (config.intraday == true)
+            if (config->intraday == true)
             {
-                if (is_date_over_or_eq_intraday(storage.date, settings.intraday_hour, settings.intraday_min) == true)
+                if (is_date_over_or_eq_intraday(storage.date, settings->intraday_hour, settings->intraday_min) == true)
                 {
                     continue;
                 }
@@ -142,7 +142,6 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_trgt_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.t_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else if (strcmp(positionresult.hit_type, "SL") == 0)
             {
@@ -155,12 +154,15 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
                 {
                     simresult.s_sl_hits += 1;
                 }
-                {algoticks_event ev={0}; ev.sl_h=true; ev.pnl = simresult.pnl; send_callbacks(ev);}
             }
             else
             {
-                debug_msg(settings, 1, "Hit", "sim_derivative.c", "Position did not hit any boundary");
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Position did not hit any boundary");
             }
+
+            //send callback
+            algoticks_event ev = make_event_from_positionresult(positionresult);
+            send_callbacks(ev);
 
             if (positionresult.eof == true)
             {
@@ -175,7 +177,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         }
 
         // -1 from back +1 from front. easy way to do it it set curr to 1st index of series.
-        if (config.sliding == true && (config.candles > 2) == true)
+        if (config->sliding == true && (config->candles > 2) == true)
         {
             if (curr_i != -1)
             {
@@ -187,7 +189,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         memset(&storage, 0, sizeof(storage));
 
         //zero out series
-        for (int i = 0; i < config.candles; i++)
+        for (int i = 0; i < config->candles; i++)
         {
             memset(&series[i], 0, sizeof(series[i]));
         }
@@ -195,7 +197,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
         //print simresult.pnl
         char pnl[32];
         sprintf(pnl, "%f", simresult.pnl);
-        debug_msg(settings, 1, "SimPnl", "sim_derivative.c", pnl);        
+        debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, pnl);
     }
 
     //close datasource(s) file.
@@ -212,15 +214,16 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings settings, algoticks_
     curr_i = 0;
     curr_d = 0;
 
-    write_simresult_to_csv(simresult);
+    write_simresult_to_csv(&simresult);
+
     return simresult;
 }
-algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FILE *index_f, FILE *derivative_f, algoticks_settings settings, algoticks_config config, algoticks_row lastrow)
+algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FILE *index_f, FILE *derivative_f, algoticks_settings *settings, algoticks_config *config, algoticks_row lastrow)
 {
 
     //declare buffer for debug messages
     char *debug_msg_buffer;
-    debug_msg_buffer = (char*)malloc(512 * sizeof(char));
+    debug_msg_buffer = (char *)malloc(512 * sizeof(char));
 
     struct Row pos_storage;
 
@@ -230,23 +233,21 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     struct Dashboard dashboard;
 
     //reset curr that matches derivate
-    curr_d = sync_curr(settings, config, derivative_f, config.derivative.derivative_datasource, lastrow.date, curr_d, settings.debug);
-    if (curr_d == -1){
-        printf("Error: Date:%s NIF %s\n", lastrow.date, config.derivative.derivative_datasource);
+    curr_d = sync_curr(settings, config, derivative_f, config->derivative.derivative_datasource, lastrow.date, curr_d, settings->debug);
+    if (curr_d == -1)
+    {
+        printf("Error: %s not in file %s", lastrow.date, config->derivative.derivative_datasource);
         positionresult.eof = true;
         return positionresult;
     }
 
-    curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
-    
+    curr_d = read_csv(settings, config, derivative_f, config->derivative.derivative_datasource, &pos_storage, curr_d);
 
-     // swap datasource with derivative_datasource.
-    strncpy(config.datasource, config.derivative.derivative_datasource, 512);
+    config->datasource = derivative_datasource_ptr;
 
     //set required details in dashboard
     dashboard.a = pos_storage.close;
-    dashboard.q = config.quantity;
-
+    dashboard.q = config->quantity;
 
     if (signal.buy == true)
     {
@@ -263,7 +264,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     }
 
     //filter targets
-    config = filter_boundaries(config, dashboard.is_short);
+    filter_boundaries(config, dashboard.is_short);
 
     // infinite loop
     while (true)
@@ -272,11 +273,11 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
         if (curr_d == EOF || curr_d == -1)
         {
-            if (settings.debug)
+            if (settings->debug)
             {
-                debug_msg(settings, 1, "EOF", "sim_derivative.c", config.datasource);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, config->datasource);
                 sprintf(debug_msg_buffer, "%d", curr_d);
-                debug_msg(settings, 2, "derivative_curr", "sim_derivative.c", debug_msg_buffer);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
             }
             positionresult.pnl = getPnL(dashboard);
 
@@ -293,7 +294,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             break;
         }
 
-        curr_d = read_csv(settings, config, derivative_f, config.derivative.derivative_datasource, &pos_storage, curr_d);
+        curr_d = read_csv(settings, config, derivative_f, config->derivative.derivative_datasource, &pos_storage, curr_d);
 
         if ((pos_storage.date == NULL) || (pos_storage.close == 0))
         {
@@ -304,23 +305,22 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         strncpy(dashboard.date, pos_storage.date, 32);
         positionresult.curr = curr_d;
 
-        if (settings.print == true)
+        if (settings->print == true)
         {
             print_dashboard(settings, config, dashboard);
         }
 
         //intraday check condition.
-        if (config.intraday)
+        if (config->intraday)
         {
 
             //check if over intraday squareoff time!
-            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings.intraday_min, settings.intraday_hour);
+            int intraday_check = is_date_over_or_eq_intraday(pos_storage.date, settings->intraday_min, settings->intraday_hour);
 
             if (intraday_check == true)
             {
-                //debug msg
-                sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings.intraday_hour, settings.intraday_min, pos_storage.date);
-                debug_msg(settings, 2, "intraday_squareoff", "sim_derivative.c", debug_msg_buffer);
+                sprintf(debug_msg_buffer, "H: %d S: %d Date: %s", settings->intraday_hour, settings->intraday_min, pos_storage.date);
+                debug_msg(settings->debug, settings->debug_level, 2, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
 
                 positionresult.pnl = getPnL(dashboard);
 
@@ -337,28 +337,28 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             }
         }
 
-        if (is_target_hit(dashboard, config.target) == true)
+        if (is_target_hit(dashboard, config->target) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim_derivative.c", "Target Hit!");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "Target Hit!");
 
             strncpy(positionresult.hit_type, "T", 4);
             positionresult.pnl = getPnL(dashboard);
 
-            if (config.is_training_sl)
+            if (config->is_trailing_sl)
             {
-                config.target = (dashboard.b - dashboard.a) + config.trailing_sl_val;
+                config->target = (dashboard.b - dashboard.a) + config->trailing_sl_val;
 
                 if (dashboard.is_short)
                 {
-                    config.stoploss += config.trailing_sl_val;
+                    config->stoploss += config->trailing_sl_val;
                 }
                 else
                 {
-                    config.stoploss -= -config.trailing_sl_val;
+                    config->stoploss -= -config->trailing_sl_val;
                 }
 
-                sprintf(debug_msg_buffer, "T:%f SL:%f", config.target, config.stoploss);
-                debug_msg(settings, 1, "TSL_Adjust", "sim_derivative.c", debug_msg_buffer);
+                sprintf(debug_msg_buffer, "T:%f SL:%f", config->target, config->stoploss);
+                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
 
                 continue;
             }
@@ -366,9 +366,9 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
             break;
         }
 
-        if (is_stoploss_hit(dashboard, config.stoploss) == true)
+        if (is_stoploss_hit(dashboard, config->stoploss) == true)
         {
-            debug_msg(settings, 1, "Hit", "sim_derivative.c", "SL Hit!");
+            debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, "SL Hit!");
 
             positionresult.pnl = getPnL(dashboard);
 
@@ -385,15 +385,10 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
         }
 
         {
-        //send callback from pos
-        algoticks_event ev = {0};
-        ev.from_pos = true;
-        strncpy(ev.date, pos_storage.date, 64);
-        ev.a = dashboard.a;
-        ev.b = dashboard.b;
-        ev.pnl = getPnL(dashboard);
-        send_callbacks(ev);
-        }        
+            //send callback from pos
+            algoticks_event ev = make_event_from_position(pos_storage, dashboard);
+            send_callbacks(ev);
+        }
 
         //zero out pos_stotage
         memset(&pos_storage, 0, sizeof(pos_storage));
@@ -402,21 +397,23 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
     if (positionresult.n_steps > 0)
     {
         sprintf(debug_msg_buffer, "%f", positionresult.pnl);
-        debug_msg(settings, 1, "PosPnl", "sim_derivative.c", debug_msg_buffer);
+        debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, debug_msg_buffer);
     }
-
 
     //reset curr that matches index
-    curr_i = sync_curr(settings, config, index_f, index_datasource, pos_storage.date, curr_i, settings.debug);
-    if (curr_i == -1 && check_row_integrity(&lastrow) == false){
-        printf("Error: %s not found in %s\n", pos_storage.date, index_datasource);
+    curr_i = sync_curr(settings, config, index_f, index_datasource_ptr, pos_storage.date, curr_i, settings->debug);
+    if (curr_i == -1 && check_row_integrity(&lastrow) == false)
+    {
+        printf("Error: %s not found in %s\n", pos_storage.date, index_datasource_ptr);
         positionresult.eof = true;
     }
-    else{
-    positionresult.curr = curr_i;
+    else
+    {
+        positionresult.curr = curr_i;
     }
-    
+
     free(debug_msg_buffer);
     positionresult.lastrow = pos_storage;
+    config->datasource = index_datasource_ptr;
     return positionresult;
 }
