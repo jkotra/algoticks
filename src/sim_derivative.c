@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
@@ -25,8 +26,9 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks
 
     // open and read CSV file.
     FILE *index;
+    assert(config->datasource != NULL);
     index = fopen(config->datasource, "rb");
-
+    
     // exit if file cannot be opened.
     if (index == NULL)
     {
@@ -36,6 +38,7 @@ algoticks_simresult run_sim_w_derivative(algoticks_settings *settings, algoticks
 
     // open and read CSV file.
     FILE *derivative;
+    assert(config->derivative.derivative_datasource != NULL);
     derivative = fopen(config->derivative.derivative_datasource, "rb");
 
     // exit if file cannot be opened.

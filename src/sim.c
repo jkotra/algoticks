@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 #include "../include/dtypes.h"
 #include "../include/csvutils.h"
 #include "../include/dashboard.h"
@@ -17,6 +18,7 @@ algoticks_simresult run_sim(algoticks_settings *settings, algoticks_config *conf
 
     // open and read CSV file.
     FILE *fp;
+    assert(config->datasource != NULL);
     fp = fopen(config->datasource, "rb");
     int curr = 0;
 
