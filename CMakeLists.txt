@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
+set(CMAKE_BUILD_TYPE Debug)
 if (CMAKE_BUILD_TYPE MATCHES Release)
     message("Release Build: Enabling Optimizations (-O3)")
     set(CMAKE_C_FLAGS "-O3")
@@ -70,6 +71,7 @@ add_executable(algoticks ${SRC_FILES})
 #link required libs
 target_link_libraries(algoticks PRIVATE json-c)
 target_link_libraries(algoticks PRIVATE zmq)
+target_link_libraries(algoticks PRIVATE uv)
 
 if(NOT WIN32)
      target_link_libraries(algoticks PRIVATE dl)
