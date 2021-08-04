@@ -39,9 +39,15 @@ void print_dashboard(algoticks_settings *settings,algoticks_config *config,algot
         else {
             strcpy(pnlcolor, "\033[0;31m");
         }
-        sprintf(pnl_s, "%s%f (%f%%) %f %s", pnlcolor, pnl, percentage_change, pnl_i, color_reset);
+        if (pnl > 0){
+                        //^ added space to make it look uniform wrt. negative values
+            sprintf(pnl_s, "%s  %f\t (%f%%)\t %f %s", pnlcolor, pnl, percentage_change, pnl_i, color_reset);
+        }
+        else{
+        sprintf(pnl_s, "%s %f\t (%f%%)\t%f %s", pnlcolor, pnl, percentage_change, pnl_i, color_reset);
+        }
     }else{
-        sprintf(pnl_s, "%f (%f%%) %f", pnl, percentage_change, pnl_i);
+        sprintf(pnl_s, "%f(%f%%) %f", pnl, percentage_change, pnl_i);
     }
     
     sprintf(buffer, "%s\t%s\t%f\t%f\t%s", dashboard.date, config->symbol, dashboard.a, dashboard.b, pnl_s);               
