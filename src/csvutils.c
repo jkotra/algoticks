@@ -314,7 +314,7 @@ void set_ohlcv_as_header() {
 void changed_cb(uv_fs_event_t *handle, const char *filename, int events, int status){
 
     if (events & UV_CHANGE){
-        printf("changed\n");
+        //printf("changed\n");
         uv_close(handle, NULL);
     }
 
@@ -326,8 +326,10 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
     if ( feof(fp) )
     {
         if (settings->is_live_data == true){
-
-            printf("datasource EOF\n");
+            
+            if (settings->print != false){
+            printf("watching for data in %s\n", config->datasource);
+            }
 
             uv_loop_t *loop = uv_default_loop();
             uv_fs_event_t *event = malloc(sizeof(uv_fs_event_t)); 
@@ -336,7 +338,7 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
             uv_run(loop, UV_RUN_DEFAULT);
 
             reopen_datasource(config->datasource, &fp, "rb");
-            uv_loop_delete(loop);
+            assert(uv_loop_close(loop) == 0);
 
         }else if (settings->is_live_data_socket == true){
 
