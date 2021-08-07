@@ -311,7 +311,7 @@ void set_ohlcv_as_header() {
     }    
 }
 
-void changed_cb(uv_fs_event_t *handle, const char *filename, int events, int status){
+void changed_cb(uv_handle_t *handle, const char *filename, int events, int status){
 
     if (events & UV_CHANGE){
         //printf("changed\n");
