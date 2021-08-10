@@ -2,16 +2,20 @@ cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
-if (CMAKE_BUILD_TYPE MATCHES Release)
-    message("Release Build: Enabling Optimizations (-O3)")
-    set(CMAKE_C_FLAGS "-O3")
+if (NOT CMAKE_BUILD_TYPE)
+     message("No Build type specified. Default is Debug.")
+     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-#default
-set(CMAKE_CURRENT_BINARY_DIR "release")
+if (CMAKE_BUILD_TYPE MATCHES Release)
+     message("Release Type = Release")
+     set(CMAKE_CURRENT_BINARY_DIR "release")
+     set(CMAKE_C_FLAGS "-s -O3")
+endif()
 
 #if debug in arg, change folder name to "debug"
 if(CMAKE_BUILD_TYPE MATCHES Debug)
+     message("Release Type = Debug")
      set(CMAKE_C_FLAGS "-Wall")
      set(CMAKE_CURRENT_BINARY_DIR "debug")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -22,44 +26,39 @@ include_directories(include /usr/include)
 #GLOB all source files!
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
 
+
 #############ALGORITHMS#########################
 
-# add algorithm names to this list
-list(APPEND algorithms
-    Greens
-    Reds
-    ThreeLineStrike
-    ThreeBlackCrows
-    TwoBlackGapping
-    EveningStar
-    AbandonedBaby)
+#GLOB all source files!
+file(GLOB ALGORITHMS ${PROJECT_SOURCE_DIR}/src/algorithms/*.c)
 
-foreach(algo ${algorithms})
-message("Building Algorithm:" ${algo})
-add_library(${algo} MODULE src/algorithms/${algo}.c)
-set_target_properties(${algo}
-    PROPERTIES
-    PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms/
-)
+foreach(algo ${ALGORITHMS})
+     get_filename_component(algo_name ${algo} NAME_WLE)
+     message("Algorithm:" ${algo_name})
+     add_library(${algo_name} MODULE src/algorithms/${algo_name}.c)
+     set_target_properties(${algo_name}
+                           PROPERTIES
+                           PREFIX ""
+                           LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/algorithms/
+     )
 endforeach()
 
 ###############//END//#########################
 
 #############CALLBACKS#########################
 
-# add algorithm names to this list
-list(APPEND callbacks
-     log)
+#GLOB all source files!
+file(GLOB CALLBACKS ${PROJECT_SOURCE_DIR}/src/callbacks/*.c)
 
-foreach(cb ${callbacks})
-message("Building callback:" ${cb})
-add_library(${cb} MODULE src/callbacks/${cb}.c)
-set_target_properties(${cb}
-    PROPERTIES
-    PREFIX ""
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/callbacks/
-)
+foreach(cb ${CALLBACKS})
+     get_filename_component(cb_name ${cb} NAME_WLE)
+     message("Callback:" ${cb_name})
+     add_library(${cb_name} MODULE src/callbacks/${cb_name}.c)
+     set_target_properties(${cb_name}
+                         PROPERTIES
+                         PREFIX ""
+                         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/callbacks/
+     )
 endforeach()
 
 ###############//END//######################
@@ -70,6 +69,7 @@ add_executable(algoticks ${SRC_FILES})
 #link required libs
 target_link_libraries(algoticks PRIVATE json-c)
 target_link_libraries(algoticks PRIVATE zmq)
+target_link_libraries(algoticks PRIVATE uv)
 
 if(NOT WIN32)
      target_link_libraries(algoticks PRIVATE dl)

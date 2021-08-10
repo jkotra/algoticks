@@ -1,7 +1,7 @@
 {
     "algo": "algorithms/Reds.dll",
     "datasource": "example.csv",
-    "symbol": "EXAMPLE",
+    "symbol": "_EXAMPLE_",
     "candles": 3,
     "interval": 0,
 

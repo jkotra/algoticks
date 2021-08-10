@@ -11,6 +11,8 @@
 #include <sys/types.h>
 
 #include <zmq.h>
+#include <uv.h>
+
 #include<assert.h>
 
 
@@ -309,25 +311,34 @@ void set_ohlcv_as_header() {
     }    
 }
 
+void changed_cb(uv_handle_t *handle, const char *filename, int events, int status){
+
+    if (events & UV_CHANGE){
+        //printf("changed\n");
+        uv_close(handle, NULL);
+    }
+
+
+}
+
 int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, char *fname, algoticks_row *storage, int seek_offset){
    while(true) {
     if ( feof(fp) )
     {
         if (settings->is_live_data == true){
-            while ((change_in_modified_date(config->datasource) == false))
-            {
-                printf("checking for new data in %s ...\r", config->datasource);
-                fflush(stdout);
-                }
+            
+            if (settings->print != false){
+            printf("watching for data in %s\n", config->datasource);
+            }
 
-                //since we are using fgets() the new data written to data source MUST end with new line (\n)
-                //reopen datasource
-                reopen_datasource(fname, &fp, "rb");
+            uv_loop_t *loop = uv_default_loop();
+            uv_fs_event_t *event = malloc(sizeof(uv_fs_event_t)); 
+            uv_fs_event_init(loop, event);
+            uv_fs_event_start(event, (uv_fs_event_cb)changed_cb, config->datasource, UV_FS_EVENT);
+            uv_run(loop, UV_RUN_DEFAULT);
 
-                //set seek
-                fseek(fp, seek_offset, SEEK_SET);
-
-                debug_msg(settings->debug, settings->debug_level, 1, __FILE__, __FUNCTION__, __LINE__, config->datasource);
+            reopen_datasource(config->datasource, &fp, "rb");
+            assert(uv_loop_close(loop) == 0);
 
         }else if (settings->is_live_data_socket == true){
 

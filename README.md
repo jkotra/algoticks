@@ -13,7 +13,6 @@ Algoticks is an algorithmic trading simulator written in C.
 </pre>
 
 
-
 [READ: Getting started with Algoticks](https://stdin.top/posts/getting-started-with-algoticks/)
 
 [READ: Writing an Algorithm for Algoticks](https://stdin.top/posts/write-algo-for-algoticks/)
@@ -32,6 +31,8 @@ Recommended Standard: `C11`
 
 Dependencies:
 - [`JSON-C`](https://github.com/json-c/json-c)
+- [`ZeroMQ`](https://github.com/zeromq/libzmq)
+- [`libuv`](https://github.com/libuv/libuv)
 
 ```
 mkdir bin
@@ -70,7 +71,7 @@ C:\msys64\usr\bin
 
 Run the following commands in `mingw64.exe` terminal:
 ```
-pacman -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-json-c mingw-w64-x86_64-zeromq
+pacman -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-json-c mingw-w64-x86_64-zeromq mingw-w64-x86_64-libuv
 ```
 
 Run the following commands from repository root directory:
