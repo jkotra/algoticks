@@ -405,7 +405,7 @@ algoticks_positionresult take_position_w_derivative(algoticks_signal signal, FIL
 
     //reset curr that matches index
     curr_i = sync_curr(settings, config, index_f, index_datasource_ptr, pos_storage.date, curr_i, settings->debug);
-    if (curr_i == -1 && check_row_integrity(&lastrow) == false)
+    if (curr_i == -1)
     {
         printf("Error: %s not found in %s\n", pos_storage.date, index_datasource_ptr);
         positionresult.eof = true;

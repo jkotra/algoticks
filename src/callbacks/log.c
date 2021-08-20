@@ -25,7 +25,10 @@ void get_hrt(char *hrt)
     time(&now);
 
     sprintf(hrt, "%s", ctime(&now));
+    
+    #ifdef CHOMP
     chomp(hrt);
+    #endif
 }
 
 #ifdef _WIN32

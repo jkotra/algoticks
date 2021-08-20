@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 project(algoticks VERSION 1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 
+#uncomment below line to enable Optimizations
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCHOMP -DQUOTED_CHECK -DCHECK_ROW_INTEGRITY")
+
 if (NOT CMAKE_BUILD_TYPE)
      message("No Build type specified. Default is Debug.")
      set(CMAKE_BUILD_TYPE Debug)
@@ -10,13 +13,13 @@ endif()
 if (CMAKE_BUILD_TYPE MATCHES Release)
      message("Release Type = Release")
      set(CMAKE_CURRENT_BINARY_DIR "release")
-     set(CMAKE_C_FLAGS "-s -O3")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s -O3")
 endif()
 
 #if debug in arg, change folder name to "debug"
 if(CMAKE_BUILD_TYPE MATCHES Debug)
      message("Release Type = Debug")
-     set(CMAKE_C_FLAGS "-Wall")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
      set(CMAKE_CURRENT_BINARY_DIR "debug")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 

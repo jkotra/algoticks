@@ -140,61 +140,55 @@ algoticks_row tokenize_row(char *row){
 
         //for debugging
         //printf("header_i: %d header_map: %d header_template: %s\n",header_i, header_map[header_i], header_template[header_map[header_i]]);
+        
+        #ifdef QUOTED_CHECK
+        if (is_quoted(token) == true) { remove_quotes(token); }
+        #endif
 
         if (strcmp(header_template[header_map[header_i]],"date") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             strncpy(data.date, token, 32);
         }
         else if (strcmp(header_template[header_map[header_i]],"open") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.open = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"high") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.high = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"low") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.low = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"close") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.close = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"volume") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.volume = atoi(token);
         }
 
         //technical indicators
         else if (strcmp(header_template[header_map[header_i]],"ti1") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti1_p = true;
             data.technical_indicators.ti1 = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"ti2") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti2_p = true;
             data.technical_indicators.ti2 = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"ti3") == 0)
         {
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti3_p = true;
             data.technical_indicators.ti3 = atof(token);
         }
         else if (strcmp(header_template[header_map[header_i]],"ti_others") == 0)
         {
             
-            if (is_quoted(token) == true) { remove_quotes(token); }
             data.technical_indicators.is_ti_others_p = true;
             data.technical_indicators.ti_others = (char*) malloc((strlen(token) + 1) * sizeof(char));
             strcpy(data.technical_indicators.ti_others, token);
@@ -227,7 +221,10 @@ int process_csv_header(algoticks_settings *settings, char *row){
 
         while (token != NULL && header_i < MAXCSVHEAD)
         {
+            #ifdef CHOMP
             chomp(token);
+            #endif
+
             convert_to_lowercase(token);
 
             debug_msg(settings->debug, settings->debug_level, 4, __FILE__, __FUNCTION__, __LINE__, token);
@@ -410,7 +407,9 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
 
 
     //remove white space at end
+    #ifdef CHOMP
     chomp(row);
+    #endif
 
     if (!is_header_skipped){
         if (config->skip_header == true){
@@ -425,10 +424,12 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
     curr_sp = ftell(fp);
 
     *storage = tokenize_row(row);
-
+    
+    #ifdef CHECK_ROW_INTEGRITY
     if (check_row_integrity(storage) == false){
         continue;
     }
+    #endif
     
     storage->curr = curr_sp;
     
