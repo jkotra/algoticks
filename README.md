@@ -23,6 +23,15 @@ Algoticks is an algorithmic trading simulator written in C.
 
 ## Building
 
+### Optimizations
+
+Some optimizations are disabled by default to improve speed and efficiency.
+
+```
+#uncomment below line to enable Optimizations
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCHOMP -DQUOTED_CHECK -DCHECK_ROW_INTEGRITY")
+```
+
 ### Release
 
 Recommended Compiler: `GCC`
