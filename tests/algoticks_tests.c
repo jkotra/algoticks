@@ -65,7 +65,7 @@ END_TEST
 START_TEST
 (__misc_c__filter_boundaries) {
   
-  algoticks_config x = parse_config_from_json("../assets/configs/linux/config.json");
+  algoticks_config x = parse_config_from_json("config.json");
 
   x.target = 15;
   x.stoploss = 20;
@@ -235,8 +235,8 @@ START_TEST
 
   get_time_with_sscanf_from_string("2015-02-02 09:25:51", &time_test);
 
-  ck_assert_int_eq(time_test.tm_year, 2015);
-  ck_assert_int_eq(time_test.tm_mon, 2);
+  ck_assert_int_eq(time_test.tm_year, 2015 - 1900);
+  ck_assert_int_eq(time_test.tm_mon, 2 - 1);
   ck_assert_int_eq(time_test.tm_mday, 2);
 
   ck_assert_int_eq(time_test.tm_hour, 9);
@@ -265,7 +265,7 @@ Suite *algoticks_suite(void) {
   Suite *s;
   TCase *tc_core;
 
-  s = suite_create("Algoticks");
+  s = suite_create("algoticks");
   tc_core = tcase_create("Core");
 
   tcase_add_test(tc_core, test_it_works_2_plus_2);

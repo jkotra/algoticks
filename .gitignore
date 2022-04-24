@@ -14,6 +14,9 @@ tests/**
 !stream_to_csv.py
 !stream_to_socket.py
 !tests/AAPL.csv
+!tests/example_DOHLC.csv
+!tests/example_OCDHL.csv
+!tests/example_ODHLC.csv
 
 build/**
 CMakeLists.txt.user
