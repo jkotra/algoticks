@@ -87,8 +87,8 @@ Run the following commands from repository root directory:
 ```
 mkdir bin
 cd bin
-cmake -G "MSYS Makefiles" ..
-make
+cmake -G "MinGW Makefiles" ..
+mingw32-make.exe
 ```
 
 ---
