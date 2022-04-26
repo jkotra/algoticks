@@ -259,7 +259,68 @@ START_TEST
 }
 END_TEST
 
+START_TEST(__csvutils_c__parse_header_DOHLC)
+{
 
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_DOHLC.csv", "r");
+
+  read_csv(&settings, &config, f, "example_DOHLC.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "date"), true);
+  ck_assert_int_eq(is_mapped(1, "open"), true);
+  ck_assert_int_eq(is_mapped(2, "high"), true);
+  ck_assert_int_eq(is_mapped(3, "low"), true);
+  ck_assert_int_eq(is_mapped(4, "close"), true);
+}
+END_TEST
+
+START_TEST(__csvutils_c__parse_header_OCDHL)
+{
+
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_OCDHL.csv", "r");
+
+  read_csv(&settings, &config, f, "example_OCDHL.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "open"), true);
+  ck_assert_int_eq(is_mapped(1, "close"), true);
+  ck_assert_int_eq(is_mapped(2, "date"), true);
+  ck_assert_int_eq(is_mapped(3, "high"), true);
+  ck_assert_int_eq(is_mapped(4, "low"), true);
+}
+END_TEST
+
+START_TEST(__csvutils_c__parse_header_ODHLC)
+{
+
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_ODHLC.csv", "r");
+
+  read_csv(&settings, &config, f, "example_ODHLC.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "open"), true);
+  ck_assert_int_eq(is_mapped(1, "date"), true);
+  ck_assert_int_eq(is_mapped(2, "high"), true);
+  ck_assert_int_eq(is_mapped(3, "low"), true);
+  ck_assert_int_eq(is_mapped(4, "close"), true);
+}
+END_TEST
 
 Suite *algoticks_suite(void) {
   Suite *s;
@@ -283,6 +344,9 @@ Suite *algoticks_suite(void) {
   tcase_add_test(tc_core, __timeutils_c__get_time_with_sscanf_from_string);
 
   tcase_add_test(tc_core, __csvutils_c__is_quoted);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_DOHLC);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_OCDHL);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_ODHLC);
 
   suite_add_tcase(s, tc_core);
 

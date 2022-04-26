@@ -17,13 +17,14 @@
 
 
 int is_header_skipped = false;
-int is_socket_init = false;
-void* client_d = 0;
 
 void reset_header_skip(){
     is_header_skipped = false;
 }
 
+
+int is_socket_init = false;
+void* client_d = 0;
 
 void* socket_init(char *port){
 
@@ -50,10 +51,7 @@ int check_row_integrity(algoticks_row *row){
 }
 
 /*
-header_template holds the values that program expects to find in header of csv.
-header_map is initially set to -1
-
-Example:
+Example Header:
 date,open,close,volume,high,low
 
 0->0 -> header_template[0]="date"
@@ -63,13 +61,45 @@ date,open,close,volume,high,low
 4->2 -> header_template[4]="close"
 5->3 -> header_template[5]="volume"
 
-header_map = {0,1,4,5,2,3,(Optional technical_indicator n)}
+header_map = {0,1,4,5,2,3,(Optional: technical_indicator n)}
 
-technical_indicators is optional! it is by default set to None.
+technical_indicators are optional! it is by default set to NULL.
 */
 
-char header_template[MAXCSVHEAD][24] = {"date", "open", "high", "low", "close", "volume", "ti1", "ti2", "ti3", "ti_others"};
-int header_map[MAXCSVHEAD] = {0};
+char header_template[MAXCSVHEAD][10] = {"date", "open", "high", "low", "close", "volume", "ti1", "ti2", "ti3", "ti_others"};
+int header_map[MAXCSVHEAD] = {-1};
+
+char *get_relative_header_mapping(int index)
+{
+    if ( (index < MAXCSVHEAD) && (index != -1) )
+    {
+        return header_template[header_map[index]];
+    }
+
+    return NULL;
+}
+
+char *get_header_mapping(int index)
+{
+    if ( (index < MAXCSVHEAD) && (index != -1) )
+    {
+        return header_template[index];
+    }
+
+    return NULL;
+}
+
+bool is_mapped(int key, char *header_name)
+{
+
+    char* header = get_relative_header_mapping(key);
+    if (!header){
+        return NULL;
+    }
+    return strcmp(header, header_name) == 0;
+
+}
+
 
 struct stat stat_info;
 unsigned int datasource_lastmodified = -1;
@@ -79,7 +109,7 @@ int change_in_modified_date(char* filename){
 
         if (stat(filename, &stat_info) != 1){
             
-            //if datasource_lastmodified is -1 then it's initial check, update last it to last modfied
+        //if datasource_lastmodified is -1 then it's initial check, update last it to last modfied
         if (datasource_lastmodified == -1) { 
             datasource_lastmodified = stat_info.st_mtime;
             return false; 
@@ -133,69 +163,67 @@ algoticks_row tokenize_row(char *row){
     while (token != NULL && header_i < MAXCSVHEAD)
     {
         
-        if (header_map[header_i] == -1){
+
+        if ( get_relative_header_mapping(header_i) == NULL ){
             header_i++;
             continue;
         }
 
-        //for debugging
-        //printf("header_i: %d header_map: %d header_template: %s\n",header_i, header_map[header_i], header_template[header_map[header_i]]);
-        
         #ifdef QUOTED_CHECK
-        if (is_quoted(token) == true) { remove_quotes(token); }
+            if (is_quoted(token) == true) { remove_quotes(token); }
         #endif
 
-        if (strcmp(header_template[header_map[header_i]],"date") == 0)
+        if ( is_mapped(header_i, header_template[0]) )
         {
             strncpy(data.date, token, 32);
         }
-        else if (strcmp(header_template[header_map[header_i]],"open") == 0)
+        else if ( is_mapped(header_i, header_template[1]) )
         {
             data.open = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"high") == 0)
+        else if ( is_mapped(header_i, header_template[2]) )
         {
             data.high = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"low") == 0)
+        else if ( is_mapped(header_i, header_template[3]) )
         {
             data.low = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"close") == 0)
+        else if ( is_mapped(header_i, header_template[4]) )
         {
             data.close = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"volume") == 0)
+        else if ( is_mapped(header_i, header_template[5]) )
         {
             data.volume = atoi(token);
         }
 
-        //technical indicators
-        else if (strcmp(header_template[header_map[header_i]],"ti1") == 0)
+        // technical indicators
+        else if ( is_mapped(header_i, header_template[6]) )
         {
             data.technical_indicators.is_ti1_p = true;
             data.technical_indicators.ti1 = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"ti2") == 0)
+        else if ( is_mapped(header_i, header_template[7]) )
         {
             data.technical_indicators.is_ti2_p = true;
             data.technical_indicators.ti2 = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"ti3") == 0)
+        else if ( is_mapped(header_i, header_template[8]) )
         {
             data.technical_indicators.is_ti3_p = true;
             data.technical_indicators.ti3 = atof(token);
         }
-        else if (strcmp(header_template[header_map[header_i]],"ti_others") == 0)
+        else if ( is_mapped(header_i, header_template[9]) )
         {
-            
+
             data.technical_indicators.is_ti_others_p = true;
-            data.technical_indicators.ti_others = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            data.technical_indicators.ti_others = (char *)malloc((strlen(token) + 1) * sizeof(char));
             strcpy(data.technical_indicators.ti_others, token);
         }
         else
         {
-            //unknown row position.
+            // unknown row position.
             break;
         }
 
@@ -213,65 +241,47 @@ int process_csv_header(algoticks_settings *settings, char *row){
         token = strtok(row, ",");
         int header_i = 0;
 
-        //set header_map to -1
-        for (int i = 0; i < MAXCSVHEAD; i++)
-        {
-            header_map[i] = -1;
-        }
-
         while (token != NULL && header_i < MAXCSVHEAD)
         {
             #ifdef CHOMP
-            chomp(token);
+                chomp(token);
             #endif
 
             convert_to_lowercase(token);
 
             debug_msg(settings->debug, settings->debug_level, 4, __FILE__, __FUNCTION__, __LINE__, token);
 
-            /*
-            "date" = 0,
-            "open" = 1,
-            "high" = 2,
-            "low" = 3,
-            "close" = 4,
-            "volume" = 5,
-            "ti1" = 6,
-            "ti2" = 7,
-            "ti3" = 9,
-            "ti_others" = 10
-            */
 
-            if(strcmp(token, "date") == 0){ 
+            if( strcmp(token, header_template[0]) == 0 ){ 
                 header_map[header_i] = 0; }
 
-            else if(strcmp(token, "open") == 0){ 
+            else if( strcmp(token, header_template[1]) == 0 ){ 
                 header_map[header_i] = 1; }
 
-            else if(strcmp(token, "high") == 0){ 
+            else if( strcmp(token, header_template[2]) == 0 ){ 
                 header_map[header_i] = 2; }
 
-            else if(strcmp(token, "low") == 0){ 
+            else if( strcmp(token, header_template[3]) == 0 ){ 
 
                 header_map[header_i] = 3; }
 
-            else if(strcmp(token, "close") == 0){ 
+            else if( strcmp(token, header_template[4]) == 0 ){ 
 
                 header_map[header_i] = 4; }
 
-            else if(strcmp(token, "volume") == 0){ 
+            else if( strcmp(token, header_template[5]) == 0 ){ 
                 header_map[header_i] = 5; }
 
-            else if(strcmp(token, "ti1") == 0){ 
+            else if( strcmp(token, header_template[6]) == 0 ){ 
                 header_map[header_i] = 6; }
 
-            else if(strcmp(token, "ti2") == 0){ 
+            else if( strcmp(token, header_template[7]) == 0 ){ 
                 header_map[header_i] = 7; }
 
-            else if(strcmp(token, "ti3") == 0){ 
+            else if( strcmp(token, header_template[8]) == 0 ){ 
                 header_map[header_i] = 8; }
 
-            else if(strcmp(token, "ti_others") == 0){ 
+            else if( strcmp(token, header_template[9]) == 0 ){ 
                 header_map[header_i] = 9; }            
 
             else { 
@@ -281,15 +291,6 @@ int process_csv_header(algoticks_settings *settings, char *row){
             header_i++;
             token = strtok(NULL, ",");
         }
-
-
-        /* FOR DEBUG USE
-        for (int i = 0; i < MAXCSVHEAD; i++)
-        {
-            printf("i:%d %d->%s\n",i, header_map[i], header_template[header_map[i]]);
-        }
-        */
-        
         
         //skip the 1st row i.e header
         is_header_skipped = true;
@@ -297,15 +298,12 @@ int process_csv_header(algoticks_settings *settings, char *row){
 }
 
 void set_ohlcv_as_header() {
-    for (int i = 0; i < MAXCSVHEAD; i++){
-        header_map[i] = -1;
-    }
 
-    //set to ohlcv
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < MAXCSVHEAD; i++)
     {
         header_map[i] = i;
-    }    
+    }
+
 }
 
 void changed_cb(uv_handle_t *handle, const char *filename, int events, int status){
@@ -408,11 +406,11 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
 
     //remove white space at end
     #ifdef CHOMP
-    chomp(row);
+        chomp(row);
     #endif
 
     if (!is_header_skipped){
-        if (config->skip_header == true){
+        if (config->skip_header != true){
             process_csv_header(settings, row);
         }
         else{
@@ -426,9 +424,9 @@ int read_csv(algoticks_settings *settings,algoticks_config *config, FILE *fp, ch
     *storage = tokenize_row(row);
     
     #ifdef CHECK_ROW_INTEGRITY
-    if (check_row_integrity(storage) == false){
-        continue;
-    }
+        if (check_row_integrity(storage) == false){
+            continue;
+        }
     #endif
     
     storage->curr = curr_sp;
