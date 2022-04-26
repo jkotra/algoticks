@@ -35,7 +35,7 @@ struct program_args
 #include <argp.h>
 
 const char *argp_program_version =
-    "algoticks v2.1";
+    "algoticks v2.2";
 const char *argp_program_bug_address =
     "<jagadeesh@stdin.top>";
 
