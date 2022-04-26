@@ -65,7 +65,7 @@ END_TEST
 START_TEST
 (__misc_c__filter_boundaries) {
   
-  algoticks_config x = parse_config_from_json("../assets/configs/linux/config.json");
+  algoticks_config x = parse_config_from_json("config.json");
 
   x.target = 15;
   x.stoploss = 20;
@@ -235,8 +235,8 @@ START_TEST
 
   get_time_with_sscanf_from_string("2015-02-02 09:25:51", &time_test);
 
-  ck_assert_int_eq(time_test.tm_year, 2015);
-  ck_assert_int_eq(time_test.tm_mon, 2);
+  ck_assert_int_eq(time_test.tm_year, 2015 - 1900);
+  ck_assert_int_eq(time_test.tm_mon, 2 - 1);
   ck_assert_int_eq(time_test.tm_mday, 2);
 
   ck_assert_int_eq(time_test.tm_hour, 9);
@@ -259,13 +259,74 @@ START_TEST
 }
 END_TEST
 
+START_TEST(__csvutils_c__parse_header_DOHLC)
+{
 
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_DOHLC.csv", "r");
+
+  read_csv(&settings, &config, f, "example_DOHLC.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "date"), true);
+  ck_assert_int_eq(is_mapped(1, "open"), true);
+  ck_assert_int_eq(is_mapped(2, "high"), true);
+  ck_assert_int_eq(is_mapped(3, "low"), true);
+  ck_assert_int_eq(is_mapped(4, "close"), true);
+}
+END_TEST
+
+START_TEST(__csvutils_c__parse_header_OCDHL)
+{
+
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_OCDHL.csv", "r");
+
+  read_csv(&settings, &config, f, "example_OCDHL.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "open"), true);
+  ck_assert_int_eq(is_mapped(1, "close"), true);
+  ck_assert_int_eq(is_mapped(2, "date"), true);
+  ck_assert_int_eq(is_mapped(3, "high"), true);
+  ck_assert_int_eq(is_mapped(4, "low"), true);
+}
+END_TEST
+
+START_TEST(__csvutils_c__parse_header_ODHLC)
+{
+
+  algoticks_config config = parse_config_from_json("config.json");
+  algoticks_settings settings = parse_settings_from_json("settings.json");
+  config.skip_header = false;
+  reset_header_skip();
+
+  algoticks_row row = {0};
+
+  FILE *f = fopen("example_ODHLC.csv", "r");
+
+  read_csv(&settings, &config, f, "example_ODHLC.csv", &row, 0);
+  ck_assert_int_eq(is_mapped(0, "open"), true);
+  ck_assert_int_eq(is_mapped(1, "date"), true);
+  ck_assert_int_eq(is_mapped(2, "high"), true);
+  ck_assert_int_eq(is_mapped(3, "low"), true);
+  ck_assert_int_eq(is_mapped(4, "close"), true);
+}
+END_TEST
 
 Suite *algoticks_suite(void) {
   Suite *s;
   TCase *tc_core;
 
-  s = suite_create("Algoticks");
+  s = suite_create("algoticks");
   tc_core = tcase_create("Core");
 
   tcase_add_test(tc_core, test_it_works_2_plus_2);
@@ -283,6 +344,9 @@ Suite *algoticks_suite(void) {
   tcase_add_test(tc_core, __timeutils_c__get_time_with_sscanf_from_string);
 
   tcase_add_test(tc_core, __csvutils_c__is_quoted);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_DOHLC);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_OCDHL);
+  tcase_add_test(tc_core, __csvutils_c__parse_header_ODHLC);
 
   suite_add_tcase(s, tc_core);
 

@@ -13,6 +13,8 @@ void convert_to_lowercase(char *str);
 void free_algoticks_config(algoticks_config *config);
 void free_algoticks_settings(algoticks_settings *settings);
 void free_algoticks_benchmark(algoticks_benchmarkconfig *benchmark);
+bool is_mapped(int key, char *header_name);
+char *get_relative_header_mapping(int index);
 
 //optional optimization
 void chomp(char *s);
